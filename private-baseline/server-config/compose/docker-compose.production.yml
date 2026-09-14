@@ -159,7 +159,7 @@ services:
         createdBy: "bt_apps"
 
     billionmail_P4xa:
-      image: billionmail/core:4.9.4
+      image: jessusmail/core:4.9.4-native-activation-20260914T172518Z
       hostname: core-manage
       depends_on:
         - pgsql-billionmail
@@ -180,8 +180,6 @@ services:
         - ${APP_PATH}/data/logs:/opt/billionmail/logs
         - ${APP_PATH}/data/logs/core:/opt/billionmail/core/logs
         - ${APP_PATH}/data/core-data:/opt/billionmail/core/data
-        - ${APP_PATH}/conf/custom-ui:/opt/billionmail/core/public/dist/custom:ro
-        - ${APP_PATH}/conf/custom-ui/index.html:/opt/billionmail/core/public/dist/index.html:ro
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
         - TZ=${TZ}

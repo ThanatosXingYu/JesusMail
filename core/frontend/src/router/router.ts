@@ -13,6 +13,7 @@ const routesReflectList = [
 	'Enrichment',
 	'MailDomain',
 	'MailBoxes',
+	'Activation Keys',
 	'SMTP',
 	'Logs',
 	'Settings',
@@ -56,6 +57,11 @@ if (isDev) {
 }
 
 export const routes: RouteRecordRaw[] = [
+	{
+		path: '/activate',
+		name: 'Activate',
+		component: () => import('@/views/activate/index.vue'),
+	},
 	{
 		path: '/login',
 		name: 'Login',

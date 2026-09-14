@@ -3,6 +3,7 @@ package cmd
 import (
 	"billionmail-core/internal/consts"
 	"billionmail-core/internal/controller/abnormal_recipient"
+	"billionmail-core/internal/controller/activation"
 	"billionmail-core/internal/controller/askai"
 	"billionmail-core/internal/controller/batch_mail"
 	"billionmail-core/internal/controller/campaign"
@@ -17,6 +18,7 @@ import (
 	"billionmail-core/internal/controller/middleware"
 	"billionmail-core/internal/controller/operation_log"
 	"billionmail-core/internal/controller/overview"
+	"billionmail-core/internal/controller/public_activation"
 	"billionmail-core/internal/controller/rbac"
 	"billionmail-core/internal/controller/relay"
 	"billionmail-core/internal/controller/settings"
@@ -204,25 +206,27 @@ var (
 
 			// Define excluded URIs
 			excludesURIs := map[string]struct{}{
-				"/favicon.ico":                   {},
-				"/robots.txt":                    {},
-				"/unsubscribe.html":              {},
-				"/unsubscribe_new.html":          {},
-				"/api/aapanel/sso":               {},
-				"/api/unsubscribe/user_group":    {},
-				"/api/unsubscribe":               {},
-				"/api/unsubscribe_new":           {},
-				"/api/batch_mail/api/send":       {},
-				"/api/batch_mail/api/batch_send": {},
-				"/api/subscribe/confirm":         {},
-				"/api/subscribe/submit":          {},
-				"/api/languages/get":             {},
-				"/already_subscribed.html":       {},
-				"/subscribe_confirm.html":        {},
-				"/subscribe_form.html":           {},
-				"/subscribe_success.html":        {},
-				"/unsubscribe_success.html":      {},
-				"/subscribe_form_code.html":      {},
+				"/favicon.ico":                    {},
+				"/robots.txt":                     {},
+				"/activate":                       {},
+				"/unsubscribe.html":               {},
+				"/unsubscribe_new.html":           {},
+				"/api/aapanel/sso":                {},
+				"/api/unsubscribe/user_group":     {},
+				"/api/unsubscribe":                {},
+				"/api/unsubscribe_new":            {},
+				"/api/batch_mail/api/send":        {},
+				"/api/batch_mail/api/batch_send":  {},
+				"/api/subscribe/confirm":          {},
+				"/api/subscribe/submit":           {},
+				"/api/languages/get":              {},
+				"/api/public/activation/activate": {},
+				"/already_subscribed.html":        {},
+				"/subscribe_confirm.html":         {},
+				"/subscribe_form.html":            {},
+				"/subscribe_success.html":         {},
+				"/unsubscribe_success.html":       {},
+				"/subscribe_form_code.html":       {},
 			}
 
 			// Bind Server Hooks
@@ -291,6 +295,12 @@ var (
 				)
 			})
 
+			// Public activation API: intentionally excludes JWT/RBAC but keeps standard responses.
+			s.Group("/api/public", func(group *ghttp.RouterGroup) {
+				group.Middleware(middlewares.HandleApiResponse)
+				group.Bind(public_activation.NewV1())
+			})
+
 			// Register Apis
 			s.Group("/api", func(group *ghttp.RouterGroup) {
 				// Add CORS middleware
@@ -315,6 +325,7 @@ var (
 
 				group.Bind(
 					rbac.NewV1(),
+					activation.NewV1(),
 					domains.NewV1(),
 					mail_boxes.NewV1(),
 					overview.NewV1(),

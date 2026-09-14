@@ -6,7 +6,7 @@ import router from '@/router/router'
 import loadingBar from '@/config/loadingBar'
 
 // Route white list
-const whitePathList = ['/login']
+const whitePathList = ['/login', '/activate']
 
 router.beforeEach(async (to, from, next) => {
 	loadingBar.start()
@@ -36,8 +36,8 @@ router.beforeEach(async (to, from, next) => {
 
 	// User is logged in
 	if (userStore.isLogin) {
-		// If the visited route is in the white list, jump to the home page
-		if (whitePathList.includes(to.path)) {
+		// Only the login page redirects authenticated users; /activate remains public.
+		if (to.path === '/login') {
 			next('/')
 		} else {
 			next()

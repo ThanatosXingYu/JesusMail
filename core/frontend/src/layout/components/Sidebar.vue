@@ -13,8 +13,8 @@
 		<!-- 应用标志和名称 -->
 		<div class="app-logo" :class="{ collapse: isCollapse }">
 			<a href="/">
-				<img class="icon" src="@/assets/images/logo.png"></img>
-				<span v-show="!isCollapse" class="app-name">BillionMail</span>
+				<img class="icon" src="@/assets/images/logo.png" />
+				<span v-show="!isCollapse" class="app-name">JessusMail</span>
 			</a>
 		</div>
 
@@ -112,6 +112,7 @@ const iconMap: Record<string, VNodeChild> = {
 	enrichment: <i class="i-mdi-database-search-outline"></i>,
 	domain: <i class="i-mdi-web"></i>,
 	mailbox: <i class="i-custom:mailbox"></i>,
+	activation: <i class="i-mdi-key-variant"></i>,
 	smtp: <i class="i-custom:smtp"></i>,
 	settings: <i class="i-mdi-settings-outline"></i>,
 	template: <i class="i-mdi-settings-outline"></i>,
@@ -125,7 +126,7 @@ const renderIcon = (key: string) => {
 }
 
 const handleUpdateMenu = (key: string) => {
-	if (key === 'logout') {        
+	if (key === 'logout') {
 		userStore.logout()
 	}
 	if (key === 'webmail') {
@@ -168,7 +169,7 @@ onMounted(() => {
 	.icon {
 		width: 36px;
 	}
-	
+
 	.app-name {
 		font-size: 19px;
 		font-weight: bold;

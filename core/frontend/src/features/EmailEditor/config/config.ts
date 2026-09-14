@@ -420,14 +420,14 @@ export const copyrightVNode = h(
 		h(
 			'a',
 			{
-				href: 'https://www.billionmail.com',
+				href: 'https://mail.qlu.edu.kg',
 				target: '_blank',
 				style: {
 					color: '#999',
 					textDecoration: 'underline',
 				},
 			},
-			'BillionMail'
+			'JessusMail'
 		),
 	]
 )

@@ -21,6 +21,27 @@ import (
 	"time"
 )
 
+func PrepareForInsert(ctx context.Context, mailbox *v1.Mailbox) (err error) {
+	mailbox.PasswordEncode = PasswdEncode(ctx, mailbox.Password)
+	mailbox.Password, err = PasswdMD5Crypt(ctx, mailbox.Password)
+	if err != nil {
+		return fmt.Errorf("Generate password md5-crypt failed: %w", err)
+	}
+	mailbox.Username = strings.ToLower(mailbox.Username)
+	mailbox.LocalPart = strings.ToLower(mailbox.LocalPart)
+	mailbox.Domain = strings.ToLower(mailbox.Domain)
+	now := time.Now().Unix()
+	mailbox.CreateTime = now
+	mailbox.UpdateTime = now
+	mailbox.Active = 1
+	mailbox.Maildir = fmt.Sprintf("%s@%s/", mailbox.LocalPart, mailbox.Domain)
+	return nil
+}
+
+func EnsureStorage(ctx context.Context, mailbox *v1.Mailbox) error {
+	return ensureMaildirAndQuotaFile(ctx, mailbox)
+}
+
 func Add(ctx context.Context, mailbox *v1.Mailbox) (err error) {
 	// Encode password
 	mailbox.PasswordEncode = PasswdEncode(ctx, mailbox.Password)

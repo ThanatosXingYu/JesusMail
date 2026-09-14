@@ -8,9 +8,9 @@ import (
 	"billionmail-core/internal/service/public"
 	"context"
 	"fmt"
-	"net/url"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/grand"
+	"net/url"
 	"time"
 
 	"billionmail-core/api/campaign/v1"
@@ -152,7 +152,7 @@ func sendConfirmationEmail(ctx context.Context, email, name string) error {
         </div>
         <div class="footer">
             <p>This email was sent to %s</p>
-            <p>Powered by BillionMail</p>
+            <p>Powered by JessusMail</p>
         </div>
     </div>
 </body>

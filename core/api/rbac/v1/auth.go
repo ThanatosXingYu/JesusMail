@@ -35,7 +35,7 @@ type LoginRes struct {
 // AaPanelSSOReq defines the request for aaPanel trusted SSO.
 type AaPanelSSOReq struct {
 	g.Meta   `path:"/aapanel/sso" method:"post" tags:"Authentication" summary:"aaPanel SSO" sm:"aaPanel SSO" in:"body"`
-	Username string `p:"username" dc:"BillionMail username to sign in"`
+	Username string `p:"username" dc:"JessusMail username to sign in"`
 }
 
 // AaPanelSSORes defines the response for aaPanel trusted SSO.

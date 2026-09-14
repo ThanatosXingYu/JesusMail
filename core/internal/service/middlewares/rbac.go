@@ -24,7 +24,7 @@ func PathToRouteInfo(path string) (module, action, resource string) {
 		"contact", "email_template", "batch_mail", "files",
 		"abnormal_recipient", "languages", "mail_services",
 		"relay", "settings", "subscribe_list", "operation_log",
-		"askai", "tags", "video_outreach",
+		"askai", "tags", "video_outreach", "activation",
 	}
 	for _, m := range modules {
 		if strings.Contains(path, "/"+m+"/") || strings.HasSuffix(path, "/"+m) {
@@ -124,6 +124,16 @@ func (m *RBACMiddleware) PermissionCheck(r *ghttp.Request) {
 
 	// Extract module, action, and resource from request path
 	module, action, resource := PathToRouteInfo(r.URL.Path)
+
+	// Activation keys can create mailboxes and expose key material; keep management admin-only.
+	if module == "activation" {
+		r.Response.WriteJson(g.Map{
+			"code": 403,
+			"msg":  "Insufficient permissions",
+		})
+		r.Exit()
+		return
+	}
 
 	// Default-deny: if we couldn't determine the module, action, or resource, deny access
 	if module == "" || action == "" || resource == "" {

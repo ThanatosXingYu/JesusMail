@@ -12,7 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
+	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -20,8 +22,40 @@ import (
 const defaultDomain = "mail.qlu.edu.kg"
 const defaultQuota int64 = 33554432
 
+const activationRateLimitPrefix = "JESUSMAIL_ACTIVATE_RATE:"
+const legacyActivationRateLimitPrefix = "JESSUSMAIL_ACTIVATE_RATE:"
+
+const activationRateLimitScript = `
+local current = redis.call("GET", KEYS[1])
+if not current then
+    local legacy = redis.call("GET", KEYS[2])
+    if legacy then
+        local ttl = redis.call("TTL", KEYS[2])
+        if ttl < 1 then
+            ttl = ARGV[1]
+        end
+        redis.call("SET", KEYS[1], legacy, "EX", ttl)
+        redis.call("DEL", KEYS[2])
+        current = legacy
+    else
+        redis.call("SET", KEYS[1], 1, "EX", ARGV[1])
+        return 1
+    end
+end
+
+local count = redis.call("INCR", KEYS[1])
+if redis.call("TTL", KEYS[1]) < 0 then
+    redis.call("EXPIRE", KEYS[1], ARGV[1])
+end
+return count
+`
+
+type redisScriptEvaluator interface {
+	Eval(ctx context.Context, script string, numKeys int64, keys []string, args []any) (*gvar.Var, error)
+}
+
 var (
-	keyPattern       = regexp.MustCompile(`^QLU-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$`)
+	keyPattern       = regexp.MustCompile(`^(?:JESUSMAIL|QLU)-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$`)
 	prefixPattern    = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$`)
 	passwordLetter   = regexp.MustCompile(`[A-Za-z]`)
 	passwordDigit    = regexp.MustCompile(`[0-9]`)
@@ -65,16 +99,23 @@ type ListResult struct {
 	List     []Key    `json:"list"`
 }
 
+func activationEnv(primary, legacy string) string {
+	if value := strings.TrimSpace(os.Getenv(primary)); value != "" {
+		return value
+	}
+	return strings.TrimSpace(os.Getenv(legacy))
+}
+
 func Domain() string {
-	if v := strings.TrimSpace(os.Getenv("JESSUSMAIL_ACTIVATION_DOMAIN")); v != "" {
-		return strings.ToLower(v)
+	if value := activationEnv("JESUSMAIL_ACTIVATION_DOMAIN", "JESSUSMAIL_ACTIVATION_DOMAIN"); value != "" {
+		return strings.ToLower(value)
 	}
 	return defaultDomain
 }
 
 func quota() int64 {
-	if v, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("JESSUSMAIL_ACTIVATION_QUOTA")), 10, 64); err == nil && v > 0 {
-		return v
+	if value, err := strconv.ParseInt(activationEnv("JESUSMAIL_ACTIVATION_QUOTA", "JESSUSMAIL_ACTIVATION_QUOTA"), 10, 64); err == nil && value > 0 {
+		return value
 	}
 	return defaultQuota
 }
@@ -98,18 +139,20 @@ func Validate(key, prefix, password string) (string, string, error) {
 }
 
 func AllowAttempt(ctx context.Context, ip string) (bool, error) {
+	return allowAttempt(ctx, ip, g.Redis())
+}
+
+func allowAttempt(ctx context.Context, ip string, redis redisScriptEvaluator) (bool, error) {
+	ip = strings.TrimSpace(ip)
 	if ip == "" {
 		ip = "unknown"
 	}
-	key := "JESSUSMAIL_ACTIVATE_RATE:" + ip
-	n, err := g.Redis().Incr(ctx, key)
+	keys := []string{activationRateLimitPrefix + ip, legacyActivationRateLimitPrefix + ip}
+	result, err := redis.Eval(ctx, activationRateLimitScript, int64(len(keys)), keys, []any{600})
 	if err != nil {
-		return true, nil
+		return false, fmt.Errorf("activation rate limit failed: %w", err)
 	}
-	if n == 1 {
-		_, _ = g.Redis().Expire(ctx, key, 600)
-	}
-	return n <= 8, nil
+	return result.Int64() <= 8, nil
 }
 
 func Activate(ctx context.Context, keycode, prefix, password, ip string) (string, error) {
@@ -229,7 +272,21 @@ func generateKey() (string, error) {
 			break
 		}
 	}
-	return fmt.Sprintf("QLU-%s-%s-%s", b[:4], b[4:8], b[8:12]), nil
+	return fmt.Sprintf("JESUSMAIL-%s-%s-%s", b[:4], b[4:8], b[8:12]), nil
+}
+
+func validateGenerateMetadata(note, group string) error {
+	if utf8.RuneCountInString(note) > 255 || utf8.RuneCountInString(group) > 100 {
+		return errors.New("备注或分组过长")
+	}
+	return nil
+}
+
+func validateGroupName(group string) error {
+	if utf8.RuneCountInString(group) > 100 {
+		return errors.New("分组名称过长")
+	}
+	return nil
 }
 
 func Generate(ctx context.Context, count int, note, group string) (int, error) {
@@ -238,8 +295,8 @@ func Generate(ctx context.Context, count int, note, group string) (int, error) {
 	}
 	note = strings.TrimSpace(note)
 	group = strings.TrimSpace(group)
-	if len(note) > 255 || len(group) > 100 {
-		return 0, errors.New("备注或分组过长")
+	if err := validateGenerateMetadata(note, group); err != nil {
+		return 0, err
 	}
 	made := 0
 	for guard := 0; made < count && guard < count*5; guard++ {
@@ -262,8 +319,8 @@ func SetGroup(ctx context.Context, ids []int64, group string) (int64, error) {
 		return 0, errors.New("请选择 1-500 个激活码")
 	}
 	group = strings.TrimSpace(group)
-	if len(group) > 100 {
-		return 0, errors.New("分组名称过长")
+	if err := validateGroupName(group); err != nil {
+		return 0, err
 	}
 	r, err := g.DB().Model("activation_keys").Ctx(ctx).WhereIn("id", ids).Data("group_name", group).Update()
 	if err != nil {
@@ -272,36 +329,84 @@ func SetGroup(ctx context.Context, ids []int64, group string) (int64, error) {
 	return r.RowsAffected()
 }
 
+type activationDeleteStore interface {
+	CountNonUnused(ctx context.Context, ids []int64) (int64, error)
+	LockKeycodes(ctx context.Context, ids []int64) ([]string, error)
+	DeleteKeys(ctx context.Context, ids []int64, onlyUnused bool) (int64, error)
+	DeleteLogs(ctx context.Context, keycodes []string) error
+}
+
+type activationDeleteTx struct {
+	tx gdb.TX
+}
+
+func (s activationDeleteTx) CountNonUnused(ctx context.Context, ids []int64) (int64, error) {
+	count, err := s.tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids).WhereNot("status", 0).Count()
+	return int64(count), err
+}
+
+func (s activationDeleteTx) LockKeycodes(ctx context.Context, ids []int64) ([]string, error) {
+	values, err := s.tx.Model("activation_keys").Ctx(ctx).Fields("keycode").WhereIn("id", ids).LockUpdate().Array("keycode")
+	if err != nil {
+		return nil, err
+	}
+	keycodes := make([]string, 0, len(values))
+	for _, value := range values {
+		if keycode := value.String(); keycode != "" {
+			keycodes = append(keycodes, keycode)
+		}
+	}
+	return keycodes, nil
+}
+
+func (s activationDeleteTx) DeleteKeys(ctx context.Context, ids []int64, onlyUnused bool) (int64, error) {
+	m := s.tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids)
+	if onlyUnused {
+		m = m.Where("status", 0)
+	}
+	result, err := m.Delete()
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+func (s activationDeleteTx) DeleteLogs(ctx context.Context, keycodes []string) error {
+	if len(keycodes) == 0 {
+		return nil
+	}
+	_, err := s.tx.Model("activation_logs").Ctx(ctx).WhereIn("keycode", keycodes).Delete()
+	return err
+}
+
+func deleteActivationKeys(ctx context.Context, store activationDeleteStore, ids []int64, force bool) (deleted, skipped int64, err error) {
+	var keycodes []string
+	if force {
+		keycodes, err = store.LockKeycodes(ctx, ids)
+	} else {
+		skipped, err = store.CountNonUnused(ctx, ids)
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+
+	deleted, err = store.DeleteKeys(ctx, ids, !force)
+	if err != nil {
+		return 0, 0, err
+	}
+	if force {
+		err = store.DeleteLogs(ctx, keycodes)
+	}
+	return
+}
+
 func Delete(ctx context.Context, ids []int64, force bool) (deleted, skipped int64, err error) {
 	if len(ids) == 0 || len(ids) > 500 {
 		return 0, 0, errors.New("请选择 1-500 个激活码")
 	}
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		if !force {
-			var skippedCount int
-			skippedCount, err = tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids).WhereNot("status", 0).Count()
-			skipped = int64(skippedCount)
-			if err != nil {
-				return err
-			}
-		}
-		m := tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids)
-		if !force {
-			m = m.Where("status", 0)
-		}
-		r, e := m.Delete()
-		if e != nil {
-			return e
-		}
-		deleted, e = r.RowsAffected()
-		if e != nil {
-			return e
-		}
-		if force {
-			_, e = tx.Exec(`DELETE FROM activation_logs l WHERE NOT EXISTS (SELECT 1 FROM activation_keys k WHERE k.keycode=l.keycode)`)
-			return e
-		}
-		return nil
+		deleted, skipped, err = deleteActivationKeys(ctx, activationDeleteTx{tx: tx}, ids, force)
+		return err
 	})
 	return
 }

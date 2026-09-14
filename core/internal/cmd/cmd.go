@@ -111,6 +111,21 @@ func stripWebBasePathMiddleware(basePath string) ghttp.HandlerFunc {
 	}
 }
 
+func isPublicActivationPath(path string) bool {
+	return path == "/activate" ||
+		path == "/activate/" ||
+		path == "/api/public/activation/activate" ||
+		strings.HasPrefix(path, "/static/")
+}
+
+func ipWhitelistWithPublicActivation(r *ghttp.Request) {
+	if isPublicActivationPath(r.URL.Path) {
+		r.Middleware.Next()
+		return
+	}
+	middleware.IPWhitelist(r)
+}
+
 var (
 	Main = gcmd.Command{
 		Name:  consts.DEFAULT_SERVER_NAME,
@@ -127,6 +142,10 @@ var (
 
 			if err != nil {
 				g.Log().Error(ctx, "initialize databases failed ", err)
+				return err
+			}
+			if err = database_initialization.ActivationSchemaInitializationError(); err != nil {
+				g.Log().Error(ctx, "initialize activation schema failed ", err)
 				return err
 			}
 
@@ -201,14 +220,15 @@ var (
 			// Allow BillionMail to run behind a path-prefix reverse proxy.
 			s.Use(stripWebBasePathMiddleware(webBasePath))
 
-			// ip whitelist middleware
-			s.Use(middleware.IPWhitelist)
+			// Keep the public activation flow reachable when the console IP whitelist is enabled.
+			s.Use(ipWhitelistWithPublicActivation)
 
 			// Define excluded URIs
 			excludesURIs := map[string]struct{}{
 				"/favicon.ico":                    {},
 				"/robots.txt":                     {},
 				"/activate":                       {},
+				"/activate/":                      {},
 				"/unsubscribe.html":               {},
 				"/unsubscribe_new.html":           {},
 				"/api/aapanel/sso":                {},

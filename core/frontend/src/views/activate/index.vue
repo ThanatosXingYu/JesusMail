@@ -2,8 +2,8 @@
 	<div class="activate-page">
 		<n-card class="activate-card" :bordered="false">
 			<div v-if="!email" class="brand">
-				<img src="@/assets/images/logo.png" alt="JessusMail" />
-				<h1>JessusMail</h1>
+				<img src="@/assets/images/logo.svg" alt="JesusMail" />
+				<h1>JesusMail</h1>
 				<p>使用激活密钥开通你的邮箱</p>
 			</div>
 			<div v-if="email" class="success-box">
@@ -25,8 +25,8 @@
 				<n-form-item label="激活密钥" path="key">
 					<n-input
 						v-model:value="form.key"
-						maxlength="19"
-						placeholder="QLU-XXXX-XXXX-XXXX"
+						maxlength="24"
+						placeholder="JESUSMAIL-XXXX-XXXX-XXXX"
 						@update:value="form.key = form.key.toUpperCase()" />
 				</n-form-item>
 				<n-form-item label="邮箱前缀" path="prefix">
@@ -77,7 +77,7 @@ const rules: FormRules = {
 	key: [
 		{
 			required: true,
-			pattern: /^QLU-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/,
+			pattern: /^(?:JESUSMAIL|QLU)-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/,
 			message: '请输入正确格式的激活密钥',
 			trigger: ['blur', 'input'],
 		},

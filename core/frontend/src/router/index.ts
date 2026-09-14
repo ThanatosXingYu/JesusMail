@@ -1,53 +1,44 @@
 import { useGlobalStore, useUserStore } from '@/store'
 import { setLanguage } from '@/i18n'
 import { clearPendingRequests } from '@/api'
-import { routes } from '@/router/router'
 import router from '@/router/router'
 import loadingBar from '@/config/loadingBar'
 
 // Route white list
-const whitePathList = ['/login', '/activate']
+const whitePathList = ['/login', '/activate', '/activate/']
 
-router.beforeEach(async (to, from, next) => {
+const syncLanguage = () => {
+	const globalStore = useGlobalStore()
+
+	// Apply the persisted/default language immediately. Language discovery is auxiliary
+	// and must never block authentication redirects or initial route rendering.
+	setLanguage(globalStore.lang)
+	void globalStore
+		.getLang()
+		.then(() => setLanguage(globalStore.lang))
+		.catch(() => setLanguage(globalStore.lang))
+}
+
+router.beforeEach((to, from, next) => {
 	loadingBar.start()
 
 	clearPendingRequests()
 
-	const globalStore = useGlobalStore()
+	const userStore = useUserStore()
 
-	// Set the language
-	try {
-		await globalStore.getLang()
-		setLanguage(globalStore.lang)
-	} catch {
-		setLanguage(globalStore.lang)
-	}
-
-	// Check if the visited route exists in the registered routes
-	const routeExists = routes.some(route => route.path === to.path)
-
-	// If the route does not exist, go directly
-	if (!routeExists) {
-		next()
+	// Resolve authentication synchronously before starting any network request.
+	if (!userStore.isLogin && !whitePathList.includes(to.path)) {
+		next('/login')
 		return
 	}
 
-	const userStore = useUserStore()
-
-	// User is logged in
-	if (userStore.isLogin) {
-		// Only the login page redirects authenticated users; /activate remains public.
-		if (to.path === '/login') {
-			next('/')
-		} else {
-			next()
-		}
-	} else if (whitePathList.includes(to.path)) {
-		// If the visited route is in the white list, go directly
-		next()
-	} else {
-		next('/login')
+	if (userStore.isLogin && to.path === '/login') {
+		next('/')
+		return
 	}
+
+	syncLanguage()
+	next()
 })
 
 router.afterEach(() => {

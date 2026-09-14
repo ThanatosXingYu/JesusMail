@@ -1,6 +1,7 @@
 <?php
     # Product name
-    $config['product_name'] = 'BillionMail';
+    $config['product_name'] = 'JesusMail';
+    $config['display_product_info'] = false;
 
     $config['mime_types'] = '/var/roundcube/config/mime.types';
        

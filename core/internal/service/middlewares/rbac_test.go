@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"billionmail-core/internal/model"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,6 +62,26 @@ func TestPathToRouteInfo(t *testing.T) {
 			assert.Equal(t, tt.wantModule, module, "module")
 			assert.Equal(t, tt.wantAction, action, "action")
 			assert.Equal(t, tt.wantResource, resource, "resource")
+		})
+	}
+}
+
+func TestHasAdminRole(t *testing.T) {
+	tests := []struct {
+		name  string
+		roles any
+		want  bool
+	}{
+		{name: "active model admin", roles: []model.Role{{RoleName: "admin", Status: 1}}, want: true},
+		{name: "disabled model admin", roles: []model.Role{{RoleName: "admin", Status: 0}}, want: false},
+		{name: "active non-admin model role", roles: []model.Role{{RoleName: "operator", Status: 1}}, want: false},
+		{name: "legacy string admin", roles: []string{"admin"}, want: true},
+		{name: "no roles", roles: nil, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, hasAdminRole(tt.roles))
 		})
 	}
 }

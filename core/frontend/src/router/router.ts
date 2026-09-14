@@ -1,5 +1,18 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import { is, isDev } from '@/utils'
+import { isDev } from '@/utils'
+import activationRoute from './modules/activation'
+import apiRoute from './modules/api'
+import automationRoute from './modules/automation'
+import contactsRoute from './modules/contacts'
+import domainRoute from './modules/domain'
+import logsRoute from './modules/logs'
+import mailboxRoute from './modules/mailbox'
+import marketRoute from './modules/market'
+import overviewRoute from './modules/overview'
+import settingsRoute from './modules/settings'
+import smtpRoute from './modules/smtp'
+import templateRoute from './modules/template'
+import videoOutreachRoute from './modules/video-outreach'
 
 // Routes reflect list
 const routesReflectList = [
@@ -21,30 +34,30 @@ const routesReflectList = [
 	'Video Outreach',
 ]
 
-// Import routes from modules
-const modules = import.meta.webpackContext('./modules', {
-	// Whether to search for subdirectories
-	recursive: false,
-	regExp: /^[^.]+\.ts$/,
+const moduleRoutes: RouteRecordRaw[] = [
+	activationRoute,
+	apiRoute,
+	automationRoute,
+	contactsRoute,
+	domainRoute,
+	logsRoute,
+	mailboxRoute,
+	marketRoute,
+	overviewRoute,
+	settingsRoute,
+	smtpRoute,
+	templateRoute,
+	videoOutreachRoute,
+]
+
+const routeOrder = new Map(routesReflectList.map((title, index) => [title, index]))
+
+// Keep the route list dense. Sparse entries are invalid Vue Router records.
+export const menuList: RouteRecordRaw[] = moduleRoutes.sort((a, b) => {
+	const aIndex = routeOrder.get(String(a.meta?.title)) ?? Number.MAX_SAFE_INTEGER
+	const bIndex = routeOrder.get(String(b.meta?.title)) ?? Number.MAX_SAFE_INTEGER
+	return aIndex - bIndex
 })
-
-// Module routes
-export let menuList: RouteRecordRaw[] = []
-
-// Iterate through the module list to generate module routes
-for (const path of modules.keys()) {
-	const mod = modules(path)
-	if (is<{ default: RouteRecordRaw }>(mod, 'Module')) {
-		menuList.push(mod.default)
-	}
-}
-
-// Sort module routes
-menuList = menuList.reduce((p: RouteRecordRaw[], v: RouteRecordRaw) => {
-	const routeIndex = routesReflectList.findIndex(item => item == v.meta!.title)
-	p[routeIndex] = v
-	return p
-}, [] as RouteRecordRaw[])
 
 const otherArray: RouteRecordRaw[] = []
 

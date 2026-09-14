@@ -100,24 +100,7 @@ func (m *RBACMiddleware) PermissionCheck(r *ghttp.Request) {
 
 	// Get roles from context — may be []model.Role, []string, or []interface{}
 	rolesVal := r.GetCtxVar("roles").Val()
-	isAdmin := false
-	switch rv := rolesVal.(type) {
-	case []model.Role:
-		for _, role := range rv {
-			if role.RoleName == "admin" {
-				isAdmin = true
-				break
-			}
-		}
-	default:
-		for _, s := range gconv.Strings(rv) {
-			if s == "admin" {
-				isAdmin = true
-				break
-			}
-		}
-	}
-	if isAdmin {
+	if hasAdminRole(rolesVal) {
 		r.Middleware.Next()
 		return
 	}
@@ -171,6 +154,32 @@ func (m *RBACMiddleware) PermissionCheck(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
+func hasAdminRole(roles any) bool {
+	switch typed := roles.(type) {
+	case []model.Role:
+		for _, role := range typed {
+			if role.RoleName == "admin" && role.Status == 1 {
+				return true
+			}
+		}
+		return false
+	case []string:
+		for _, role := range typed {
+			if role == "admin" {
+				return true
+			}
+		}
+		return false
+	default:
+		for _, role := range gconv.Strings(typed) {
+			if role == "admin" {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 // HasPermission checks if the current user has a specific permission
 func HasPermission(ctx context.Context, module, action, resource string) bool {
 	accountId := rbac.GetCurrentAccountId(ctx)
@@ -178,18 +187,9 @@ func HasPermission(ctx context.Context, module, action, resource string) bool {
 		return false
 	}
 
-	// Get roles from context
-	rolesVar := ctx.Value("roles")
-	roles := []string{}
-	if rolesVar != nil {
-		roles = rolesVar.([]string)
-	}
-
 	// Check for admin role (has all permissions)
-	for _, role := range roles {
-		if role == "admin" {
-			return true
-		}
+	if hasAdminRole(ctx.Value("roles")) {
+		return true
 	}
 
 	// Check specific permission

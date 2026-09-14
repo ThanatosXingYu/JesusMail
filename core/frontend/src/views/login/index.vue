@@ -3,11 +3,11 @@
 		<div class="login-card">
 			<div class="logo-container">
 				<div class="logo">
-					<img class="w-full" src="@/assets/images/logo.png" />
+					<img class="w-full" src="@/assets/images/logo.svg" alt="JesusMail" />
 				</div>
 			</div>
 
-			<h2 class="login-title">JessusMail</h2>
+			<h2 class="login-title">JesusMail</h2>
 
 			<n-form ref="formRef" size="large" :model="form" :rules="rules">
 				<n-form-item :show-label="false" path="username">

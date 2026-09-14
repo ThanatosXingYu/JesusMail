@@ -1,0 +1,31 @@
+<roundcube:include file="includes/layout.html" />
+
+<h1 class="voice"><roundcube:object name="productname" /> <roundcube:label name="login" /></h1>
+
+<div id="layout-content" class="selected no-navbar" role="main">
+	<roundcube:object name="logo" src="/images/logo.svg" id="logo" alt="Logo" />
+	<roundcube:form id="login-form" name="login-form" method="post" class="propform">
+	<roundcube:object name="loginform" form="login-form" size="40" submit=true class="form-control" />
+		<style>
+			#qlu-activate-entry { margin-top: 4px; }
+			#qlu-activate-entry a {
+				display: block; text-align: center; padding: 10px 12px;
+				background: linear-gradient(135deg,#1e6fd9,#0aa2c0);
+				color: #fff; font-weight: 600; font-size: .95rem; letter-spacing: .5px;
+				border-radius: .4rem; text-decoration: none;
+				box-shadow: 0 4px 14px rgba(14,120,200,.35);
+			}
+			#qlu-activate-entry a:hover { filter: brightness(1.08); color: #fff; }
+		</style>
+		<div id="qlu-activate-entry">
+			<a href="https://mail.qlu.edu.kg/activate.php">没有账号？立即激活邮箱 &raquo;</a>
+		</div>
+		<div id="login-footer" role="contentinfo"></div>
+	</form>
+</div>
+
+<noscript>
+	<p class="noscriptwarning"><roundcube:label name="noscriptwarning" /></p>
+</noscript>
+
+<roundcube:include file="includes/footer.html" />

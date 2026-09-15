@@ -328,7 +328,7 @@ func RenameRelayTable(ctx context.Context) error {
 	}
 
 	existsOld := checkTableExists(ctx, "bm_relay_old")
-	if !existsOld {
+	if existsOld {
 		return gerror.New("Table bm_relay_old already exists, skipping rename operation")
 	}
 

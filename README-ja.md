@@ -2,7 +2,7 @@
   <a name="readme-top"></a>
   <h1>JesusMail 📧</h1>
   <p><strong>メールボックス販売・運用向けのセルフホスト型メールプラットフォーム</strong></p>
-  <p>バージョン 1.0.0</p>
+  <p>バージョン 5.0.0</p>
 
 [English](README.md) | [简体中文](README-zh_CN.md) | 日本語 | [Türkçe](README-tr.md)
 </div>

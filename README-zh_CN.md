@@ -2,7 +2,7 @@
   <a name="readme-top"></a>
   <h1>JesusMail 📧</h1>
   <p><strong>适合邮箱分销场景的自托管邮件运营平台</strong></p>
-  <p>版本 1.0.0</p>
+  <p>版本 5.0.0</p>
 
 [English](README.md) | 简体中文 | [日本語](README-ja.md) | [Türkçe](README-tr.md)
 </div>

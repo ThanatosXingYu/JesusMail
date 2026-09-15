@@ -2,7 +2,7 @@
   <a name="readme-top"></a>
   <h1>JesusMail 📧</h1>
   <p><strong>Self-hosted mail operations and distribution platform</strong></p>
-  <p>Version 1.0.0</p>
+  <p>Version 5.0.0</p>
 
 English | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | [Türkçe](README-tr.md)
 </div>

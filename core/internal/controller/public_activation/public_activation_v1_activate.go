@@ -27,7 +27,7 @@ func (c *ControllerV1) Activate(ctx context.Context, req *v1.ActivateReq) (res *
 		res.Msg = "尝试次数过多，请 10 分钟后再试"
 		return res, nil
 	}
-	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, ip)
+	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, ip, req.DurationDays)
 	if err != nil {
 		res.Code = 422
 		switch {

@@ -1,5 +1,6 @@
 import { instance } from '@/api'
 import i18n from '@/i18n'
+import type { MailboxLoginTicket } from '@/views/mailbox/interface'
 
 const { t } = i18n.global
 
@@ -12,16 +13,19 @@ export const getMailboxList = (params: {
 	return instance.get('/mailbox/list', { params })
 }
 
-type MailboxParams = {
+export type MailboxMutationParams = {
 	full_name: string
+	local_part: string
 	domain: string
 	password: string
 	active: number
 	isAdmin: number
 	quota: number
+	quota_active: number
+	expires_at: string | null
 }
 
-export const createMailbox = (params: MailboxParams) => {
+export const createMailbox = (params: MailboxMutationParams) => {
 	return instance.post('/mailbox/create', params, {
 		fetchOptions: {
 			loading: t('mailbox.api.loading.creating'),
@@ -44,7 +48,7 @@ export const createBatchMailbox = (params: {
 	})
 }
 
-export const updateMailbox = (params: MailboxParams) => {
+export const updateMailbox = (params: MailboxMutationParams) => {
 	return instance.post('/mailbox/update', params, {
 		fetchOptions: {
 			loading: t('mailbox.api.loading.updating'),
@@ -79,4 +83,8 @@ export const importMailbox = (params: { file_data: string; file_type: string }) 
 			successMessage: true,
 		},
 	})
+}
+
+export const createMailboxLoginTicket = (params: { username: string }) => {
+	return instance.post<MailboxLoginTicket, MailboxLoginTicket>('/mailbox/login_ticket', params)
 }

@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gogf/gf/v2/container/gvar"
 )
@@ -207,83 +208,98 @@ func TestActivationEnvironmentCompatibility(t *testing.T) {
 }
 
 type fakeActivationDeleteStore struct {
-	nonUnused          int64
-	lockedKeycodes     []string
-	deleted            int64
-	countCalls         int
-	lockCalls          int
-	deleteCalls        int
-	deleteLogCalls     int
-	deletedIDs         []int64
-	deleteOnlyUnused   bool
-	deletedLogKeycodes []string
+	states      []activationDeleteState
+	deleted     int64
+	lockCalls   int
+	deleteCalls int
+	lockedIDs   []int64
+	deletedIDs  []int64
 }
 
-func (s *fakeActivationDeleteStore) CountNonUnused(_ context.Context, _ []int64) (int64, error) {
-	s.countCalls++
-	return s.nonUnused, nil
-}
-
-func (s *fakeActivationDeleteStore) LockKeycodes(_ context.Context, _ []int64) ([]string, error) {
+func (s *fakeActivationDeleteStore) LockStates(_ context.Context, ids []int64) ([]activationDeleteState, error) {
 	s.lockCalls++
-	return append([]string(nil), s.lockedKeycodes...), nil
+	s.lockedIDs = append([]int64(nil), ids...)
+	return append([]activationDeleteState(nil), s.states...), nil
 }
 
-func (s *fakeActivationDeleteStore) DeleteKeys(_ context.Context, ids []int64, onlyUnused bool) (int64, error) {
+func (s *fakeActivationDeleteStore) DeleteNotUsed(_ context.Context, ids []int64) (int64, error) {
 	s.deleteCalls++
 	s.deletedIDs = append([]int64(nil), ids...)
-	s.deleteOnlyUnused = onlyUnused
 	return s.deleted, nil
 }
 
-func (s *fakeActivationDeleteStore) DeleteLogs(_ context.Context, keycodes []string) error {
-	s.deleteLogCalls++
-	s.deletedLogKeycodes = append([]string(nil), keycodes...)
-	return nil
-}
-
-func TestForceDeleteOnlyRemovesLogsForSelectedKeys(t *testing.T) {
+func TestDeleteActivationKeysLocksAndSkipsOnlyUsed(t *testing.T) {
 	store := &fakeActivationDeleteStore{
-		lockedKeycodes: []string{"JESUSMAIL-SELECTED-KEY"},
-		deleted:        1,
+		states:  []activationDeleteState{{ID: 11, Status: 0}, {ID: 12, Status: 1}, {ID: 13, Status: 2}},
+		deleted: 2,
 	}
 
-	deleted, skipped, err := deleteActivationKeys(context.Background(), store, []int64{12}, true)
+	deleted, skipped, err := deleteActivationKeys(context.Background(), store, []int64{11, 12, 13})
 	if err != nil {
 		t.Fatalf("deleteActivationKeys() unexpected error: %v", err)
 	}
-	if deleted != 1 || skipped != 0 {
-		t.Fatalf("deleteActivationKeys() = deleted %d, skipped %d; want 1, 0", deleted, skipped)
+	if deleted != 2 || skipped != 1 {
+		t.Fatalf("deleteActivationKeys() = deleted %d, skipped %d; want 2, 1", deleted, skipped)
 	}
-	if store.countCalls != 0 || store.lockCalls != 1 || store.deleteCalls != 1 || store.deleteLogCalls != 1 {
-		t.Fatalf("unexpected calls: count=%d lock=%d delete=%d deleteLogs=%d", store.countCalls, store.lockCalls, store.deleteCalls, store.deleteLogCalls)
+	if store.lockCalls != 1 || store.deleteCalls != 1 {
+		t.Fatalf("unexpected calls: lock=%d delete=%d", store.lockCalls, store.deleteCalls)
 	}
-	if store.deleteOnlyUnused {
-		t.Fatal("force delete unexpectedly restricted key deletion to unused rows")
-	}
-	if !reflect.DeepEqual(store.deletedIDs, []int64{12}) {
-		t.Fatalf("deleted IDs = %#v, want [12]", store.deletedIDs)
-	}
-	if !reflect.DeepEqual(store.deletedLogKeycodes, []string{"JESUSMAIL-SELECTED-KEY"}) {
-		t.Fatalf("deleted log keycodes = %#v, want only selected key", store.deletedLogKeycodes)
+	if len(store.lockedIDs) != 3 || len(store.deletedIDs) != 3 {
+		t.Fatalf("selected IDs were not passed through: locked=%v deleted=%v", store.lockedIDs, store.deletedIDs)
 	}
 }
 
-func TestNonForceDeleteSkipsUsedAndDoesNotDeleteLogs(t *testing.T) {
-	store := &fakeActivationDeleteStore{nonUnused: 2, deleted: 1}
+func TestExpirationFromDurationBoundaries(t *testing.T) {
+	now := time.Date(2026, time.September, 15, 12, 30, 0, 0, time.UTC)
+	for _, days := range []int{0, 32} {
+		if _, err := expirationFromDuration(now, days); err == nil {
+			t.Fatalf("expirationFromDuration(%d) accepted invalid duration", days)
+		}
+	}
+	for _, days := range []int{1, 31} {
+		expiresAt, err := expirationFromDuration(now, days)
+		if err != nil {
+			t.Fatalf("expirationFromDuration(%d) unexpected error: %v", days, err)
+		}
+		want := now.AddDate(0, 0, days)
+		if !expiresAt.Equal(want) {
+			t.Fatalf("expirationFromDuration(%d) = %s, want %s", days, expiresAt, want)
+		}
+	}
+}
 
-	deleted, skipped, err := deleteActivationKeys(context.Background(), store, []int64{11, 12, 13}, false)
-	if err != nil {
-		t.Fatalf("deleteActivationKeys() unexpected error: %v", err)
+func TestClearBindingStateGuards(t *testing.T) {
+	original := &Key{Id: 7, Status: 1, Email: "user@example.com"}
+	if !canClearBinding(original) {
+		t.Fatal("used key with an email should be clearable")
 	}
-	if deleted != 1 || skipped != 2 {
-		t.Fatalf("deleteActivationKeys() = deleted %d, skipped %d; want 1, 2", deleted, skipped)
+	if canClearBinding(&Key{Id: 7, Status: 0, Email: "user@example.com"}) {
+		t.Fatal("unused key should be skipped")
 	}
-	if store.countCalls != 1 || store.lockCalls != 0 || store.deleteCalls != 1 || store.deleteLogCalls != 0 {
-		t.Fatalf("unexpected calls: count=%d lock=%d delete=%d deleteLogs=%d", store.countCalls, store.lockCalls, store.deleteCalls, store.deleteLogCalls)
+	if canClearBinding(&Key{Id: 7, Status: 1}) {
+		t.Fatal("used key without an email should be skipped")
 	}
-	if !store.deleteOnlyUnused {
-		t.Fatal("non-force delete did not restrict key deletion to unused rows")
+	if !bindingStillMatches(&Key{Id: 7, Status: 1, Email: "user@example.com"}, original) {
+		t.Fatal("unchanged binding should match")
+	}
+	if bindingStillMatches(&Key{Id: 7, Status: 1, Email: "other@example.com"}, original) {
+		t.Fatal("email mismatch should reject reset")
+	}
+	if bindingStillMatches(&Key{Id: 7, Status: 0, Email: "user@example.com"}, original) {
+		t.Fatal("status mismatch should reject reset")
+	}
+}
+
+func TestClearBindingResetDataClearsUsageFields(t *testing.T) {
+	data := clearBindingResetData()
+	if status, ok := data["status"]; !ok || status != 0 {
+		t.Fatalf("reset status = %#v, want 0", status)
+	}
+	for _, field := range []string{"used_at", "used_ip", "email"} {
+		value, ok := data[field]
+		if !ok || value != nil {
+			t.Fatalf("reset field %s = %#v (present=%v), want explicit nil", field, value, ok)
+		}
 	}
 }
 

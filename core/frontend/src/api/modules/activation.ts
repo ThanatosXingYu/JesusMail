@@ -20,7 +20,12 @@ export interface ActivationList {
 	list: ActivationKey[]
 }
 
-export const activateMailbox = (params: { key: string; prefix: string; password: string }) =>
+export const activateMailbox = (params: {
+	key: string
+	prefix: string
+	password: string
+	duration_days: number
+}) =>
 	instance.post('/public/activation/activate', params)
 
 export const getActivationStats = () => instance.get('/activation/stats')
@@ -34,5 +39,7 @@ export const generateActivationKeys = (params: { count: number; note: string; gr
 	instance.post('/activation/generate', params, { fetchOptions: { successMessage: true } })
 export const setActivationGroup = (params: { ids: number[]; group: string }) =>
 	instance.post('/activation/set_group', params, { fetchOptions: { successMessage: true } })
-export const deleteActivationKeys = (params: { ids: number[]; force: boolean }) =>
+export const deleteActivationKeys = (params: { ids: number[] }) =>
 	instance.post('/activation/delete', params, { fetchOptions: { successMessage: true } })
+export const clearActivationBindings = (params: { ids: number[] }) =>
+	instance.post('/activation/clear_binding', params, { fetchOptions: { successMessage: true } })

@@ -1,107 +1,50 @@
-# BillionMail Pull Request Template
+# JesusMail Pull Request
 
-## PR Title Format
-`<type>(<scope>): <description>`  
-**Examples**:
-- `fix(smtp): handle connection timeout during bulk send`
-- `feat(campaign-ui): add A/B testing template selector`
+## Summary
 
-### Type Guidelines
-```
-fix      : Bug fixes (e.g., `fix(auth): prevent login loop`)  
-feat     : New features (e.g., `feat(analytics): add real-time dashboard`)  
-build    : Build system changes (Docker/dependencies)  
-ci       : CI/CD workflows (GitHub Actions)  
-docs     : Documentation updates  
-style    : Code formatting (non-functional changes)  
-refactor : Code restructuring (no functionality change)  
-perf     : Performance improvements  
-test     : Test-related changes  
-chore    : Maintenance/tooling changes  
-```
+Describe what changed and why it is needed.
 
-**Rules**:
-- **Scope**: Specify module (e.g., `smtp`) or layer (e.g., `frontend`)
-- **Description**:
-    - Use **present tense verbs** (e.g., `add` not `added`)
-    - No ending punctuation, max 76 chars
+## Scope
 
----
+- [ ] Backend
+- [ ] Frontend
+- [ ] Mail services or configuration
+- [ ] Activation-code workflow
+- [ ] Mailbox lifecycle or recycle bin
+- [ ] Roundcube or one-click login
+- [ ] Documentation or branding only
 
-## Linked Issues
-Add one of these at the PR description's start:
-- `Fixes #1234` → Complete resolution
-- `Updates #1234` → Partial fix/related update
+## Safety checklist
 
----
+- [ ] I did not rename legacy-compatible runtime identifiers without a migration plan.
+- [ ] I did not include passwords, tokens, private keys, customer data, or production dumps.
+- [ ] Database and mailbox lifecycle changes are transactional or have a documented recovery strategy.
+- [ ] User-visible text and assets use JesusMail branding.
+- [ ] I considered rollback and compatibility with existing deployments.
 
-## Branch Management
-### Frontend Specific
-- **Target Branch**: `dev-frontend` (All frontend PRs must use this)
-- **Naming Convention**:
-```bash
-# Feature development
-feat/[description]  # e.g., feat/ab-test-ui
-# Bug fixes
-fix/[issue-id]-[desc]  # e.g., fix/4567-template-render
+## Validation
+
+List the exact commands and manual flows used to validate this change.
+
+```text
+# Example
+# go test ./path/to/package
+# pnpm test
+# bash -n bm.sh install.sh update.sh
 ```
 
-### Backend/Core
-- **Target Branch**: `main`
-- **Naming Convention**:
-```bash
-# Mail engine
-smtp/[feature]  # e.g., smtp/rate-limit
-# Infrastructure
-infra/[change]  # e.g., infra/redis-cluster
-```
+## User flow tested
 
----
+Explain the relevant workflow, including activation, mailbox sign-in, sending/receiving, deletion, recycle-bin recovery, or expiration where applicable.
 
-## PR Description Template
-```markdown
-### Purpose  
-<!-- Why this change is needed (reference project goals) -->
+## Screenshots
 
-### Implementation  
-<!-- Key code/architecture changes, especially for SMTP/Rspamd -->
+Attach before/after screenshots for visible UI changes. Redact all private information.
 
-### Testing  
-- [ ] Unit tests passed (`npm test`/`go test`)  
-- [ ] Manual steps:  
-~~~bash
-# Example: Test bulk send
-bm send --campaign test --list 1000
-~~~
-- [ ] Impact analysis (e.g., template compatibility/sending rate)
+## Rollback
 
-### Additional Context
-<!-- Screenshots, performance metrics, or related docs -->
-```
+Describe how this change can be reverted safely.
 
----
+## Additional notes
 
-## Automation Integration
-1. **Commit Validation**:  
-   Use `husky` + `commitlint` to enforce conventions:  
-```javascript
-// commitlint.config.js
-module.exports = { extends: ['@commitlint/config-conventional'] };
-```
-
-2. **PR Title Check**:  
-   Add GitHub Action to validate PR titles:
-```yaml
-# .github/workflows/pr-check.yml
-uses: amannn/action-semantic-pull-request@v5
-```
-
-> **Tip**: For mail-sending logic changes, verify SPF/DKIM signing
-```
-
-### Key Features
-- **Frontend Isolation**: Explicit `dev-frontend` branch for frontend changes  
-- **Modular Scopes**: Clear module boundaries (e.g., `smtp`, `analytics`) for automated changelogs  
-- **Compliance Ready**: GDPR/SPF checks emphasized for critical components  
-
-This template can be saved to `.github/PULL_REQUEST_TEMPLATE.md` for automatic application.
+Document known limitations, follow-up work, and deployment requirements.

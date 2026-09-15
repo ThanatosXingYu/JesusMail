@@ -1,4 +1,4 @@
-"""Seed test data for E2E tests via BillionMail API."""
+"""Seed end-to-end test data through the JesusMail API."""
 
 import logging
 import time
@@ -12,7 +12,7 @@ logger = logging.getLogger("e2e")
 E2E_TEMPLATE_NAME = "E2E Test Template"
 E2E_TEMPLATE_HTML = """<html><body>
 <h1>Hello {{ .Subscriber.Email }}</h1>
-<p>{Hi|Hey|Hello} there, this is a test email from BillionMail E2E.</p>
+<p>{Hi|Hey|Hello} there, this is a test email from JesusMail E2E.</p>
 <p>Visit <a href="https://example.com/offer">our offer</a>.</p>
 </body></html>"""
 
@@ -25,7 +25,7 @@ E2E_SENDER_PASSWORD = "e2eTest1234!"
 
 
 async def seed_test_data(bm_client: httpx.AsyncClient, db=None) -> dict:
-    """Create all test fixtures via BillionMail API. Returns IDs dict."""
+    """Create all test fixtures through the JesusMail API and return their IDs."""
     data = {}
 
     # 0. Create domain + sender mailbox (required for SMTP auth)

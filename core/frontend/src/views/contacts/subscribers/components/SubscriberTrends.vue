@@ -77,7 +77,7 @@ const chartOptions = computed<ECOptionLine>(() => {
 				type: 'line',
 				data: subscribe.value.map(item => item.count),
 				itemStyle: {
-					color: '#20a53a',
+					color: '#2563eb',
 				},
 				smooth: true,
 				showSymbol: false,

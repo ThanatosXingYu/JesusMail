@@ -1,27 +1,23 @@
-# Running BillionMail Behind a Reverse Proxy
+# Running JesusMail Behind a Reverse Proxy
 
-BillionMail can be placed behind a reverse proxy (nginx, Caddy, Traefik, etc.) to add SSL termination, custom domains, or integrate with existing infrastructure.
+JesusMail can run behind nginx, Caddy, Traefik, or another reverse proxy for TLS termination, custom domains, and integration with existing infrastructure.
 
-## The `reverse_proxy_domain` Setting
+## The `reverse_proxy_domain` setting
 
-BillionMail stores a `reverse_proxy_domain` value in the `bm_options` table. When set, tracking URLs (open/click tracking) and public-facing links use this domain instead of the internal container address.
+JesusMail stores the public reverse-proxy address in the `reverse_proxy_domain` option. Tracking URLs and other public links use this value instead of the internal container address.
 
-**Set via UI:** Settings > General > Reverse Proxy Domain
+Configure it in **Settings > General > Reverse Proxy Domain**. Include the scheme, for example `https://mail.example.com`. The application validates connectivity before saving the value.
 
-The domain must include the scheme, e.g. `https://mail.example.com`. BillionMail tests connectivity by calling `GET {domain}/api/languages/get` before saving.
-
-## Required Headers
-
-All proxy configs must forward these headers:
+## Required headers
 
 | Header | Purpose |
-|--------|---------|
-| `Host` | Original host header for correct URL generation |
-| `X-Real-IP` | Client's real IP for analytics and rate limiting |
-| `X-Forwarded-For` | Full proxy chain for logging |
-| `X-Forwarded-Proto` | `https` — ensures BillionMail generates HTTPS tracking URLs |
+|---|---|
+| `Host` | Preserves the public host used for URL generation |
+| `X-Real-IP` | Supplies the client IP for analytics and rate limiting |
+| `X-Forwarded-For` | Preserves the proxy chain for logging |
+| `X-Forwarded-Proto` | Ensures public links use the correct scheme |
 
-## Nginx
+## nginx
 
 ```nginx
 server {
@@ -41,17 +37,15 @@ server {
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket support (live updates)
         proxy_http_version 1.1;
         proxy_set_header Upgrade    $http_upgrade;
         proxy_set_header Connection "upgrade";
 
-        # SPA fallback — let BillionMail handle routing
+        # Let the JesusMail application handle SPA routes.
         proxy_intercept_errors off;
     }
 }
 
-# HTTP -> HTTPS redirect
 server {
     listen 80;
     server_name mail.example.com;
@@ -71,38 +65,43 @@ mail.example.com {
 }
 ```
 
-Caddy handles SSL certificates automatically via Let's Encrypt.
+Caddy can manage certificates automatically when the public DNS and network requirements are satisfied.
 
-## Traefik (Docker labels)
+## Traefik Docker labels
 
 ```yaml
 labels:
   - "traefik.enable=true"
-  - "traefik.http.routers.billionmail.rule=Host(`mail.example.com`)"
-  - "traefik.http.routers.billionmail.tls.certresolver=letsencrypt"
-  - "traefik.http.services.billionmail.loadbalancer.server.port=8080"
+  - "traefik.http.routers.jesusmail.rule=Host(`mail.example.com`)"
+  - "traefik.http.routers.jesusmail.tls.certresolver=letsencrypt"
+  - "traefik.http.services.jesusmail.loadbalancer.server.port=8080"
 ```
 
-## After Setup
+## After setup
 
-1. Set the reverse proxy domain in BillionMail: Settings > General > Reverse Proxy Domain
-2. Enter your full URL with scheme: `https://mail.example.com`
-3. BillionMail will test the connection before saving
+1. Open **Settings > General > Reverse Proxy Domain**.
+2. Enter the full public URL, including `https://`.
+3. Save only after the connectivity check succeeds.
+4. Verify administrator pages, public activation, Roundcube, tracking URLs, and WebSocket updates.
 
 ## Troubleshooting
 
-### SPA 404 errors on page refresh
+### SPA returns 404 after refresh
 
-The frontend is a Vue SPA — all routes must resolve to the BillionMail backend, not return static 404s. Ensure your proxy passes all paths to the upstream (no `try_files` that serve a local 404 page).
+All frontend routes must reach the JesusMail backend. Do not configure a local `try_files` fallback that returns a static 404 before the request reaches the application.
 
-### Tracking URLs showing internal port (e.g. `:5679`)
+### Tracking URLs contain an internal port
 
-The `reverse_proxy_domain` is not set, or `X-Forwarded-Proto` / `Host` headers are not forwarded. BillionMail falls back to the internal address. Set the reverse proxy domain in Settings after confirming headers are passed.
+Confirm that `reverse_proxy_domain` is set and that `Host` and `X-Forwarded-Proto` are forwarded correctly.
 
-### SSL certificate mismatch
+### TLS certificate mismatch
 
-Ensure the certificate matches the domain used in `reverse_proxy_domain`. If using Caddy, certificates are automatic. For nginx, verify `ssl_certificate` matches `server_name`.
+The certificate must cover the same hostname configured as the reverse-proxy domain. Verify `server_name`, certificate files, and DNS.
 
-### WebSocket connection failures
+### WebSocket updates fail
 
-If live dashboard updates stop working behind the proxy, ensure you forward `Upgrade` and `Connection` headers (see nginx config above). Caddy handles this automatically.
+For nginx, forward the `Upgrade` and `Connection` headers and use HTTP/1.1 to the upstream. Caddy normally handles this automatically.
+
+### Client IP is always the proxy address
+
+Forward `X-Real-IP` and `X-Forwarded-For`, then make sure only trusted proxies can reach the backend directly.

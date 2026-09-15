@@ -36,19 +36,17 @@
 						>批量分组</n-button
 					>
 					<n-button
-						type="error"
-						ghost
 						:disabled="!checked.length"
-						:loading="mutationLoading === 'delete'"
-						@click="removeSelected(false)"
-						>批量删除（仅未使用）</n-button
+						:loading="mutationLoading === 'unbind'"
+						@click="clearSelectedBindings"
+						>清除绑定</n-button
 					>
 					<n-button
 						type="error"
 						:disabled="!checked.length"
 						:loading="mutationLoading === 'delete'"
-						@click="removeSelected(true)"
-						>批量强制删除（含流水）</n-button
+						@click="removeSelected"
+						>批量删除</n-button
 					>
 				</n-space>
 				<n-space align="center">
@@ -63,7 +61,7 @@
 				:data="rows"
 				:row-key="row => row.id"
 				:checked-row-keys="checked"
-				:scroll-x="1720"
+				:scroll-x="1790"
 				@update:checked-row-keys="keys => checked = keys as number[]" />
 			<div class="pager">
 				<n-pagination
@@ -136,6 +134,7 @@ import { NButton, NTag } from 'naive-ui'
 import { confirm, Message } from '@/utils'
 import { useCopy } from '@/hooks/useCopy'
 import {
+	clearActivationBindings,
 	deleteActivationKeys,
 	generateActivationKeys,
 	getActivationList,
@@ -160,7 +159,7 @@ const rows = ref<ActivationKey[]>([]),
 	checked = ref<number[]>([]),
 	loading = ref(false),
 	exporting = ref(false)
-const mutationLoading = ref<'generate' | 'group' | 'delete' | null>(null)
+const mutationLoading = ref<'generate' | 'group' | 'delete' | 'unbind' | null>(null)
 const statusOptions = [
 	{ label: '全部状态', value: -1 },
 	{ label: '未使用', value: 0 },
@@ -178,7 +177,7 @@ const getStatusText = (status: number) => statusText[status] || '未知'
 const getStatusType = (status: number) => statusType[status] || 'default'
 const fmt = (value?: string | null) => (value ? new Date(value).toLocaleString() : '-')
 
-const removeRows = (ids: number[], force: boolean, row?: ActivationKey) => {
+const removeRows = (ids: number[], row?: ActivationKey) => {
 	if (!ids.length) {
 		Message.warning('请先选择要删除的激活码')
 		return
@@ -186,33 +185,52 @@ const removeRows = (ids: number[], force: boolean, row?: ActivationKey) => {
 	const targetIds = [...ids]
 	const isSingle = targetIds.length === 1 && row
 	const content = isSingle
-		? force
-			? `激活码「${row.keycode}」已使用或禁用。删除记录会同时清理关联激活流水且不可恢复，确定继续吗？`
-			: `确定删除未使用的激活码「${row.keycode}」吗？`
-		: force
-			? `确认强制删除选中的 ${targetIds.length} 个激活码吗？已使用激活码及其关联流水也会被清理，且不可恢复。`
-			: `确认删除选中的 ${targetIds.length} 个未使用激活码吗？已使用或已禁用的激活码会被保留。`
+		? row.status === 0
+			? `确定删除激活码「${row.keycode}」吗？删除后不可恢复。`
+			: `激活码「${row.keycode}」当前不是未使用状态，系统会保留它。若要重新销售，请先执行“清除绑定”。仍要继续检查删除吗？`
+		: `确定删除选中的 ${targetIds.length} 个激活码吗？仅未使用的激活码会被删除，已使用或已禁用的记录将保留。`
 
 	confirm({
-		title: force
-			? isSingle
-				? '删除激活记录'
-				: '批量强制删除'
-			: isSingle
-				? '删除激活码'
-				: '批量删除未使用激活码',
+		title: isSingle ? '删除激活码' : '批量删除激活码',
 		content,
-		confirmText: '删除',
+		confirmText: '确认删除',
 		confirmType: 'error',
 		onConfirm: async () => {
 			mutationLoading.value = 'delete'
 			try {
-				await deleteActivationKeys({ ids: targetIds, force })
+				await deleteActivationKeys({ ids: targetIds })
 				await Promise.all([load(), loadStats()])
 				if (!rows.value.length && params.page > 1 && total.value > 0) {
 					params.page = Math.ceil(total.value / params.page_size)
 					await load()
 				}
+			} finally {
+				mutationLoading.value = null
+			}
+		},
+	})
+}
+
+const clearBindings = (ids: number[], row?: ActivationKey) => {
+	if (!ids.length) {
+		Message.warning('请先选择要清除绑定的激活码')
+		return
+	}
+	const targetIds = [...ids]
+	const isSingle = targetIds.length === 1 && row
+	const content = isSingle
+		? `确定清除激活码「${row.keycode}」与邮箱「${row.email || '-'}」的绑定吗？邮箱及邮件会进入回收站，激活码恢复为未使用。`
+		: `确定清除选中激活码的邮箱绑定吗？所有受影响邮箱及邮件会进入回收站，成功处理的激活码恢复为未使用。`
+	confirm({
+		title: isSingle ? '清除激活码绑定' : '批量清除绑定',
+		content,
+		confirmText: '确认清除',
+		confirmType: 'warning',
+		onConfirm: async () => {
+			mutationLoading.value = 'unbind'
+			try {
+				await clearActivationBindings({ ids: targetIds })
+				await Promise.all([load(), loadStats()])
 			} finally {
 				mutationLoading.value = null
 			}
@@ -248,16 +266,27 @@ const columns: DataTableColumns<ActivationKey> = [
 	{
 		title: '操作',
 		key: 'actions',
-		width: 100,
+		width: 170,
 		fixed: 'right',
 		render: row => (
-			<NButton
-				text
-				type="error"
-				disabled={mutationLoading.value === 'delete'}
-				onClick={() => removeRows([row.id], row.status !== 0, row)}>
-				{row.status === 0 ? '删除' : '删除记录'}
-			</NButton>
+			<div class="flex gap-12px justify-end">
+				{row.status === 1 ? (
+					<NButton
+						text
+						type="warning"
+						disabled={mutationLoading.value !== null}
+						onClick={() => clearBindings([row.id], row)}>
+						清除绑定
+					</NButton>
+				) : null}
+				<NButton
+					text
+					type="error"
+					disabled={mutationLoading.value !== null}
+					onClick={() => removeRows([row.id], row)}>
+					删除
+				</NButton>
+			</div>
 		),
 	},
 ]
@@ -339,7 +368,8 @@ const saveGroup = async () => {
 		mutationLoading.value = null
 	}
 }
-const removeSelected = (force: boolean) => removeRows(checked.value, force)
+const removeSelected = () => removeRows(checked.value)
+const clearSelectedBindings = () => clearBindings(checked.value)
 
 const csvCell = (value: unknown) => {
 	const raw = String(value ?? '')

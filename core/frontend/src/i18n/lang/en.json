@@ -58,8 +58,7 @@
 	},
 	"components": {
 		"tableHelp": {
-			"text1": "Submit {issues} for questions or suggestions, and light up a {star} on Github to support the project.",
-			"text2": "We highly value your active participation. Thank you."
+			"empty": "No data available."
 		},
 		"upload": {
 			"error": {
@@ -110,10 +109,10 @@
 			"logs": "Logs",
 			"operation_logs": "Operation Logs",
 			"error_logs": "Error Logs",
+			"mailboxRecycle": "Recycle Bin",
 			"sequences": "Sequences",
 			"leads": "Leads",
-			"enrichment": "Enrichment",
-			"videoOutreach": "Video Outreach"
+			"enrichment": "Enrichment"
 		}
 	},
 	"login": {
@@ -862,7 +861,7 @@
 			"title": "Black List Check",
 			"checking": "Checking {results} which resolves to {ip} against {tested} known blacklists...",
 			"listed": "Listed: {count}",
-			"success": "Your IP does not exist in the blacklist known by aaPanel",
+			"success": "Your IP was not found on any known blacklist",
 			"columns": {
 				"blacklist": "Black List",
 				"responseIp": "Response IP",
@@ -889,7 +888,7 @@
 			"domainPlaceholder": "Please enter domain, e.g.: example.com",
 			"urlsPlacement": "Please enter url, e.g.: https://example.com",
 			"aRecord": "A Record",
-			"aRecordPlaceholder": "Please enter A record, e.g.: mail.aapanel.com",
+			"aRecordPlaceholder": "Please enter A record, e.g.: mail.example.com",
 			"quota": "Domain Quota",
 			"mailboxCount": "Mailbox Count",
 			"globalCatch": "Catch All",
@@ -1143,7 +1142,8 @@
 			"add": "Add Mailbox",
 			"batchAdd": "Batch Add",
 			"batchDelete": "Batch Delete",
-			"exportAll": "Export All"
+			"exportAll": "Export All",
+			"oneClickLogin": "One-click Login"
 		},
 		"search": {
 			"usernamePlaceholder": "Search username"
@@ -1157,7 +1157,8 @@
 			"loginInfo": "Login Info(WebMail / SMTP)",
 			"quota": "Quota",
 			"type": "Type",
-			"status": "Status"
+			"status": "Status",
+			"expiresAt": "Expires At"
 		},
 		"userType": {
 			"admin": "Admin",
@@ -1177,7 +1178,10 @@
 			"status": "Status",
 			"domain": "Domain",
 			"prefix": "Email Prefix",
-			"count": "Email Count"
+			"count": "Email Count",
+			"displayName": "Display Name",
+			"quotaLimit": "Quota Limit",
+			"expiresAt": "Expires At"
 		},
 		"validation": {
 			"emailRequired": "Please enter email address",
@@ -1186,7 +1190,10 @@
 			"domainRequired": "Please select domain",
 			"prefixRequired": "Please enter email prefix",
 			"countRequired": "Please enter email count",
-			"fileRequired": "Please select upload file"
+			"fileRequired": "Please select upload file",
+			"nameRequired": "Please enter a display name",
+			"expirationRequired": "Please select an expiration date",
+			"expirationPast": "The expiration date cannot be before today"
 		},
 		"delete": {
 			"title": "Delete Mailbox",
@@ -1194,7 +1201,8 @@
 			"batchConfirm": "Are you sure you want to delete {count} mailboxes?"
 		},
 		"loginInfo": {
-			"template": "WebMail: {webmail}\nUsername: {username}\nPassword: {password}\nPOP service [ Address: {mx} Port: 110/995 ]\nIMAP service [ Address: {mx} Port: 143/993 ]\nSMTP service [ Address: {mx} Port: 25/465/587 ]"
+			"template": "WebMail: {webmail}\nUsername: {username}\nPassword: {password}\nPOP service [ Address: {mx} Port: 110/995 ]\nIMAP service [ Address: {mx} Port: 143/993 ]\nSMTP service [ Address: {mx} Port: 25/465/587 ]",
+			"oneClickLoginFailed": "One-click login failed. Confirm that the mailbox is enabled and unexpired, and check WebMail."
 		},
 		"api": {
 			"loading": {
@@ -1204,6 +1212,11 @@
 				"exporting": "Exporting Mailbox, please wait...",
 				"importing": "Importing Mailbox, please wait..."
 			}
+		},
+		"expiration": {
+			"permanent": "Permanent",
+			"specificDate": "Specific Date",
+			"tip": "The mailbox stops working after 23:59:59 on the expiry date and enters the 30-day recycle period."
 		}
 	},
 	"smtp": {

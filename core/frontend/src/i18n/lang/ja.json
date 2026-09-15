@@ -50,8 +50,7 @@
 	},
 	"components": {
 		"tableHelp": {
-			"text1": "質問や提案は {issues} に投稿し、プロジェクトを応援するために Github で {star} を付けてください。",
-			"text2": "皆様の積極的な参加を高く評価しています。ありがとうございます。"
+			"empty": "データがありません。"
 		},
 		"upload": {
 			"error": {
@@ -101,10 +100,10 @@
 			"logs": "Logs",
 			"operation_logs": "Operation Logs",
 			"error_logs": "Error Logs",
+			"mailboxRecycle": "ごみ箱",
 			"sequences": "Sequences",
 			"leads": "Leads",
-			"enrichment": "Enrichment",
-			"videoOutreach": "ビデオアウトリーチ"
+			"enrichment": "Enrichment"
 		}
 	},
 	"login": {
@@ -772,7 +771,6 @@
 			}
 		}
 	},
-
 	"domain": {
 		"title": "MailDomain",
 		"addDomain": "ドメインを追加",
@@ -816,10 +814,10 @@
 			"addTitle": "ドメイン追加",
 			"editTitle": "ドメイン編集",
 			"domain": "ドメイン",
-			"domainPlaceholder": "例: aapanel.com",
-			"urlsPlacement": "例: https://aapanel.com",
+			"domainPlaceholder": "例: example.com",
+			"urlsPlacement": "例: https://example.com",
 			"aRecord": "A レコード",
-			"aRecordPlaceholder": "例: mail.aapanel.com",
+			"aRecordPlaceholder": "例: mail.example.com",
 			"quota": "ドメインクォータ",
 			"mailboxCount": "メールボックス数",
 			"globalCatch": "Catch All",
@@ -928,7 +926,7 @@
 			"title": "ブラックリストチェック",
 			"checking": "{results} は {ip} に解決され、既知のブラックリスト {tested} 件に対してチェックしています...",
 			"listed": "リスト件数: {count}",
-			"success": "aaPanel が認識するブラックリストには IP は存在しません",
+			"success": "既知のブラックリストに IP は見つかりませんでした",
 			"columns": {
 				"blacklist": "ブラックリスト",
 				"responseIp": "レスポンス IP",
@@ -1054,7 +1052,8 @@
 			"add": "メールボックス追加",
 			"batchAdd": "一括追加",
 			"batchDelete": "一括削除",
-			"exportAll": "すべてエクスポート"
+			"exportAll": "すべてエクスポート",
+			"oneClickLogin": "ワンクリックログイン"
 		},
 		"search": {
 			"usernamePlaceholder": "ユーザー名検索"
@@ -1068,7 +1067,8 @@
 			"loginInfo": "ログイン情報（WebMail / SMTP）",
 			"quota": "クォータ",
 			"type": "タイプ",
-			"status": "ステータス"
+			"status": "ステータス",
+			"expiresAt": "有効期限"
 		},
 		"userType": {
 			"admin": "管理者",
@@ -1087,7 +1087,10 @@
 			"status": "ステータス",
 			"domain": "ドメイン",
 			"prefix": "メールプレフィックス",
-			"count": "メール数"
+			"count": "メール数",
+			"displayName": "表示名",
+			"quotaLimit": "クォータ制限",
+			"expiresAt": "有効期限"
 		},
 		"validation": {
 			"emailRequired": "メールアドレスを入力してください",
@@ -1096,7 +1099,10 @@
 			"domainRequired": "ドメインを選択してください",
 			"prefixRequired": "メールプレフィックスを入力してください",
 			"countRequired": "メール数を入力してください",
-			"fileRequired": "アップロードファイルを選択してください"
+			"fileRequired": "アップロードファイルを選択してください",
+			"nameRequired": "表示名を入力してください",
+			"expirationRequired": "有効期限を選択してください",
+			"expirationPast": "有効期限は今日より前に設定できません"
 		},
 		"delete": {
 			"title": "メールボックス削除",
@@ -1104,7 +1110,8 @@
 			"batchConfirm": "{count}個のメールボックスを削除してもよろしいですか？"
 		},
 		"loginInfo": {
-			"template": "WebMail: {webmail}\nユーザー名: {username}\nパスワード: {password}\nPOP サービス [ アドレス: {mx} ポート: 110/995 ]\nIMAP サービス [ アドレス: {mx} ポート: 143/993 ]\nSMTP サービス [ アドレス: {mx} ポート: 25/465/587 ]"
+			"template": "WebMail: {webmail}\nユーザー名: {username}\nパスワード: {password}\nPOP サービス [ アドレス: {mx} ポート: 110/995 ]\nIMAP サービス [ アドレス: {mx} ポート: 143/993 ]\nSMTP サービス [ アドレス: {mx} ポート: 25/465/587 ]",
+			"oneClickLoginFailed": "ワンクリックログインに失敗しました。メールボックスが有効かつ期限内であることと、WebMailを確認してください。"
 		},
 		"api": {
 			"loading": {
@@ -1114,6 +1121,11 @@
 				"exporting": "メールボックスをエクスポート中... お待ちください",
 				"importing": "メールボックスをインポート中... お待ちください"
 			}
+		},
+		"expiration": {
+			"permanent": "無期限",
+			"specificDate": "日付指定",
+			"tip": "有効期限日の23:59:59を過ぎると利用停止となり、30日間のごみ箱保管期間に入ります。"
 		}
 	},
 	"smtp": {
@@ -1495,19 +1507,61 @@
 		}
 	},
 	"sequences": {
-		"search": { "placeholder": "Search sequences..." },
+		"search": {
+			"placeholder": "Search sequences..."
+		},
 		"empty": "No sequences yet",
-		"columns": { "name": "Name", "status": "Status", "steps": "Steps", "sent": "Sent", "opens": "Opens", "replies": "Replies", "created": "Created" },
-		"detail": { "steps": "Sequence Steps", "stats": "Statistics", "stepNumber": "Step", "subject": "Subject", "status": "Status", "sentAt": "Sent At", "opened": "Opened", "clicked": "Clicked", "replied": "Replied" }
+		"columns": {
+			"name": "Name",
+			"status": "Status",
+			"steps": "Steps",
+			"sent": "Sent",
+			"opens": "Opens",
+			"replies": "Replies",
+			"created": "Created"
+		},
+		"detail": {
+			"steps": "Sequence Steps",
+			"stats": "Statistics",
+			"stepNumber": "Step",
+			"subject": "Subject",
+			"status": "Status",
+			"sentAt": "Sent At",
+			"opened": "Opened",
+			"clicked": "Clicked",
+			"replied": "Replied"
+		}
 	},
 	"leads": {
-		"search": { "placeholder": "Search leads..." },
+		"search": {
+			"placeholder": "Search leads..."
+		},
 		"empty": "No leads yet",
-		"columns": { "businessName": "Business Name", "ownerName": "Owner Name", "ownerEmail": "Owner Email", "status": "Status", "category": "Category", "city": "City" }
+		"columns": {
+			"businessName": "Business Name",
+			"ownerName": "Owner Name",
+			"ownerEmail": "Owner Email",
+			"status": "Status",
+			"category": "Category",
+			"city": "City"
+		}
 	},
 	"enrichment": {
-		"scraper": { "title": "Scraper Configuration", "query": "Search Query", "queryPlaceholder": "e.g. dentist, plumber", "location": "Location", "maxResults": "Max Results", "start": "Start Scraping" },
-		"pipeline": { "title": "Pipeline Status", "scraped": "Scraped", "enriching": "Enriching", "personalized": "Personalized", "queued": "Queued" }
+		"scraper": {
+			"title": "Scraper Configuration",
+			"query": "Search Query",
+			"queryPlaceholder": "e.g. dentist, plumber",
+			"location": "Location",
+			"maxResults": "Max Results",
+			"start": "Start Scraping"
+		},
+		"pipeline": {
+			"title": "Pipeline Status",
+			"scraped": "Scraped",
+			"enriching": "Enriching",
+			"personalized": "Personalized",
+			"queued": "Queued"
+		}
 	},
 	"logs": {
 		"title": "ログ",

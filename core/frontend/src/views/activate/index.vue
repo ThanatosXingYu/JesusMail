@@ -56,6 +56,22 @@
 						placeholder="再次输入密码"
 						@keyup.enter="submit" />
 				</n-form-item>
+				<n-form-item label="邮箱有效期" path="duration_days">
+					<div class="w-full">
+						<n-date-picker
+							:value="expirationDate"
+							type="date"
+							format="yyyy-MM-dd"
+							:clearable="false"
+							:is-date-disabled="isExpirationDateDisabled"
+							class="w-full"
+							@update:value="handleExpirationDateChange">
+						</n-date-picker>
+						<div class="expiry-tip">
+							当前有效期 {{ form.duration_days }} 天；到期后邮箱账号与邮件将进入 30 天回收期。
+						</div>
+					</div>
+				</n-form-item>
 				<n-button type="primary" size="large" block :loading="loading" attr-type="submit"
 					>立即开通邮箱</n-button
 				>
@@ -67,12 +83,31 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules } from 'naive-ui'
+import { addDays, differenceInCalendarDays, startOfDay } from 'date-fns'
 import { activateMailbox } from '@/api/modules/activation'
 
 const formRef = ref<FormInst | null>(null)
 const loading = ref(false)
 const email = ref('')
-const form = reactive({ key: '', prefix: '', password: '', password2: '' })
+const form = reactive({ key: '', prefix: '', password: '', password2: '', duration_days: 30 })
+const getToday = () => startOfDay(new Date())
+const expirationDate = ref(addDays(getToday(), form.duration_days).getTime())
+
+const getDurationDays = (timestamp: number) => differenceInCalendarDays(timestamp, getToday())
+
+const isExpirationDateDisabled = (timestamp: number) => {
+	const durationDays = getDurationDays(timestamp)
+	return durationDays < 1 || durationDays > 31
+}
+
+const handleExpirationDateChange = (timestamp: number | null) => {
+	if (timestamp === null) return
+	const durationDays = getDurationDays(timestamp)
+	if (durationDays < 1 || durationDays > 31) return
+	expirationDate.value = startOfDay(timestamp).getTime()
+	form.duration_days = durationDays
+}
+
 const rules: FormRules = {
 	key: [
 		{
@@ -108,6 +143,14 @@ const rules: FormRules = {
 			trigger: ['blur', 'input'],
 		},
 	],
+	duration_days: [
+		{
+			required: true,
+			validator: (_rule, value: number) => Number.isInteger(value) && value >= 1 && value <= 31,
+			message: '邮箱有效期必须为 1-31 天',
+			trigger: ['change'],
+		},
+	],
 }
 const submit = async () => {
 	await formRef.value?.validate()
@@ -117,6 +160,7 @@ const submit = async () => {
 			key: form.key,
 			prefix: form.prefix,
 			password: form.password,
+			duration_days: form.duration_days,
 		})) as { email: string }
 		email.value = data.email
 	} finally {
@@ -158,6 +202,12 @@ const submit = async () => {
 		margin: 0;
 	}
 }
+.expiry-tip {
+	margin-top: 8px;
+	color: var(--color-text-3);
+	font-size: 12px;
+	line-height: 1.6;
+}
 .success-box {
 	text-align: center;
 	.success-icon {
@@ -177,9 +227,9 @@ const submit = async () => {
 		display: inline-block;
 		padding: 10px 18px;
 		margin-bottom: 14px;
-		color: #2080f0;
-		background: #eef5ff;
-		border: 1px dashed #8ebcf2;
+		color: #2563eb;
+		background: #eff6ff;
+		border: 1px dashed #93c5fd;
 		border-radius: 8px;
 		font-size: 17px;
 		font-weight: 600;

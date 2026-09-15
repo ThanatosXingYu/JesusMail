@@ -155,14 +155,31 @@ func allowAttempt(ctx context.Context, ip string, redis redisScriptEvaluator) (b
 	return result.Int64() <= 8, nil
 }
 
-func Activate(ctx context.Context, keycode, prefix, password, ip string) (string, error) {
+func expirationFromDuration(now time.Time, durationDays int) (*time.Time, error) {
+	if durationDays < 1 || durationDays > 31 {
+		return nil, errors.New("邮箱有效期必须为 1-31 天")
+	}
+	expiresAt := now.AddDate(0, 0, durationDays)
+	return &expiresAt, nil
+}
+
+func Activate(ctx context.Context, keycode, prefix, password, ip string, durationDays int) (string, error) {
 	keycode, prefix, err := Validate(keycode, prefix, password)
+	if err != nil {
+		return "", err
+	}
+	now := time.Now().UTC()
+	expiresAt, err := expirationFromDuration(now, durationDays)
 	if err != nil {
 		return "", err
 	}
 	domain := Domain()
 	email := prefix + "@" + domain
-	mailbox := &mailboxv1.Mailbox{Username: email, Password: password, FullName: prefix, IsAdmin: 0, Quota: quota(), LocalPart: prefix, Domain: domain, Active: 1, QuotaActive: 1}
+	mailbox := &mailboxv1.Mailbox{
+		Username: email, Password: password, FullName: prefix, IsAdmin: 0,
+		Quota: quota(), LocalPart: prefix, Domain: domain, Active: 1, QuotaActive: 1,
+		ExpiresAt: expiresAt, SourceType: "activation",
+	}
 
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		domainCount, err := tx.Model("domain").Ctx(ctx).Where("domain", domain).WhereNot("active", 0).Count()
@@ -173,9 +190,30 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 			return errors.New("激活域名尚未启用")
 		}
 
+		var key Key
+		if err := tx.Model("activation_keys").Ctx(ctx).
+			Where("keycode", keycode).Where("status", 0).LockUpdate().Scan(&key); err != nil {
+			return fmt.Errorf("锁定激活码失败: %w", err)
+		}
+		if key.Id == 0 {
+			return ErrInvalidKey
+		}
+		mailbox.ActivationKeyID = &key.Id
+
+		if err = mail_boxes.PrepareForInsert(ctx, mailbox); err != nil {
+			return err
+		}
+		if _, err = tx.Model("mailbox").Ctx(ctx).Insert(mailbox); err != nil {
+			lowerErr := strings.ToLower(err.Error())
+			if strings.Contains(lowerErr, "duplicate") || strings.Contains(lowerErr, "unique") {
+				return ErrMailboxExists
+			}
+			return fmt.Errorf("创建邮箱失败: %w", err)
+		}
+
 		result, err := tx.Model("activation_keys").Ctx(ctx).
-			Where("keycode", keycode).Where("status", 0).
-			Data(g.Map{"status": 1, "used_at": time.Now(), "used_ip": ip, "email": email}).Update()
+			Where("id", key.Id).Where("status", 0).
+			Data(g.Map{"status": 1, "used_at": now, "used_ip": ip, "email": email}).Update()
 		if err != nil {
 			return fmt.Errorf("核销激活码失败: %w", err)
 		}
@@ -186,17 +224,9 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 		if affected != 1 {
 			return ErrInvalidKey
 		}
-
-		if err = mail_boxes.PrepareForInsert(ctx, mailbox); err != nil {
-			return err
-		}
-		if _, err = tx.Model("mailbox").Ctx(ctx).Insert(mailbox); err != nil {
-			if strings.Contains(strings.ToLower(err.Error()), "duplicate") || strings.Contains(strings.ToLower(err.Error()), "unique") {
-				return ErrMailboxExists
-			}
-			return fmt.Errorf("创建邮箱失败: %w", err)
-		}
-		if _, err = tx.Model("activation_logs").Ctx(ctx).Data(g.Map{"keycode": keycode, "email": email, "ip": ip}).Insert(); err != nil {
+		if _, err = tx.Model("activation_logs").Ctx(ctx).Data(g.Map{
+			"keycode": keycode, "email": email, "ip": ip,
+		}).Insert(); err != nil {
 			return fmt.Errorf("记录激活日志失败: %w", err)
 		}
 		return nil
@@ -329,84 +359,215 @@ func SetGroup(ctx context.Context, ids []int64, group string) (int64, error) {
 	return r.RowsAffected()
 }
 
+type activationDeleteState struct {
+	ID     int64
+	Status int
+}
+
 type activationDeleteStore interface {
-	CountNonUnused(ctx context.Context, ids []int64) (int64, error)
-	LockKeycodes(ctx context.Context, ids []int64) ([]string, error)
-	DeleteKeys(ctx context.Context, ids []int64, onlyUnused bool) (int64, error)
-	DeleteLogs(ctx context.Context, keycodes []string) error
+	LockStates(ctx context.Context, ids []int64) ([]activationDeleteState, error)
+	DeleteNotUsed(ctx context.Context, ids []int64) (int64, error)
 }
 
 type activationDeleteTx struct {
 	tx gdb.TX
 }
 
-func (s activationDeleteTx) CountNonUnused(ctx context.Context, ids []int64) (int64, error) {
-	count, err := s.tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids).WhereNot("status", 0).Count()
-	return int64(count), err
+func (s activationDeleteTx) LockStates(ctx context.Context, ids []int64) ([]activationDeleteState, error) {
+	var states []activationDeleteState
+	err := s.tx.Model("activation_keys").Ctx(ctx).Fields("id,status").
+		WhereIn("id", ids).LockUpdate().Scan(&states)
+	return states, err
 }
 
-func (s activationDeleteTx) LockKeycodes(ctx context.Context, ids []int64) ([]string, error) {
-	values, err := s.tx.Model("activation_keys").Ctx(ctx).Fields("keycode").WhereIn("id", ids).LockUpdate().Array("keycode")
-	if err != nil {
-		return nil, err
-	}
-	keycodes := make([]string, 0, len(values))
-	for _, value := range values {
-		if keycode := value.String(); keycode != "" {
-			keycodes = append(keycodes, keycode)
-		}
-	}
-	return keycodes, nil
-}
-
-func (s activationDeleteTx) DeleteKeys(ctx context.Context, ids []int64, onlyUnused bool) (int64, error) {
-	m := s.tx.Model("activation_keys").Ctx(ctx).WhereIn("id", ids)
-	if onlyUnused {
-		m = m.Where("status", 0)
-	}
-	result, err := m.Delete()
+func (s activationDeleteTx) DeleteNotUsed(ctx context.Context, ids []int64) (int64, error) {
+	result, err := s.tx.Model("activation_keys").Ctx(ctx).
+		WhereIn("id", ids).WhereNot("status", 1).Delete()
 	if err != nil {
 		return 0, err
 	}
 	return result.RowsAffected()
 }
 
-func (s activationDeleteTx) DeleteLogs(ctx context.Context, keycodes []string) error {
-	if len(keycodes) == 0 {
-		return nil
-	}
-	_, err := s.tx.Model("activation_logs").Ctx(ctx).WhereIn("keycode", keycodes).Delete()
-	return err
-}
-
-func deleteActivationKeys(ctx context.Context, store activationDeleteStore, ids []int64, force bool) (deleted, skipped int64, err error) {
-	var keycodes []string
-	if force {
-		keycodes, err = store.LockKeycodes(ctx, ids)
-	} else {
-		skipped, err = store.CountNonUnused(ctx, ids)
-	}
+func deleteActivationKeys(ctx context.Context, store activationDeleteStore, ids []int64) (deleted, skippedUsed int64, err error) {
+	states, err := store.LockStates(ctx, ids)
 	if err != nil {
 		return 0, 0, err
 	}
-
-	deleted, err = store.DeleteKeys(ctx, ids, !force)
-	if err != nil {
-		return 0, 0, err
+	for _, state := range states {
+		if state.Status == 1 {
+			skippedUsed++
+		}
 	}
-	if force {
-		err = store.DeleteLogs(ctx, keycodes)
-	}
+	deleted, err = store.DeleteNotUsed(ctx, ids)
 	return
 }
 
-func Delete(ctx context.Context, ids []int64, force bool) (deleted, skipped int64, err error) {
+func Delete(ctx context.Context, ids []int64) (deleted, skippedUsed int64, err error) {
 	if len(ids) == 0 || len(ids) > 500 {
 		return 0, 0, errors.New("请选择 1-500 个激活码")
 	}
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		deleted, skipped, err = deleteActivationKeys(ctx, activationDeleteTx{tx: tx}, ids, force)
+		deleted, skippedUsed, err = deleteActivationKeys(ctx, activationDeleteTx{tx: tx}, ids)
 		return err
 	})
 	return
+}
+
+type ClearBindingResult struct {
+	Cleared int `json:"cleared"`
+	Skipped int `json:"skipped"`
+	Failed  int `json:"failed"`
+}
+
+func canClearBinding(key *Key) bool {
+	return key != nil && key.Id > 0 && key.Status == 1 && strings.TrimSpace(key.Email) != ""
+}
+
+func bindingStillMatches(current, original *Key) bool {
+	return current != nil && original != nil && current.Id == original.Id &&
+		current.Status == 1 && current.Email == original.Email
+}
+
+func clearBindingResetData() g.Map {
+	return g.Map{"status": 0, "used_at": nil, "used_ip": nil, "email": nil}
+}
+
+func activationRelationProven(ctx context.Context, tx gdb.TX, key *Key) (bool, error) {
+	var mailbox struct {
+		Username        string
+		ActivationKeyID *int64
+	}
+	if err := tx.Model("mailbox").Ctx(ctx).Fields("username,activation_key_id").
+		Where("username", key.Email).LockUpdate().Scan(&mailbox); err != nil {
+		return false, err
+	}
+	if mailbox.Username != "" && mailbox.ActivationKeyID != nil && *mailbox.ActivationKeyID == key.Id {
+		return true, nil
+	}
+	var recycled struct {
+		ID                     int64
+		ActivationKeyID        *int64
+		RelatedActivationKeyID *int64
+	}
+	if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		Fields("id,activation_key_id,related_activation_key_id").Where("username", key.Email).
+		OrderDesc("id").Limit(1).LockUpdate().Scan(&recycled); err != nil {
+		return false, err
+	}
+	if recycled.ID != 0 && ((recycled.ActivationKeyID != nil && *recycled.ActivationKeyID == key.Id) ||
+		(recycled.RelatedActivationKeyID != nil && *recycled.RelatedActivationKeyID == key.Id)) {
+		return true, nil
+	}
+	logCount, err := tx.Model("activation_logs").Ctx(ctx).
+		Where("keycode", key.Keycode).Where("email", key.Email).Count()
+	if err != nil {
+		return false, err
+	}
+	return logCount > 0, nil
+}
+
+func clearOneBinding(ctx context.Context, id int64) (bool, error) {
+	var key Key
+	var item *mail_boxes.RecycleItem
+	err := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		if err := tx.Model("activation_keys").Ctx(ctx).Where("id", id).LockUpdate().Scan(&key); err != nil {
+			return fmt.Errorf("锁定激活码失败: %w", err)
+		}
+		if key.Id == 0 {
+			return fmt.Errorf("激活码 %d 不存在", id)
+		}
+		if !canClearBinding(&key) {
+			return nil
+		}
+		proven, err := activationRelationProven(ctx, tx, &key)
+		if err != nil {
+			return fmt.Errorf("验证激活码邮箱关联失败: %w", err)
+		}
+		if !proven {
+			return errors.New("无法证明激活码与邮箱的关联，拒绝清除绑定")
+		}
+		item, err = mail_boxes.PrepareArchiveInTx(ctx, tx, key.Email, mail_boxes.ArchiveOptions{
+			DeleteReason: "activation_clear_binding", DeleteSource: "activation",
+			RelatedActivationKeyID: &key.Id, ActivationKeycodeSnapshot: key.Keycode,
+		})
+		if err != nil {
+			return fmt.Errorf("归档绑定邮箱准备失败: %w", err)
+		}
+		_, err = tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).Data(g.Map{
+			"related_activation_key_id":   key.Id,
+			"activation_keycode_snapshot": key.Keycode,
+			"delete_reason":               "activation_clear_binding",
+			"delete_source":               "activation",
+		}).Update()
+		return err
+	})
+	if err != nil {
+		return false, err
+	}
+	if !canClearBinding(&key) {
+		return false, nil
+	}
+	if err := mail_boxes.CompleteArchive(ctx, item, false); err != nil {
+		return false, fmt.Errorf("归档绑定邮箱失败: %w", err)
+	}
+
+	reset := false
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		var locked Key
+		if err := tx.Model("activation_keys").Ctx(ctx).Where("id", key.Id).LockUpdate().Scan(&locked); err != nil {
+			return err
+		}
+		if !bindingStillMatches(&locked, &key) {
+			return errors.New("激活码绑定状态已发生变化，未重置")
+		}
+		result, err := tx.Model("activation_keys").Ctx(ctx).
+			Where("id", key.Id).Where("status", 1).Where("email", key.Email).
+			Data(clearBindingResetData()).Update()
+		if err != nil {
+			return err
+		}
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected != 1 {
+			return errors.New("激活码绑定状态已发生变化，未重置")
+		}
+		reset = true
+		return nil
+	})
+	return reset, err
+}
+
+func ClearBinding(ctx context.Context, ids []int64) (ClearBindingResult, error) {
+	if len(ids) == 0 || len(ids) > 500 {
+		return ClearBindingResult{}, errors.New("请选择 1-500 个激活码")
+	}
+	seen := make(map[int64]struct{}, len(ids))
+	var result ClearBindingResult
+	var clearErrors []error
+	for _, id := range ids {
+		if id <= 0 {
+			result.Failed++
+			clearErrors = append(clearErrors, fmt.Errorf("无效激活码 ID: %d", id))
+			continue
+		}
+		if _, exists := seen[id]; exists {
+			continue
+		}
+		seen[id] = struct{}{}
+		cleared, err := clearOneBinding(ctx, id)
+		if err != nil {
+			result.Failed++
+			clearErrors = append(clearErrors, fmt.Errorf("激活码 %d: %w", id, err))
+			continue
+		}
+		if cleared {
+			result.Cleared++
+		} else {
+			result.Skipped++
+		}
+	}
+	return result, errors.Join(clearErrors...)
 }

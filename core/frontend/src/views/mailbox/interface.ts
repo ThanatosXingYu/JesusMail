@@ -22,4 +22,12 @@ export interface MailBox {
 	active: number
 	used_quota: number
 	quota_active: number
+	expires_at: string | null
+	source_type: string
+	activation_key_id: number | null
+}
+
+export interface MailboxLoginTicket {
+	ticket: string
+	expires_in: number
 }

@@ -152,6 +152,7 @@ services:
         - ./webmail-data:/var/www/html
         - ./conf/webmail/mime.types:/var/roundcube/config/mime.types
         - ./conf/webmail:/var/roundcube/config
+        - ./conf/webmail/plugins/jesusmail_sso:/var/www/html/plugins/jesusmail_sso:ro
         - ./conf/php:/usr/local/etc
         - ./php-sock/:/var/run/
       environment:
@@ -166,6 +167,9 @@ services:
         - ROUNDCUBEMAIL_SMTP_SERVER=postfix
         - ROUNDCUBEMAIL_SMTP_PORT=${SMTP_PORT:-25}
         - ROUNDCUBEMAIL_REQUEST_PATH=/roundcube
+        - JESUSMAIL_ROUNDCUBE_SSO_SECRET=${JESUSMAIL_ROUNDCUBE_SSO_SECRET:-}
+        - JESSUSMAIL_ROUNDCUBE_SSO_SECRET=${JESSUSMAIL_ROUNDCUBE_SSO_SECRET:-}
+        - JESUSMAIL_ROUNDCUBE_SSO_CORE_URL=${JESUSMAIL_ROUNDCUBE_SSO_CORE_URL:-http://core/api/public/mailbox/login_ticket/consume}
       restart: always
       networks:
         billionmail-network:
@@ -197,6 +201,8 @@ services:
       environment:
         - TZ=${TZ}
         - FAIL2BAN_INIT=${FAIL2BAN_INIT:-y}
+        - JESUSMAIL_ROUNDCUBE_SSO_SECRET=${JESUSMAIL_ROUNDCUBE_SSO_SECRET:-}
+        - JESSUSMAIL_ROUNDCUBE_SSO_SECRET=${JESSUSMAIL_ROUNDCUBE_SSO_SECRET:-}
       cap_add:
         - NET_BIND_SERVICE
         - NET_ADMIN

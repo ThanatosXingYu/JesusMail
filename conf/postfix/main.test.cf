@@ -20,7 +20,7 @@ readme_directory = no
 # See http://www.postfix.org/COMPATIBILITY_README.html -- default to 3.6 on
 # fresh installs.
 compatibility_level = 3.7
-mail_name = PostBillionMail
+mail_name = JesusMail
 
 smtp_header_checks = pcre:/etc/postfix/conf/header_checks
 lmtp_header_checks = pcre:/etc/postfix/conf/header_checks
@@ -78,7 +78,7 @@ message_size_limit = 102400000
 
 
 # User Overrides-configuration
-myhostname = test.billionmail.com
+myhostname = example.com
 
 # BEGIN RELAY SERVICE CONFIGURATION - DO NOT EDIT THIS MARKER
 # Disabled for E2E testing — all mail relayed via relayhost to mailpit

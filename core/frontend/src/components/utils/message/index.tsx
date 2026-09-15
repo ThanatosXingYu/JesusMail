@@ -45,7 +45,7 @@ export default defineComponent({
 		const typeMap = {
 			success: {
 				icon: () => <SuccessIcon></SuccessIcon>,
-				color: '#20a53a',
+				color: '#2563eb',
 			},
 			error: {
 				icon: () => <ErrorIcon></ErrorIcon>,
@@ -57,11 +57,11 @@ export default defineComponent({
 			},
 			info: {
 				icon: () => <InfoIcon></InfoIcon>,
-				color: '#2080F0',
+				color: '#2563EB',
 			},
 			loading: {
 				icon: () => <NBaseLoading clsPrefix="bt" strokeWidth={24} scale={0.85}></NBaseLoading>,
-				color: '#20a53a',
+				color: '#2563EB',
 			},
 		}
 

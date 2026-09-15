@@ -2,9 +2,6 @@
 	<div>
 		<div class="flex items-center mb-12px">
 			<span class="font-bold text-basic text-14px">{{ $t('settings.common.api.title') }}</span>
-			<n-button class="ml-8px" text type="primary" @click="handleClickHelp">
-				{{ $t('common.actions.help') }}
-			</n-button>
 		</div>
 
 		<div class="flex items-center mb-16px">
@@ -56,10 +53,6 @@ const onUpdateEnabled = (val: boolean) => {
 			getCommonConfig()
 		},
 	})
-}
-
-const handleClickHelp = () => {
-	window.open('https://billionmail.com/start/api_usage_guide.html')
 }
 </script>
 

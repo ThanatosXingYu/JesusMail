@@ -58,8 +58,7 @@
 	},
 	"components": {
 		"tableHelp": {
-			"text1": "有问题或建议可提{issues}，也可在Github给我们{star}，",
-			"text2": "我们高度重视您的积极参与，谢谢。"
+			"empty": "暂无数据。"
 		},
 		"upload": {
 			"error": {
@@ -110,10 +109,10 @@
 			"logs": "日志",
 			"operation_logs": "操作日志",
 			"error_logs": "错误日志",
+			"mailboxRecycle": "回收站",
 			"sequences": "Sequences",
 			"leads": "Leads",
-			"enrichment": "Enrichment",
-			"videoOutreach": "视频外联"
+			"enrichment": "Enrichment"
 		}
 	},
 	"login": {
@@ -850,7 +849,7 @@
 			"title": "黑名单检测",
 			"checking": "正在检测解析到 {ip} 的 {results}，对比 {tested} 个已知黑名单...",
 			"listed": "已列入黑名单数：{count}",
-			"success": "您的 IP 未在 aaPanel 已知的黑名单中",
+			"success": "您的 IP 未出现在任何已知黑名单中",
 			"columns": {
 				"blacklist": "黑名单",
 				"responseIp": "响应 IP",
@@ -874,7 +873,7 @@
 			"domainPlaceholder": "请输入域名，例如：example.com",
 			"urlsPlacement": "请输入域名，例如：https://example.com",
 			"aRecord": "A记录",
-			"aRecordPlaceholder": "请输入A记录，例如：mailAapanelCom",
+			"aRecordPlaceholder": "请输入A记录，例如：mail.example.com",
 			"quota": "域名配额",
 			"mailboxCount": "邮箱数量",
 			"globalCatch": "Catch All",
@@ -1134,7 +1133,8 @@
 			"add": "添加邮箱",
 			"batchAdd": "批量添加",
 			"batchDelete": "批量删除",
-			"exportAll": "导出全部"
+			"exportAll": "导出全部",
+			"oneClickLogin": "一键登录"
 		},
 		"search": {
 			"usernamePlaceholder": "搜索用户名"
@@ -1148,7 +1148,8 @@
 			"loginInfo": "登录信息（WebMail / SMTP）",
 			"quota": "配额",
 			"type": "类型",
-			"status": "状态"
+			"status": "状态",
+			"expiresAt": "到期时间"
 		},
 		"userType": {
 			"admin": "管理员",
@@ -1168,7 +1169,10 @@
 			"status": "状态",
 			"domain": "域名",
 			"prefix": "邮箱前缀",
-			"count": "邮箱数量"
+			"count": "邮箱数量",
+			"displayName": "显示名称",
+			"quotaLimit": "配额限制",
+			"expiresAt": "到期时间"
 		},
 		"validation": {
 			"emailRequired": "请输入邮箱地址",
@@ -1177,7 +1181,10 @@
 			"domainRequired": "请选择域名",
 			"prefixRequired": "请输入邮箱前缀",
 			"countRequired": "请输入邮箱数量",
-			"fileRequired": "请选择上传文件"
+			"fileRequired": "请选择上传文件",
+			"nameRequired": "请输入显示名称",
+			"expirationRequired": "请选择邮箱到期日期",
+			"expirationPast": "到期日期不能早于今天"
 		},
 		"delete": {
 			"title": "删除邮箱",
@@ -1185,7 +1192,8 @@
 			"batchConfirm": "确定删除{count}个邮箱？"
 		},
 		"loginInfo": {
-			"template": "WebMail: {webmail}\n用户名: {username}\n密码: {password}\nPOP service [ Address: {mx} Port: 110/995 ]\nIMAP service [ Address: {mx} Port: 143/993 ]\nSMTP service [ Address: {mx} Port: 25/465/587 ]"
+			"template": "WebMail: {webmail}\n用户名: {username}\n密码: {password}\nPOP service [ Address: {mx} Port: 110/995 ]\nIMAP service [ Address: {mx} Port: 143/993 ]\nSMTP service [ Address: {mx} Port: 25/465/587 ]",
+			"oneClickLoginFailed": "一键登录失败，请确认邮箱已启用且未到期，并检查 WebMail 服务。"
 		},
 		"api": {
 			"loading": {
@@ -1195,6 +1203,11 @@
 				"exporting": "正在导出邮箱，请稍候...",
 				"importing": "正在导入邮箱，请稍候..."
 			}
+		},
+		"expiration": {
+			"permanent": "永久",
+			"specificDate": "指定日期",
+			"tip": "到期当天 23:59:59 后停止使用，并进入 30 天回收期。"
 		}
 	},
 	"smtp": {
@@ -1586,18 +1599,60 @@
 		}
 	},
 	"sequences": {
-		"search": { "placeholder": "Search sequences..." },
+		"search": {
+			"placeholder": "Search sequences..."
+		},
 		"empty": "No sequences yet",
-		"columns": { "name": "Name", "status": "Status", "steps": "Steps", "sent": "Sent", "opens": "Opens", "replies": "Replies", "created": "Created" },
-		"detail": { "steps": "Sequence Steps", "stats": "Statistics", "stepNumber": "Step", "subject": "Subject", "status": "Status", "sentAt": "Sent At", "opened": "Opened", "clicked": "Clicked", "replied": "Replied" }
+		"columns": {
+			"name": "Name",
+			"status": "Status",
+			"steps": "Steps",
+			"sent": "Sent",
+			"opens": "Opens",
+			"replies": "Replies",
+			"created": "Created"
+		},
+		"detail": {
+			"steps": "Sequence Steps",
+			"stats": "Statistics",
+			"stepNumber": "Step",
+			"subject": "Subject",
+			"status": "Status",
+			"sentAt": "Sent At",
+			"opened": "Opened",
+			"clicked": "Clicked",
+			"replied": "Replied"
+		}
 	},
 	"leads": {
-		"search": { "placeholder": "Search leads..." },
+		"search": {
+			"placeholder": "Search leads..."
+		},
 		"empty": "No leads yet",
-		"columns": { "businessName": "Business Name", "ownerName": "Owner Name", "ownerEmail": "Owner Email", "status": "Status", "category": "Category", "city": "City" }
+		"columns": {
+			"businessName": "Business Name",
+			"ownerName": "Owner Name",
+			"ownerEmail": "Owner Email",
+			"status": "Status",
+			"category": "Category",
+			"city": "City"
+		}
 	},
 	"enrichment": {
-		"scraper": { "title": "Scraper Configuration", "query": "Search Query", "queryPlaceholder": "e.g. dentist, plumber", "location": "Location", "maxResults": "Max Results", "start": "Start Scraping" },
-		"pipeline": { "title": "Pipeline Status", "scraped": "Scraped", "enriching": "Enriching", "personalized": "Personalized", "queued": "Queued" }
+		"scraper": {
+			"title": "Scraper Configuration",
+			"query": "Search Query",
+			"queryPlaceholder": "e.g. dentist, plumber",
+			"location": "Location",
+			"maxResults": "Max Results",
+			"start": "Start Scraping"
+		},
+		"pipeline": {
+			"title": "Pipeline Status",
+			"scraped": "Scraped",
+			"enriching": "Enriching",
+			"personalized": "Personalized",
+			"queued": "Queued"
+		}
 	}
 }

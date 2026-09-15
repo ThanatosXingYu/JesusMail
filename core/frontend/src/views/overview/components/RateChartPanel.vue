@@ -17,7 +17,7 @@
 	</n-card>
 	<n-card :title="$t('overview.rate.bounceRate')">
 		<line-chart
-			chart-color="#20a53a"
+			chart-color="#2563eb"
 			:date-type="bounce.column_type"
 			:chart-name="$t('overview.rate.bounceRate')"
 			:chart-data="bounceRateData">

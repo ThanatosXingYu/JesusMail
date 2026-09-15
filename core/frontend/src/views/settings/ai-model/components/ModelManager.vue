@@ -295,7 +295,7 @@ function handleAddModel() {
 					}
 
 					&:hover {
-						background: #eef9ee;
+						background: var(--color-primary-2);
 					}
 
 					.operation {

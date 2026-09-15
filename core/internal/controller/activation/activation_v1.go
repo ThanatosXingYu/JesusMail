@@ -48,12 +48,23 @@ func (c *ControllerV1) SetGroup(ctx context.Context, req *v1.SetGroupReq) (*v1.S
 	return res, nil
 }
 func (c *ControllerV1) Delete(ctx context.Context, req *v1.DeleteReq) (*v1.DeleteRes, error) {
-	d, s, err := service.Delete(ctx, req.Ids, req.Force)
+	d, s, err := service.Delete(ctx, req.Ids)
 	if err != nil {
 		return nil, err
 	}
 	res := &v1.DeleteRes{}
 	res.SetSuccess("删除完成")
 	res.Data = g.Map{"deleted": d, "skipped_used": s}
+	return res, nil
+}
+
+func (c *ControllerV1) ClearBinding(ctx context.Context, req *v1.ClearBindingReq) (*v1.ClearBindingRes, error) {
+	result, err := service.ClearBinding(ctx, req.Ids)
+	if err != nil && result.Cleared == 0 {
+		return nil, err
+	}
+	res := &v1.ClearBindingRes{}
+	res.SetSuccess("清除绑定完成")
+	res.Data = g.Map{"cleared": result.Cleared, "skipped": result.Skipped, "failed": result.Failed}
 	return res, nil
 }

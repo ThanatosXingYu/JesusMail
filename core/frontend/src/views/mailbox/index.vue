@@ -47,12 +47,18 @@
 <script lang="tsx" setup>
 import { DataTableColumns, NButton, NFlex, NSwitch } from 'naive-ui'
 import { useBrowserLocation } from '@vueuse/core'
-import { confirm, getByteUnit } from '@/utils'
+import { confirm, getByteUnit, Message } from '@/utils'
 import { useModal } from '@/hooks/modal/useModal'
 import { useCopy } from '@/hooks/useCopy'
 import { useDataTable } from '@/hooks/useDataTable'
-import { deleteMailbox, getMailboxList, updateMailbox } from '@/api/modules/mailbox'
+import {
+	createMailboxLoginTicket,
+	deleteMailbox,
+	getMailboxList,
+	updateMailbox,
+} from '@/api/modules/mailbox'
 import { MailBox, MailBoxParams } from './interface'
+import { buildWebmailLoginUrl, isMailboxLoginAvailable } from './login'
 
 import TablePassword from '@/components/base/bt-table-password/index.vue'
 import DomainSelect from './components/DomainSelect.vue'
@@ -66,6 +72,32 @@ const location = useBrowserLocation()
 const { t } = useI18n()
 
 const { copyText } = useCopy()
+
+const loginTicketLoading = reactive<Record<string, boolean>>({})
+
+const handleOneClickLogin = async (row: MailBox) => {
+	if (!isMailboxLoginAvailable(row) || loginTicketLoading[row.username]) return
+
+	const popup = window.open('about:blank', '_blank')
+	if (popup) popup.opener = null
+	loginTicketLoading[row.username] = true
+
+	try {
+		const { ticket } = await createMailboxLoginTicket({ username: row.username })
+		const webmailUrl = buildWebmailLoginUrl(window.location.origin, ticket)
+
+		if (popup && !popup.closed) {
+			popup.location.replace(webmailUrl)
+		} else {
+			window.location.assign(webmailUrl)
+		}
+	} catch {
+		if (popup && !popup.closed) popup.close()
+		Message.error(t('mailbox.loginInfo.oneClickLoginFailed'))
+	} finally {
+		delete loginTicketLoading[row.username]
+	}
+}
 
 const batchAddRef = useTemplateRef('batchAddRef')
 
@@ -126,13 +158,18 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'login',
 		title: t('mailbox.columns.loginInfo'),
-		ellipsis: {
-			tooltip: true,
-		},
-		minWidth: 140,
+		minWidth: 180,
 		render: row => {
 			return (
-				<div class="flex justify-center w-160px">
+				<NFlex inline={true} justify="center" size={12}>
+					<NButton
+						text
+						type="primary"
+						loading={Boolean(loginTicketLoading[row.username])}
+						disabled={!isMailboxLoginAvailable(row)}
+						onClick={() => handleOneClickLogin(row)}>
+						{t('mailbox.actions.oneClickLogin')}
+					</NButton>
 					<NButton
 						text
 						type="primary"
@@ -148,9 +185,19 @@ const columns = ref<DataTableColumns<MailBox>>([
 						}}>
 						{t('common.actions.copy')}
 					</NButton>
-				</div>
+				</NFlex>
 			)
 		},
+	},
+	{
+		key: 'expires_at',
+		title: t('mailbox.columns.expiresAt'),
+		width: '14%',
+		minWidth: 150,
+		render: row =>
+			row.expires_at
+				? new Date(row.expires_at).toLocaleString()
+				: t('mailbox.expiration.permanent'),
 	},
 	{
 		key: 'quota',
@@ -243,11 +290,14 @@ const handleAdd = () => {
 const handleStatusChange = async (row: MailBox, val: number) => {
 	await updateMailbox({
 		full_name: row.full_name,
+		local_part: row.local_part,
 		domain: row.domain,
 		password: row.password,
 		quota: row.quota,
+		quota_active: row.quota_active,
 		isAdmin: row.is_admin,
 		active: val,
+		expires_at: row.expires_at,
 	})
 	row.active = val
 }

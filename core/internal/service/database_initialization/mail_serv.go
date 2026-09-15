@@ -40,6 +40,9 @@ func init() {
 				active SMALLINT NOT NULL DEFAULT 1,
 				used_quota BIGINT NOT NULL DEFAULT 0,	
 				quota_active SMALLINT NOT NULL DEFAULT 1,
+				expires_at TIMESTAMPTZ,
+				source_type VARCHAR(32) NOT NULL DEFAULT 'legacy',
+				activation_key_id BIGINT,
 				PRIMARY KEY (username)
 			)`,
 
@@ -124,10 +127,16 @@ func init() {
 		_ = AddColumnIfNotExists("domain", "hasbrandinfo", "SMALLINT", "0", false)
 		_ = AddColumnIfNotExists("domain", "current_usage", "BIGINT", "0", true)
 
-
 		// mailbox used quota column
 		_ = AddColumnIfNotExists("mailbox", "used_quota", "BIGINT", "0", true)
 		_ = AddColumnIfNotExists("mailbox", "quota_active", "SMALLINT", "1", true)
+
+		// The lifecycle schema depends on the mailbox table above. Keeping it in
+		// this handler avoids relying on Go source-file init ordering.
+		mailboxLifecycleSchemaInitializationErr = initializeMailboxLifecycleSchema(context.Background())
+		if mailboxLifecycleSchemaInitializationErr != nil {
+			g.Log().Error(context.Background(), "Failed to initialize mailbox lifecycle schema:", mailboxLifecycleSchemaInitializationErr)
+		}
 
 	})
 }

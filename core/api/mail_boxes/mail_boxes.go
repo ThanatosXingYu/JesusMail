@@ -20,4 +20,15 @@ type IMailBoxesV1 interface {
 	GetAllEmail(ctx context.Context, req *v1.GetAllEmailReq) (res *v1.GetAllEmailRes, err error)
 	ExportMailbox(ctx context.Context, req *v1.ExportMailboxReq) (res *v1.ExportMailboxRes, err error)
 	ImportMailbox(ctx context.Context, req *v1.ImportMailboxReq) (res *v1.ImportMailboxRes, err error)
+	CreateLoginTicket(ctx context.Context, req *v1.CreateLoginTicketReq) (res *v1.CreateLoginTicketRes, err error)
+	RecycleStats(ctx context.Context, req *v1.RecycleStatsReq) (res *v1.RecycleStatsRes, err error)
+	RecycleList(ctx context.Context, req *v1.RecycleListReq) (res *v1.RecycleListRes, err error)
+	RecycleRestore(ctx context.Context, req *v1.RecycleRestoreReq) (res *v1.RecycleRestoreRes, err error)
+	RecyclePurge(ctx context.Context, req *v1.RecyclePurgeReq) (res *v1.RecyclePurgeRes, err error)
+	RecycleCleanup(ctx context.Context, req *v1.RecycleCleanupReq) (res *v1.RecycleCleanupRes, err error)
+}
+
+// IPublicMailBoxesV1 contains endpoints authenticated with the Roundcube shared secret.
+type IPublicMailBoxesV1 interface {
+	ConsumeLoginTicket(ctx context.Context, req *v1.ConsumeLoginTicketReq) (res *v1.ConsumeLoginTicketRes, err error)
 }

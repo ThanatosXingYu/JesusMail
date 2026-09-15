@@ -1,131 +1,98 @@
 <div align="center">
   <a name="readme-top"></a>
-  <h1><a href="https://www.billionmail.com/" target="_blank">BillionMail 📧</a></h1>
+  <h1>JesusMail 📧</h1>
+  <p><strong>适合邮箱分销场景的自托管邮件运营平台</strong></p>
+  <p>版本 1.0.0</p>
 
-
-## 一个开源的邮件服务器，为智能营销提供电子邮件解决方案
-
-[![][license-shield]][license-link] [![][docs-shield]][docs-link] [![][github-release-shield]][github-release-link] [![][github-stars-shield]][github-stars-link]
-
-[English](README.md) | 简体中文 | [日本語](README-ja.md) | [Türkçe](README-ja.md)
-</div>
-<br/>
-
-<div align="center">
-<a href="https://trendshift.io/repositories/13842" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13842" alt="aaPanel%2FBillionMail | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[English](README.md) | 简体中文 | [日本語](README-ja.md) | [Türkçe](README-tr.md)
 </div>
 
-## 在线演示
-BillionMail 演示: [https://demo.billionmail.com/billionmail](https://demo.billionmail.com/billionmail)
+## JesusMail 是什么？
 
-用户名: `billionmail` 
+JesusMail 将邮件服务器、网页邮箱、邮箱管理、激活码交付和邮件营销能力整合在一个自托管系统中。它主要面向通过闲鱼、私域渠道或分销商销售托管邮箱的运营者，让管理员可以统一掌控邮箱创建、激活、到期、回收与售后支持流程。
 
-密码: `billionmail` 
+## 主要功能
 
-## 什么是 BillionMail？
+- 域名与邮箱管理
+- 激活码创建、分组、导出、清除绑定和兑换
+- 公开激活页面，可配置邮箱有效期
+- 对指定邮箱进行安全的一键登录
+- 邮箱回收站，默认保留 30 天
+- 邮件营销、联系人、模板、投递统计和预热工具
+- 集成 Roundcube 网页邮箱
+- 基于 Docker Compose 部署 PostgreSQL、Redis、Postfix、Dovecot 和 Rspamd
 
-BillionMail 是一个**未来的开源邮件服务器和电子邮件营销平台**，旨在帮助企业和个人轻松管理他们的电子邮件营销活动。无论您是发送新闻通讯、促销邮件还是交易消息，这个工具都将为您的电子邮件营销工作提供**完全控制**。通过**高级分析**和**客户管理**等功能，您将能够像专业人士一样创建、发送和跟踪电子邮件。
+## 分销流程
 
-![BillionMail Banner](https://www.billionmail.com/home.png?v1)
+典型的邮箱分销流程如下：
 
-## 如何使用？
-**安装脚本：** (✅该脚本会自动安装所有必需的运行环境，包括Docker)
+1. 管理员在 JesusMail 后台创建一个或一批激活码。
+2. 通过选定的销售渠道把激活码交付给客户。
+3. 客户打开公开激活页，选择可用邮箱名和有效期，并使用激活码完成开通。
+4. 管理员可在后台查看激活码绑定关系、邮箱来源和到期时间。
+5. 用户可使用邮箱凭据登录；管理员在售后支持时可使用安全的一键登录。
+6. 清除激活码绑定时，受影响邮箱通过回收站流程删除，激活码恢复为未使用状态。
+
+## 环境要求
+
+- 安装 Docker Engine 和 Docker Compose v2 的 Linux 服务器
+- 可控制 DNS 的公网域名，并正确配置 MX、SPF、DKIM 和 DMARC
+- 按部署需要开放邮件服务端口和管理端口
+- 安装或升级生产环境前准备完整且可验证的备份
+
+## 从已有源码目录安装
+
+本定制版本不会在文档中写死公开仓库地址。请从授权渠道取得 JesusMail 源码，然后执行：
+
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && bash install.sh
+cd /path/to/JesusMail
+cp env_init .env
+# 启动前请逐项检查 .env。
+docker compose up -d
 ```
 
+也可以在检查安装脚本的配置和兼容行为后执行：
 
-**使用Docker安装：** (请手动安装Docker和docker-compose-plugin，并修改.env文件)
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && cp env_init .env && docker compose up -d || docker-compose up -d
+cd /path/to/JesusMail
+bash install.sh
 ```
 
-<div align="center">
-  <a href="https://www.bilibili.com/video/BV1JiTNzUE5m/" target="_blank">
-    <img src="https://i1.hdslb.com/bfs/archive/9065dbdf7645fa5cadb8a34e1ae3e287481fb862.jpg" alt="" width="80%">
-    <br />
-    <b>在BiliBili上观看</b>
-  </a>
-</div>
+> 未完成数据库、配置文件和邮件数据备份前，不要直接更新生产环境。
 
+## 管理命令
 
-## 管理脚本
-- 管理帮助
+```shell
+bm help          # 查看全部命令
+bm default       # 查看后台访问信息
+bm show-record   # 查看 DNS 记录要求
+bm status        # 查看容器状态
+bm restart       # 重启 JesusMail 服务
+```
 
-  `bm help`
-
-- 查看默认登录信息
-
-  `bm default`
-
-- 显示域名DNS记录
-
-  `bm show-record`
-
-- 更新BillionMail
-
-  `bm update`
-
-
+为保证已有部署能够安全升级，部分容器服务名、路径、数据库名和环境变量仍保留内部兼容标识。这些内容属于实现细节，不代表产品品牌。
 
 ## 网页邮箱
 
-BillionMail已集成**RoundCube**，您可以通过`/roundcube/`访问网页邮箱。
+系统集成 Roundcube，通常可通过 `/roundcube/` 访问。JesusMail 可以签发短时、一次性登录票据，让已授权管理员打开指定邮箱，同时避免把邮箱密码放进浏览器 URL。
 
-## 为什么选择BillionMail？
+## 生产安全
 
-### 大多数电子邮件营销平台要么**昂贵**，要么**闭源**，或者**缺乏基本功能**。BillionMail的目标是与众不同：
+修改生产环境前至少备份：
 
-✅ **完全开源** – 没有隐藏成本，没有供应商锁定。  
-📊 **高级分析** – 跟踪电子邮件投递、打开率、点击率等。  
-📧 **无限发送** – 对您可以发送的电子邮件数量没有限制。  
-🎨 **可定制模板** – 可重复使用的专业营销模板。
-🔒 **隐私优先** – 您的数据保留在您这里，没有第三方跟踪。  
-🚀 **自托管** – 在您自己的服务器上运行，完全控制。  
+- PostgreSQL 一致性数据库转储
+- Maildir 邮件数据
+- Redis 及其他必要的持久化服务数据
+- `.env`、Compose 文件和完整的 `conf/` 目录
+- 反向代理与 TLS 配置
+- 当前镜像 ID、标签和容器检查信息
 
-## 您如何提供帮助 🌟
+没有完成恢复验证前，不要执行会删除卷或清理 Docker 数据的命令。
 
-BillionMail是一个**社区驱动的项目**，我们需要您的支持才能开始！以下是您可以提供帮助的方式：
+## 贡献与支持
 
-1. **为此仓库加星标**：通过为此仓库加星表示您的兴趣。  
-2. **传播消息**：与您的网络分享BillionMail—开发者、营销人员和开源爱好者。  
-3. **分享反馈**：通过提出问题或加入讨论，让我们知道您希望在BillionMail中看到哪些功能。  
-4. **贡献**：一旦开发开始，我们将欢迎社区的贡献。敬请关注更新！
-
----
-
-📧 **BillionMail – 开源电子邮件营销的未来。**
-
-## 问题
-
-如果您遇到任何问题或有功能请求，请[提交issue](https://github.com/aaPanel/BillionMail/issues)。请确保包括：
-
-- 问题或请求的清晰描述。
-- 重现问题的步骤（如适用）。
-- 截图或错误日志（如适用）。
+提交问题或改动建议时，请使用本仓库的 Issue 与 Pull Request 模板。不要提交密码、激活码、API Token、私钥、客户邮箱地址或生产数据库内容。
 
 ## 许可证
 
-BillionMail根据**AGPLv3许可证**授权。这意味着您可以：
-
-✅ 免费使用该软件。  
-✅ 修改和分发代码。  
-✅ 私下使用，没有限制。
-
-有关更多详细信息，请参阅[LICENSE](LICENSE)文件。
-
-
-<!-- BillionMail official link -->
-[docs-link]: https://www.billionmail.com/
-
-<!-- BillionMail Other link-->
-[license-link]: https://www.gnu.org/licenses/gpl-3.0.html
-[github-release-link]: https://github.com/aaPanel/BillionMail/releases/latest
-[github-stars-link]: https://github.com/aaPanel/BillionMail
-[github-issues-link]: https://github.com/aaPanel/BillionMail/issues
-
-<!-- Shield link-->
-[docs-shield]: https://img.shields.io/badge/documentation-148F76
-[github-release-shield]: https://img.shields.io/github/v/release/aaPanel/BillionMail
-[github-stars-shield]: https://img.shields.io/github/stars/aaPanel/BillionMail?color=%231890FF&style=flat-square   
-[license-shield]: https://img.shields.io/github/license/aaPanel/BillionMail
+JesusMail 使用 [GNU Affero General Public License v3.0](LICENSE) 发布。第三方组件继续遵循各自的许可证和声明。

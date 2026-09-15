@@ -1,4 +1,4 @@
-"""HTTP API helpers for BillionMail + FrostByte E2E tests."""
+"""HTTP API helpers for JesusMail end-to-end tests."""
 
 import logging
 import re
@@ -15,7 +15,7 @@ def rewrite_url(url: str) -> str:
     """Rewrite embedded hostname URLs to point to local BM instance.
 
     BM embeds tracking/unsub URLs with the configured hostname (e.g.
-    https://test.billionmail.com:8443/pmta/...) which doesn't resolve in CI.
+    https://tracking.example.test:8443/pmta/...) which doesn't resolve in CI.
     Rewrite to BM_BASE so tests can hit the local instance.
     """
     return re.sub(r'https?://[^/]+', BM_BASE, url, count=1)

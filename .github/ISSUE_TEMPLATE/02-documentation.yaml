@@ -1,8 +1,8 @@
 # https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository#creating-issue-forms
 # https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
 name: Documentation
-description: Suggest improvements or additions to our documentation
-title: "A good idea"
+description: Suggest improvements to JesusMail documentation
+title: "[Docs] "
 labels:
   - documentation
 
@@ -10,7 +10,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping us improve! 🙏 Please answer these questions and provide as much information as possible about your problem.
+        Thanks for helping us improve JesusMail! 🙏 Please answer these questions and provide as much information as possible about your problem.
 
   - type: textarea
     id: description

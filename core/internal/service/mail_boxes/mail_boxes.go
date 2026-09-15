@@ -12,7 +12,6 @@ import (
 	"github.com/GehirnInc/crypt/md5_crypt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/util/gconv"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -35,6 +34,9 @@ func PrepareForInsert(ctx context.Context, mailbox *v1.Mailbox) (err error) {
 	mailbox.UpdateTime = now
 	mailbox.Active = 1
 	mailbox.Maildir = fmt.Sprintf("%s@%s/", mailbox.LocalPart, mailbox.Domain)
+	if strings.TrimSpace(mailbox.SourceType) == "" {
+		mailbox.SourceType = "legacy"
+	}
 	return nil
 }
 
@@ -43,26 +45,9 @@ func EnsureStorage(ctx context.Context, mailbox *v1.Mailbox) error {
 }
 
 func Add(ctx context.Context, mailbox *v1.Mailbox) (err error) {
-	// Encode password
-	mailbox.PasswordEncode = PasswdEncode(ctx, mailbox.Password)
-
-	// Crypt password
-	mailbox.Password, err = PasswdMD5Crypt(ctx, mailbox.Password)
-
-	if err != nil {
-		err = fmt.Errorf("Generate password md5-crypt failed: %w", err)
-		return
+	if err = PrepareForInsert(ctx, mailbox); err != nil {
+		return err
 	}
-
-	mailbox.Username = strings.ToLower(mailbox.Username)
-	mailbox.LocalPart = strings.ToLower(mailbox.LocalPart)
-	mailbox.Domain = strings.ToLower(mailbox.Domain)
-
-	now := time.Now().Unix()
-	mailbox.CreateTime = now
-	mailbox.UpdateTime = now
-	mailbox.Active = 1
-	mailbox.Maildir = fmt.Sprintf("%s@%s/", mailbox.LocalPart, mailbox.Domain)
 
 	_, err = g.DB().Model("mailbox").Ctx(ctx).Insert(mailbox)
 	if err != nil {
@@ -78,54 +63,94 @@ func Add(ctx context.Context, mailbox *v1.Mailbox) (err error) {
 	return nil
 }
 
-func Update(ctx context.Context, mailbox *v1.Mailbox) (err error) {
+func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided bool) (err error) {
 	mailbox.UpdateTime = time.Now().Unix()
+	updateData := g.Map{
+		"full_name":    mailbox.FullName,
+		"is_admin":     mailbox.IsAdmin,
+		"quota":        mailbox.Quota,
+		"update_time":  mailbox.UpdateTime,
+		"active":       mailbox.Active,
+		"quota_active": mailbox.QuotaActive,
+	}
 	if mailbox.Password != "" {
 		mailbox.PasswordEncode = PasswdEncode(ctx, mailbox.Password)
 		mailbox.Password, err = PasswdMD5Crypt(ctx, mailbox.Password)
-
 		if err != nil {
-			err = fmt.Errorf("Generate password md5-crypt failed: %w", err)
-			return
+			return fmt.Errorf("Generate password md5-crypt failed: %w", err)
 		}
+		updateData["password"] = mailbox.Password
+		updateData["password_encode"] = mailbox.PasswordEncode
+	}
+	if expiresAtProvided {
+		updateData["expires_at"] = mailbox.ExpiresAt
 	}
 
 	mailbox.Username = strings.ToLower(mailbox.Username)
 	mailbox.LocalPart = strings.ToLower(mailbox.LocalPart)
 	mailbox.Domain = strings.ToLower(mailbox.Domain)
-	mailbox.Maildir = fmt.Sprintf("%s@%s/", mailbox.LocalPart, mailbox.Domain)
 
-	m := gconv.Map(mailbox)
-	delete(m, "create_time")
-	delete(m, "used_quota")
+	var previous v1.Mailbox
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		if err := tx.Model("mailbox").Ctx(ctx).Where("username", mailbox.Username).LockUpdate().Scan(&previous); err != nil {
+			return err
+		}
+		if previous.Username == "" {
+			return fmt.Errorf("mailbox %s does not exist", mailbox.Username)
+		}
 
-	var mb v1.Mailbox
-	err = g.DB().Model("mailbox").Where("username", mailbox.Username).Scan(&mb)
+		var recycleOperation struct {
+			ID            int64  `json:"id"`
+			ArchiveStatus string `json:"archive_status"`
+		}
+		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+			Fields("id,archive_status").
+			Where("username", mailbox.Username).
+			Where("create_time", previous.CreateTime).
+			Where("maildir", previous.Maildir).
+			WhereIn("archive_status", mailboxUpdateBlockingRecycleStatuses()).
+			OrderDesc("id").Limit(1).LockUpdate().Scan(&recycleOperation); err != nil {
+			return fmt.Errorf("check mailbox recycle operation: %w", err)
+		}
+		if recycleOperation.ID != 0 {
+			return fmt.Errorf("mailbox %s cannot be updated while recycle operation is %s", mailbox.Username, recycleOperation.ArchiveStatus)
+		}
 
-	_, err = g.DB().Model("mailbox").
-		Ctx(ctx).
-		Where("username", mailbox.Username).
-		Update(m)
+		result, err := tx.Model("mailbox").Ctx(ctx).
+			Where("username", mailbox.Username).
+			Where("create_time", previous.CreateTime).
+			Where("maildir", previous.Maildir).
+			Update(updateData)
+		if err != nil {
+			return err
+		}
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected != 1 {
+			return fmt.Errorf("mailbox %s changed while being updated", mailbox.Username)
+		}
+		return nil
+	})
 	if err != nil {
-
 		return err
 	}
 
-	if mailbox.QuotaActive == 1 && mailbox.Quota != 0 {
-		if mailbox.Quota != mb.Quota {
-			if e2 := updateMaildirQuotaHeader(ctx, mailbox); e2 != nil {
-				g.Log().Warning(ctx, "updateMaildirQuotaHeader failed", e2)
-			}
+	if mailbox.QuotaActive == 1 && mailbox.Quota != 0 && mailbox.Quota != previous.Quota {
+		mailbox.Maildir = previous.Maildir
+		if e2 := updateMaildirQuotaHeader(ctx, mailbox); e2 != nil {
+			g.Log().Warning(ctx, "updateMaildirQuotaHeader failed", e2)
 		}
 	}
 	return nil
 }
 
 func Delete(ctx context.Context, email string) error {
-	_, err := g.DB().Model("mailbox").
-		Ctx(ctx).
-		Where("username", email).
-		Delete()
+	_, err := ArchiveMailbox(ctx, email, ArchiveOptions{
+		DeleteReason: "manual_delete",
+		DeleteSource: "admin",
+	})
 	return err
 }
 
@@ -133,22 +158,10 @@ func DeleteBatch(ctx context.Context, emails []string) (int64, error) {
 	if len(emails) == 0 {
 		return 0, nil
 	}
-
-	result, err := g.DB().Model("mailbox").
-		Ctx(ctx).
-		WhereIn("username", emails).
-		Delete()
-
-	if err != nil {
-		return 0, err
-	}
-
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affected, nil
+	return ArchiveMailboxes(ctx, emails, ArchiveOptions{
+		DeleteReason: "manual_delete",
+		DeleteSource: "admin",
+	})
 }
 
 func Get(ctx context.Context, domain, keyword string, page, pageSize int) ([]v1.Mailbox, int, error) {
@@ -323,6 +336,7 @@ func BatchAdd(ctx context.Context, domain string, quota int, count int, prefix s
 			Active:         1,
 			Maildir:        fmt.Sprintf("%s@%s/", localPart, domain),
 			QuotaActive:    quotaActive,
+			SourceType:     "batch",
 		}
 
 		mailboxes = append(mailboxes, mailbox)
@@ -439,6 +453,9 @@ func AddImport(ctx context.Context, mailbox *v1.Mailbox) (err error) {
 	mailbox.Active = 1
 	mailbox.QuotaActive = 1
 	mailbox.Maildir = fmt.Sprintf("%s@%s/", mailbox.LocalPart, mailbox.Domain)
+	if strings.TrimSpace(mailbox.SourceType) == "" {
+		mailbox.SourceType = "import"
+	}
 
 	_, err = g.DB().Model("mailbox").Ctx(ctx).InsertIgnore(mailbox)
 	if err != nil {

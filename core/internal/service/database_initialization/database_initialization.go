@@ -4,6 +4,7 @@ import (
 	"billionmail-core/internal/consts"
 	"billionmail-core/internal/service/public"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -68,8 +69,12 @@ func InitDatabase() (err error) {
 		}
 	}
 
-	// Empty the registered handlers
+	// Empty the registered handlers before reporting migration failures.
 	registeredHandlers = registeredHandlers[:0]
+
+	if migrationErr := errors.Join(activationSchemaInitializationErr, mailboxLifecycleSchemaInitializationErr); migrationErr != nil {
+		return fmt.Errorf("database schema initialization failed: %w", migrationErr)
+	}
 
 	return nil
 }

@@ -1,173 +1,98 @@
 <div align="center">
   <a name="readme-top"></a>
-  <h1><a href="https://www.billionmail.com/" target="_blank">BillionMail 📧</a></h1>
+  <h1>JesusMail 📧</h1>
+  <p><strong>Self-hosted mail operations and distribution platform</strong></p>
+  <p>Version 1.0.0</p>
 
-
-## An Open-Source MailServer, NewsLetter, Email Marketing Solution for Smarter Campaigns
-
-[![][license-shield]][license-link] [![][docs-shield]][docs-link] [![][github-release-shield]][github-release-link] [![][github-stars-shield]][github-stars-link]
-
-English | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | [Türkçe](README-ja.md)
-</div>
-<br/>
-
-<div align="center">
-<a href="https://trendshift.io/repositories/13842" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13842" alt="aaPanel%2FBillionMail | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+English | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | [Türkçe](README-tr.md)
 </div>
 
-## What is BillionMail?
+## What is JesusMail?
 
-BillionMail is a **future open-source Mail server, Email marketing platform** designed to help businesses and individuals manage their email campaigns with ease. Whether you're sending newsletters, promotional emails, or transactional messages, this tool will provide **full control** over your email marketing efforts. With features like **advanced analytics**, and **customer management**, you'll be able to create, send, and track emails like a pro.
+JesusMail combines a mail server, webmail, mailbox administration, activation-code delivery, and email campaign tools in one self-hosted system. It is designed for operators who distribute managed mailboxes through marketplaces, private sales channels, or reseller workflows while retaining control of account lifecycle and data.
 
-![BillionMail Banner](https://www.billionmail.com/home.png?v1)
+## Main capabilities
 
-# Just 3 steps to send a billion emails!
-**Billion emails. Any business. Guaranteed.**
+- Mailbox and domain administration
+- Activation-code creation, grouping, export, binding reset, and redemption
+- Public mailbox activation with configurable expiration dates
+- One-click sign-in to the corresponding webmail account
+- Mailbox recycle bin with a default 30-day retention period
+- Campaigns, contacts, templates, delivery analytics, and warm-up tools
+- Integrated Roundcube webmail
+- Docker Compose deployment with PostgreSQL, Redis, Postfix, Dovecot, and Rspamd
 
-### Step 1️⃣ Install BillionMail: 
-✅ It takes **only 8️⃣ minutes** from installation to **✅ successful email sending**
+## Distribution workflow
+
+A typical reseller flow is:
+
+1. Create one or more activation codes in the JesusMail administrator console.
+2. Deliver a code to the customer through the selected sales channel.
+3. The customer opens the public activation page, selects an available mailbox name and validity period, and redeems the code.
+4. The administrator can review the code binding, mailbox source, and expiration date.
+5. The mailbox owner can use the provided credentials or the administrator can use one-click sign-in for support.
+6. Clearing a code binding removes the affected mailbox through the recycle-bin lifecycle and returns the code to an unused state.
+
+## Requirements
+
+- A Linux server with Docker Engine and Docker Compose v2
+- A public domain with correct MX, SPF, DKIM, and DMARC records
+- Open mail and management ports required by your deployment
+- A complete backup before installing or upgrading a production instance
+
+## Install from an existing checkout
+
+The public repository URL for this customized edition is intentionally not hard-coded in the documentation. Obtain the JesusMail source from your authorized distribution channel, then run:
+
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && bash install.sh
+cd /path/to/JesusMail
+cp env_init .env
+# Review every value in .env before starting services.
+docker compose up -d
 ```
 
+Alternatively, use the installation script after reviewing its configuration and compatibility behavior:
 
-### Step 2️⃣: Connect Your Domain
-- Add the sending domain
-- Verify DNS records
-- Auto-enable free SSL
-
-
-### Step 3️⃣: Build Your Campaign
-
-- Write or paste your email
-- Choose list & tags
-- Set send time or send now
-
-
-<div align="center">
-  <a href="https://www.youtube.com/embed/UHgxZa_9jGs?si=0-f1B5hDtcWImvQv" target="_blank">
-    <img src="https://img.youtube.com/vi/UHgxZa_9jGs/maxresdefault.jpg" alt="" width="80%">
-    <br />
-    <img src="https://www.iconfinder.com/icons/317714/download/png/16" alt="YouTube" width="16"/>
-    <b>Watch on Youtube</b>
-  </a>
-</div>
-
-
-## Other installation methods
-
-### One-click installation on aaPanel
-👉 https://www.aapanel.com/new/download.html  (Log in to ✅aaPanel --> 🐳Docker --> 1️⃣OneClick install)
-
-
-
-
-**Docker**
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && cp env_init .env && docker compose up -d || docker-compose up -d
+cd /path/to/JesusMail
+bash install.sh
 ```
 
-## Management script
-- Management help
+> Do not run an update directly against a production instance without a verified database, configuration, and mail-data backup.
 
-  `bm help`
+## Management commands
 
-- View Login default info
-
-  `bm default`
-
-- Show domain DNS record
-
-  `bm show-record`
-
-- Update BillionMail
-
-  `bm update`
-
-## Live Demo
-BillionMail Demo: [https://demo.billionmail.com/billionmail](https://demo.billionmail.com/billionmail)
-
-Username: `billionmail` 
-
-Password: `billionmail` 
-
-
-## WebMail
-
-BillionMail has integrated **RoundCube**, you can access WebMail via `/roundcube/`.
-
-## Why BillionMail?
-
-Most email marketing platforms are either **expensive**, **closed-source**, or **lack essential features**. BillionMail aims to be different:
-
-✅ **Fully Open-Source** – No hidden costs, no vendor lock-in.  
-📊 **Advanced Analytics** – Track email delivery, open rates, click-through rates, and more.  
-📧 **Unlimited Sending** – No restrictions on the number of emails you can send.  
-🎨 **Customizable Templates** – Custom professional marketing templates for reuse.
-🔒 **Privacy-First** – Your data stays with you, no third-party tracking.  
-🚀 **Self-Hosted** – Run it on your own server for complete control.  
-
-## How You Can Help 🌟
-
-BillionMail is a **community-driven project**, and we need your support to get started! Here's how you can help:
-
-1. **Star This Repository**: Show your interest by starring this repo.  
-2. **Spread the Word**: Share BillionMail with your network—developers, marketers, and open-source enthusiasts.  
-3. **Share Feedback**: Let us know what features you'd like to see in BillionMail by opening an issue or joining the discussion.  
-4. **Contribute**: Once development begins, we'll welcome contributions from the community. Stay tuned for updates!
-
----
-
-📧 **BillionMail – The Future of Open-Source Email Marketing.**
-
-## Issues
-
-If you encounter any issues or have feature requests, please [open an issue](https://github.com/aaPanel/BillionMail/issues). Be sure to include:
-
-- A clear description of the problem or request.
-- Steps to reproduce the issue (if applicable).
-- Screenshots or error logs (if applicable).
-
-## Install Now:
-✅It takes **only 8 minutes** from installation to **successful email sending**
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && bash install.sh
+bm help          # Show available commands
+bm default       # Show administrator access information
+bm show-record   # Show required DNS records
+bm status        # Show container status
+bm restart       # Restart JesusMail services
 ```
 
+Some internal service names, paths, database names, and environment variables retain legacy-compatible identifiers. They are implementation details required for safe upgrades and existing deployments; they do not represent the JesusMail product name.
 
-**Install with Docker:** (Please install Docker and docker-compose-plugin manually, and modify .env file)
-```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && cp env_init .env && docker compose up -d || docker-compose up -d
-```
+## Webmail
 
-## Star History
+Roundcube is integrated and is normally available under `/roundcube/`. JesusMail can issue a short-lived, single-use sign-in ticket so an authorized administrator can open a mailbox without placing its password in the browser URL.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=aapanel/billionmail&type=Date)](https://www.star-history.com/#aapanel/billionmail&Date)
+## Production safety
+
+Before changing a production deployment, back up at least:
+
+- PostgreSQL data with a consistent database dump
+- Maildir data
+- Redis and other required persistent service data
+- `.env`, Compose files, and the complete `conf/` directory
+- Reverse-proxy and TLS configuration
+- Current image IDs, tags, and container inspection data
+
+Never use volume-destructive Compose commands or cleanup commands unless the recovery plan has been tested.
+
+## Contributing and support
+
+Use this repository's issue and pull-request templates when reporting a problem or proposing a change. Do not include passwords, activation codes, API tokens, private keys, customer addresses, or production database content.
 
 ## License
 
-BillionMail is licensed under the **AGPLv3 License**. This means you can:
-
-✅ Use the software for free.  
-✅ Modify and distribute the code.  
-✅ Use it privately without restrictions.
-
-See the [LICENSE](LICENSE) file for more details.
-
----
-
-<!-- BillionMail official link -->
-[docs-link]: https://www.billionmail.com/
-
-<!-- BillionMail Other link-->
-[license-link]: https://www.gnu.org/licenses/agpl-3.0.html
-[github-release-link]: https://github.com/aaPanel/BillionMail/releases/latest
-[github-stars-link]: https://github.com/aaPanel/BillionMail
-[github-issues-link]: https://github.com/aaPanel/BillionMail/issues
-
-<!-- Shield link-->
-[docs-shield]: https://img.shields.io/badge/documentation-148F76
-[github-release-shield]: https://img.shields.io/github/v/release/aaPanel/BillionMail
-[github-stars-shield]: https://img.shields.io/github/stars/aaPanel/BillionMail?color=%231890FF&style=flat-square   
-[license-shield]: https://img.shields.io/github/license/aaPanel/BillionMail
-
+JesusMail is distributed under the [GNU Affero General Public License v3.0](LICENSE). Third-party components retain their respective licenses and notices.

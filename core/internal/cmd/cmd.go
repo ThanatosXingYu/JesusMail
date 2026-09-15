@@ -115,7 +115,16 @@ func isPublicActivationPath(path string) bool {
 	return path == "/activate" ||
 		path == "/activate/" ||
 		path == "/api/public/activation/activate" ||
+		path == "/api/public/mailbox/login_ticket/consume" ||
 		strings.HasPrefix(path, "/static/")
+}
+
+func bindPublicAPI(group *ghttp.RouterGroup) {
+	group.Middleware(middlewares.HandleApiResponse)
+	group.Bind(
+		public_activation.NewV1(),
+		mail_boxes.NewPublicV1(),
+	)
 }
 
 func ipWhitelistWithPublicActivation(r *ghttp.Request) {
@@ -225,28 +234,29 @@ var (
 
 			// Define excluded URIs
 			excludesURIs := map[string]struct{}{
-				"/favicon.ico":                    {},
-				"/robots.txt":                     {},
-				"/activate":                       {},
-				"/activate/":                      {},
-				"/unsubscribe.html":               {},
-				"/unsubscribe_new.html":           {},
-				"/api/aapanel/sso":                {},
-				"/api/unsubscribe/user_group":     {},
-				"/api/unsubscribe":                {},
-				"/api/unsubscribe_new":            {},
-				"/api/batch_mail/api/send":        {},
-				"/api/batch_mail/api/batch_send":  {},
-				"/api/subscribe/confirm":          {},
-				"/api/subscribe/submit":           {},
-				"/api/languages/get":              {},
-				"/api/public/activation/activate": {},
-				"/already_subscribed.html":        {},
-				"/subscribe_confirm.html":         {},
-				"/subscribe_form.html":            {},
-				"/subscribe_success.html":         {},
-				"/unsubscribe_success.html":       {},
-				"/subscribe_form_code.html":       {},
+				"/favicon.ico":                             {},
+				"/robots.txt":                              {},
+				"/activate":                                {},
+				"/activate/":                               {},
+				"/unsubscribe.html":                        {},
+				"/unsubscribe_new.html":                    {},
+				"/api/aapanel/sso":                         {},
+				"/api/unsubscribe/user_group":              {},
+				"/api/unsubscribe":                         {},
+				"/api/unsubscribe_new":                     {},
+				"/api/batch_mail/api/send":                 {},
+				"/api/batch_mail/api/batch_send":           {},
+				"/api/subscribe/confirm":                   {},
+				"/api/subscribe/submit":                    {},
+				"/api/languages/get":                       {},
+				"/api/public/activation/activate":          {},
+				"/api/public/mailbox/login_ticket/consume": {},
+				"/already_subscribed.html":                 {},
+				"/subscribe_confirm.html":                  {},
+				"/subscribe_form.html":                     {},
+				"/subscribe_success.html":                  {},
+				"/unsubscribe_success.html":                {},
+				"/subscribe_form_code.html":                {},
 			}
 
 			// Bind Server Hooks
@@ -315,11 +325,8 @@ var (
 				)
 			})
 
-			// Public activation API: intentionally excludes JWT/RBAC but keeps standard responses.
-			s.Group("/api/public", func(group *ghttp.RouterGroup) {
-				group.Middleware(middlewares.HandleApiResponse)
-				group.Bind(public_activation.NewV1())
-			})
+			// Public APIs intentionally exclude administrator JWT/RBAC. Each controller performs its own authentication.
+			s.Group("/api/public", bindPublicAPI)
 
 			// Register Apis
 			s.Group("/api", func(group *ghttp.RouterGroup) {

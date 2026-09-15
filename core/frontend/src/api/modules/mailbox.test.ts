@@ -24,6 +24,7 @@ import {
   deleteMailbox,
   exportMailbox,
   importMailbox,
+  createMailboxLoginTicket,
 } from './mailbox'
 
 describe('mailbox API', () => {
@@ -45,12 +46,15 @@ describe('mailbox API', () => {
 
   it('createMailbox calls POST /mailbox/create', () => {
     const params = {
-      full_name: 'user@test.com',
+      full_name: 'User',
+      local_part: 'user',
       domain: 'test.com',
-      password: 'pass123',
+      password: 'Pass1234',
       active: 1,
       isAdmin: 0,
       quota: 1024,
+      quota_active: 1,
+      expires_at: null,
     }
     createMailbox(params)
     expect(mockPost).toHaveBeenCalledWith('/mailbox/create', params, expect.objectContaining({
@@ -69,12 +73,15 @@ describe('mailbox API', () => {
 
   it('updateMailbox calls POST /mailbox/update', () => {
     const params = {
-      full_name: 'user@test.com',
+      full_name: 'User',
+      local_part: 'user',
       domain: 'test.com',
-      password: 'newpass',
+      password: 'NewPass123',
       active: 1,
       isAdmin: 0,
       quota: 2048,
+      quota_active: 1,
+      expires_at: '2026-10-15T23:59:59Z',
     }
     updateMailbox(params)
     expect(mockPost).toHaveBeenCalledWith('/mailbox/update', params, expect.any(Object))
@@ -99,4 +106,13 @@ describe('mailbox API', () => {
     importMailbox(params)
     expect(mockPost).toHaveBeenCalledWith('/mailbox/import', params, expect.any(Object))
   })
+
+  it('createMailboxLoginTicket sends only the mailbox username', () => {
+    createMailboxLoginTicket({ username: 'user@test.com' })
+    expect(mockPost).toHaveBeenCalledWith('/mailbox/login_ticket', {
+      username: 'user@test.com',
+    })
+    expect(mockPost.mock.calls[0][1]).not.toHaveProperty('password')
+  })
+
 })

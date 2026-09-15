@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export interface BillionMailInstance {
+export interface JesusMailInstance {
 	id: string
 	name: string
 	url: string
@@ -17,7 +17,7 @@ function normalizeUrl(raw: string): string {
 export default defineStore(
 	'InstanceStore',
 	() => {
-		const instances = ref<BillionMailInstance[]>([])
+		const instances = ref<JesusMailInstance[]>([])
 
 		const currentInstance = computed(() =>
 			instances.value.find(i => i.url === window.location.origin)
@@ -39,7 +39,7 @@ export default defineStore(
 			instances.value = instances.value.filter(i => i.id !== id)
 		}
 
-		const switchTo = (instance: BillionMailInstance) => {
+		const switchTo = (instance: JesusMailInstance) => {
 			window.location.href = instance.url
 		}
 

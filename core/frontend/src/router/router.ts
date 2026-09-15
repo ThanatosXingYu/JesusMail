@@ -6,13 +6,13 @@ import automationRoute from './modules/automation'
 import contactsRoute from './modules/contacts'
 import domainRoute from './modules/domain'
 import logsRoute from './modules/logs'
+import mailboxRecycleRoute from './modules/mailbox-recycle'
 import mailboxRoute from './modules/mailbox'
 import marketRoute from './modules/market'
 import overviewRoute from './modules/overview'
 import settingsRoute from './modules/settings'
 import smtpRoute from './modules/smtp'
 import templateRoute from './modules/template'
-import videoOutreachRoute from './modules/video-outreach'
 
 // Routes reflect list
 const routesReflectList = [
@@ -26,28 +26,28 @@ const routesReflectList = [
 	'Enrichment',
 	'MailDomain',
 	'MailBoxes',
-	'Activation Keys',
+	'Mailbox Recycle Bin',
 	'SMTP',
 	'Logs',
 	'Settings',
 	'Automation',
-	'Video Outreach',
+	'Activation Keys',
 ]
 
 const moduleRoutes: RouteRecordRaw[] = [
-	activationRoute,
 	apiRoute,
 	automationRoute,
 	contactsRoute,
 	domainRoute,
 	logsRoute,
 	mailboxRoute,
+	mailboxRecycleRoute,
 	marketRoute,
 	overviewRoute,
 	settingsRoute,
 	smtpRoute,
 	templateRoute,
-	videoOutreachRoute,
+	activationRoute,
 ]
 
 const routeOrder = new Map(routesReflectList.map((title, index) => [title, index]))

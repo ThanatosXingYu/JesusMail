@@ -112,12 +112,13 @@ const iconMap: Record<string, VNodeChild> = {
 	enrichment: <i class="i-mdi-database-search-outline"></i>,
 	domain: <i class="i-mdi-web"></i>,
 	mailbox: <i class="i-custom:mailbox"></i>,
+	'mailbox-recycle': <i class="i-mdi-delete-clock-outline"></i>,
+	recycle: <i class="i-mdi-delete-clock-outline"></i>,
 	activation: <i class="i-mdi-key-variant"></i>,
 	smtp: <i class="i-custom:smtp"></i>,
 	settings: <i class="i-mdi-settings-outline"></i>,
 	template: <i class="i-mdi-settings-outline"></i>,
 	logs: <i class="i-icon-park-outline:log"></i>,
-	'video-outreach': <i class="i-mdi-video-outline"></i>,
 	logout: <i class="i-mdi-logout"></i>,
 }
 

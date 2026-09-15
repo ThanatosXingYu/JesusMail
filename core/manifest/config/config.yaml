@@ -51,7 +51,7 @@ server:
   dumpRouterMap: false # Whether to print all route lists when the Server starts. Default is true
 
   # Version
-  version: "4.9.0"
+  version: "1.0.0"
 
 viewer:
   Paths: ["template"]
@@ -74,5 +74,4 @@ logger:
   rotateCheckInterval: "1h" # Rolling cut time detection interval, generally does not need to be set. Default is 1 hour
   stdoutColorDisabled: true # Turn off the color printing of the terminal. Default is on
   writerColorEnable: false # Whether the log file has color. Default is false, indicating no color
-
 

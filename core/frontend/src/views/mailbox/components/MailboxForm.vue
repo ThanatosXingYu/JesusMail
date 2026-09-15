@@ -17,14 +17,14 @@
 					</domain-select>
 				</n-input-group>
 			</n-form-item>
-			<n-form-item label="Display Name" path="full_name">
+			<n-form-item :label="t('mailbox.form.displayName')" path="full_name">
 				<n-input v-model:value="form.full_name"> </n-input>
 			</n-form-item>
 			<n-form-item :label="t('mailbox.form.password')" path="password">
 				<n-input v-model:value="form.password" :placeholder="t('mailbox.form.passwordPlaceholder')">
 				</n-input>
 			</n-form-item>
-			<n-form-item label="Quota limit">
+			<n-form-item :label="t('mailbox.form.quotaLimit')">
 				<n-switch v-model:value="form.quota_active" :checked-value="1" :unchecked-value="0" />
 			</n-form-item>
 			<n-form-item :label="t('mailbox.form.quota')" path="quota">
@@ -39,6 +39,24 @@
 			</n-form-item>
 			<n-form-item :label="t('mailbox.form.status')" :show-feedback="false">
 				<n-switch v-model:value="form.active" :checked-value="1" :unchecked-value="0" />
+			</n-form-item>
+			<n-form-item :label="t('mailbox.form.expiresAt')" path="expiration_date">
+				<div class="w-full">
+					<n-radio-group v-model:value="form.expiration_mode" class="mb-12px">
+						<n-space>
+							<n-radio value="permanent">{{ t('mailbox.expiration.permanent') }}</n-radio>
+							<n-radio value="date">{{ t('mailbox.expiration.specificDate') }}</n-radio>
+						</n-space>
+					</n-radio-group>
+					<n-date-picker
+						v-if="form.expiration_mode === 'date'"
+						v-model:value="form.expiration_date"
+						type="date"
+						clearable
+						class="w-full"
+						:is-date-disabled="disablePastDate" />
+					<div class="expiration-tip">{{ t('mailbox.expiration.tip') }}</div>
+				</div>
 			</n-form-item>
 		</bt-form>
 	</modal>
@@ -73,6 +91,8 @@ const form = reactive({
 	domain: null as string | null,
 	password: getRandomPassword(),
 	active: 1,
+	expiration_mode: 'permanent' as 'permanent' | 'date',
+	expiration_date: null as number | null,
 })
 
 const unitOptions = [
@@ -91,7 +111,7 @@ const rules: FormRules = {
 		trigger: 'blur',
 		validator: () => {
 			if (form.full_name.trim() === '') {
-				return new Error('Please enter name')
+				return new Error(t('mailbox.validation.nameRequired'))
 			}
 			return true
 		},
@@ -102,6 +122,18 @@ const rules: FormRules = {
 		validator: () => {
 			if (form.local_part.trim() === '' || !form.domain) {
 				return new Error(t('mailbox.validation.emailRequired'))
+			}
+			return true
+		},
+	},
+	expiration_date: {
+		trigger: 'change',
+		validator: () => {
+			if (form.expiration_mode === 'date' && !form.expiration_date) {
+				return new Error(t('mailbox.validation.expirationRequired'))
+			}
+			if (form.expiration_date && form.expiration_date < startOfToday()) {
+				return new Error(t('mailbox.validation.expirationPast'))
 			}
 			return true
 		},
@@ -130,6 +162,21 @@ const rules: FormRules = {
 			return true
 		},
 	},
+}
+
+const startOfToday = () => {
+	const today = new Date()
+	today.setHours(0, 0, 0, 0)
+	return today.getTime()
+}
+
+const disablePastDate = (timestamp: number) => timestamp < startOfToday()
+
+const serializeExpiration = () => {
+	if (form.expiration_mode !== 'date' || !form.expiration_date) return null
+	const expiresAt = new Date(form.expiration_date)
+	expiresAt.setHours(23, 59, 59, 999)
+	return expiresAt.toISOString()
 }
 
 const onUpdateLocalPart = (val: string) => {
@@ -161,6 +208,7 @@ const getParams = () => {
 		isAdmin: form.isAdmin,
 		active: form.active,
 		quota_active: form.quota_active,
+		expires_at: serializeExpiration(),
 	}
 }
 
@@ -178,6 +226,8 @@ const [Modal, modalApi] = useModal({
 				form.active = row.active
 				form.password = row.password
 				form.quota_active = row.quota_active
+				form.expiration_mode = row.expires_at ? 'date' : 'permanent'
+				form.expiration_date = row.expires_at ? new Date(row.expires_at).getTime() : null
 
 				const quota = getByteUnit(row.quota)
 				const [quotaNum, quotaUnit] = quota.split(' ')
@@ -194,6 +244,8 @@ const [Modal, modalApi] = useModal({
 			form.isAdmin = 0
 			form.active = 1
 			form.quota_active = 1
+			form.expiration_mode = 'permanent'
+			form.expiration_date = null
 		}
 	},
 	onConfirm: async () => {
@@ -209,3 +261,11 @@ const [Modal, modalApi] = useModal({
 	},
 })
 </script>
+
+<style scoped>
+.expiration-tip {
+	margin-top: 8px;
+	color: var(--color-text-3);
+	font-size: 12px;
+}
+</style>

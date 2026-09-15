@@ -20,7 +20,7 @@
 							<div class="mb-12px text-desc">
 								*
 								{{
-									$t('domain.edit.domainConfiguration.dedicatedIpDesc', { domain: 'aapanel.com' })
+									$t('domain.edit.domainConfiguration.dedicatedIpDesc', { domain: 'example.com' })
 								}}
 							</div>
 							<div class="flex gap-16px">

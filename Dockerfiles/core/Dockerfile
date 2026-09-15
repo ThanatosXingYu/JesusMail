@@ -1,6 +1,6 @@
 FROM alpine:3.20
 
-LABEL maintainer="https://github.com/aaPanel/BillionMail"
+LABEL maintainer="JesusMail Project"
 
 # Set environment variables
 ENV LANG=C.UTF-8

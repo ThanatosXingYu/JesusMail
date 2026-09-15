@@ -74,7 +74,7 @@
 <script lang="ts" setup>
 import { DropdownOption } from 'naive-ui'
 import { useInstanceStore } from '@/store'
-import type { BillionMailInstance } from '@/store/modules/instance'
+import type { JesusMailInstance } from '@/store/modules/instance'
 
 const { t } = useI18n()
 const instanceStore = useInstanceStore()
@@ -138,7 +138,7 @@ const handleAdd = () => {
 	newUrl.value = ''
 }
 
-const startEdit = (inst: BillionMailInstance) => {
+const startEdit = (inst: JesusMailInstance) => {
 	editingId.value = inst.id
 	editName.value = inst.name
 	editUrl.value = inst.url

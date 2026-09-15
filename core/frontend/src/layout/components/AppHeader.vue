@@ -4,10 +4,6 @@
 			<n-button class="icon-btn" :bordered="false" @click="handleCollapse">
 				<i class="icon" :class="isCollapse ? 'i-mdi-menu-close' : 'i-mdi-menu-open'"></i>
 			</n-button>
-			<n-button type="primary" text class="text-14px" @click="handleGoIssues">
-				{{ t('layout.header.submit') }}
-				<i class="i-mdi:arrow-right ml-1px"></i>
-			</n-button>
 		</div>
 
 		<div class="header-right">
@@ -29,9 +25,7 @@
 					<i class="icon i-mdi-user-outline"></i>
 				</n-button>
 			</n-dropdown>
-			<n-button type="primary" text class="text-14px" @click="handleGoVersion">
-				{{ version }}
-			</n-button>
+			<span class="header-item version-text">{{ version }}</span>
 		</div>
 	</n-layout-header>
 </template>
@@ -53,7 +47,7 @@ defineProps({
 
 const { t } = useI18n()
 
-const version = ref('--')
+const version = ref('JesusMail 1.0.0')
 
 const userStore = useUserStore()
 
@@ -65,10 +59,6 @@ const { theme } = storeToRefs(themeStore)
 
 const handleCollapse = () => {
 	globalStore.setCollapse()
-}
-
-const handleGoIssues = () => {
-	window.open('https://github.com/aaPanel/BillionMail/issues')
 }
 
 const langOptions = ref<DropdownOption[]>([])
@@ -97,10 +87,6 @@ const handleUserAction = (key: string) => {
 	}
 }
 
-const handleGoVersion = () => {
-	window.open('https://github.com/aaPanel/BillionMail/releases')
-}
-
 const getLangOptions = async () => {
 	langOptions.value = langList.value.map(item => {
 		return {
@@ -113,7 +99,7 @@ const getLangOptions = async () => {
 const getVersion = async () => {
 	const res = await getVersionInfo()
 	if (isObject<{ version: string }>(res)) {
-		version.value = `v${res.version}`
+		version.value = `JesusMail ${res.version}`
 	}
 }
 
@@ -150,6 +136,10 @@ onMounted(() => {
 	font-size: 14px;
 	text-align: center;
 	font-weight: 600;
+}
+
+.version-text {
+	white-space: nowrap;
 }
 
 .icon-btn {

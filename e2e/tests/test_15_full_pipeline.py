@@ -75,7 +75,7 @@ async def test_full_pipeline(bm_api, fb_api, mailpit, db, seed_data):
     )
     assert reply_resp.status_code == 200
 
-    # 6. Verify BillionMail can send via API (using seed data)
+    # 6. Verify JesusMail can send through the API using seed data
     if seed_data.get("api_key"):
         send_resp = await api.post(
             bm_api,

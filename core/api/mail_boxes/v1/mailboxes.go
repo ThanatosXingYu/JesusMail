@@ -3,37 +3,42 @@ package v1
 import (
 	"billionmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/v2/frame/g"
+	"time"
 )
 
 // Mailbox defines the mailbox entity
 type Mailbox struct {
-	Username       string `json:"username"        dc:"Email address"`
-	Password       string `json:"password"        dc:"Password"`
-	PasswordEncode string `json:"password_encode" dc:"Encoded password"`
-	FullName       string `json:"full_name"       dc:"Full name"`
-	IsAdmin        int    `json:"is_admin"        dc:"Is administrator: 1-yes, 0-no"`
-	Maildir        string `json:"maildir"         dc:"Mailbox directory"`
-	Quota          int64  `json:"quota"           dc:"Mailbox quota"`
-	LocalPart      string `json:"local_part"      dc:"Local part (username)"`
-	Domain         string `json:"domain"          dc:"Domain name"`
-	CreateTime     int64  `json:"create_time"     dc:"Creation time"`
-	UpdateTime     int64  `json:"update_time"     dc:"Update time"`
-	Active         int    `json:"active"          dc:"Status: 1-enabled, 0-disabled"`
-	UsedQuota      int64  `json:"used_quota"           dc:"Used Mailbox quota"`
-	QuotaActive    int    `json:"quota_active"    dc:"Quota switch 1: On 0: Off"`
+	Username        string     `json:"username"        dc:"Email address"`
+	Password        string     `json:"password"        dc:"Password"`
+	PasswordEncode  string     `json:"password_encode" dc:"Encoded password"`
+	FullName        string     `json:"full_name"       dc:"Full name"`
+	IsAdmin         int        `json:"is_admin"        dc:"Is administrator: 1-yes, 0-no"`
+	Maildir         string     `json:"maildir"         dc:"Mailbox directory"`
+	Quota           int64      `json:"quota"           dc:"Mailbox quota"`
+	LocalPart       string     `json:"local_part"      dc:"Local part (username)"`
+	Domain          string     `json:"domain"          dc:"Domain name"`
+	CreateTime      int64      `json:"create_time"     dc:"Creation time"`
+	UpdateTime      int64      `json:"update_time"     dc:"Update time"`
+	Active          int        `json:"active"          dc:"Status: 1-enabled, 0-disabled"`
+	UsedQuota       int64      `json:"used_quota"           dc:"Used Mailbox quota"`
+	QuotaActive     int        `json:"quota_active"      dc:"Quota switch 1: On 0: Off"`
+	ExpiresAt       *time.Time `json:"expires_at"        dc:"Mailbox expiration time; null means permanent"`
+	SourceType      string     `json:"source_type"       dc:"Mailbox creation source"`
+	ActivationKeyID *int64     `json:"activation_key_id" dc:"Activation key relation"`
 }
 
 type AddMailboxReq struct {
 	g.Meta        `path:"/mailbox/create" tags:"MailBox" method:"post" summary:"Create mailbox" in:"body"`
-	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
-	Domain        string `json:"domain" v:"required|domain" dc:"Domain"`
-	FullName      string `json:"full_name" v:"min-length:1" dc:"username"`
-	LocalPart     string `json:"local_part" v:"required|min-length:1|regex:[\\w-]{1,}" dc:"local_part"`
-	Password      string `json:"password" v:"required|min-length:8" dc:"Password"`
-	Active        int    `json:"active" v:"required" dc:"Status" d:"1"`
-	IsAdmin       int    `json:"isAdmin" v:"required" dc:"IsAdmin" d:"0"`
-	Quota         int    `json:"quota"  dc:"Quota" d:"5242880"`
-	QuotaActive   int    `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
+	Authorization string     `json:"authorization" dc:"Authorization" in:"header"`
+	Domain        string     `json:"domain" v:"required|domain" dc:"Domain"`
+	FullName      string     `json:"full_name" v:"min-length:1" dc:"username"`
+	LocalPart     string     `json:"local_part" v:"required|min-length:1|regex:[\\w-]{1,}" dc:"local_part"`
+	Password      string     `json:"password" v:"required|min-length:8" dc:"Password"`
+	Active        int        `json:"active" v:"required" dc:"Status" d:"1"`
+	IsAdmin       int        `json:"isAdmin" v:"required" dc:"IsAdmin" d:"0"`
+	Quota         int        `json:"quota"  dc:"Quota" d:"5242880"`
+	QuotaActive   int        `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
+	ExpiresAt     *time.Time `json:"expires_at" dc:"Mailbox expiration time; null means permanent"`
 }
 
 type AddMailboxRes struct {
@@ -44,9 +49,9 @@ type BatchAddMailboxReq struct {
 	g.Meta        `path:"/mailbox/batch_create" tags:"MailBox" method:"post" summary:"Batch create mailbox" in:"body"`
 	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
 	Domain        string `json:"domain" v:"required|domain" dc:"Domain"`
-	Quota  int    `json:"quota"   dc:"Quota" d:"5242880"`
-	Count  int    `json:"count" v:"required|min:2" dc:"Count" d:"10"`
-	Prefix string `json:"prefix" v:"regex:[\\w-]{0,}" dc:"Email name prefix, optional" d:"user"`
+	Quota         int    `json:"quota"   dc:"Quota" d:"5242880"`
+	Count         int    `json:"count" v:"required|min:2" dc:"Count" d:"10"`
+	Prefix        string `json:"prefix" v:"regex:[\\w-]{0,}" dc:"Email name prefix, optional" d:"user"`
 	QuotaActive   int    `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
 }
 
@@ -56,15 +61,16 @@ type BatchAddMailboxRes struct {
 
 type UpdateMailboxReq struct {
 	g.Meta        `path:"/mailbox/update" tags:"MailBox" method:"post" summary:"Update mailbox" in:"body"`
-	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
-	Domain        string `json:"domain" v:"required|domain" dc:"Domain"`
-	FullName      string `json:"full_name" v:"min-length:1" dc:"username"`
-	LocalPart     string `json:"local_part" v:"required|min-length:1|regex:[\\w-]{1,}" dc:"local_part"`
-	Password      string `json:"password" v:"required|min-length:8" dc:"Password"`
-	Active        int    `json:"active" v:"required" dc:"Status" d:"1"`
-	IsAdmin       int    `json:"isAdmin" v:"required" dc:"IsAdmin" d:"0"`
-	Quota         int    `json:"quota"  dc:"Quota" d:"5242880"`
-	QuotaActive   int    `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
+	Authorization string     `json:"authorization" dc:"Authorization" in:"header"`
+	Domain        string     `json:"domain" v:"required|domain" dc:"Domain"`
+	FullName      string     `json:"full_name" v:"min-length:1" dc:"username"`
+	LocalPart     string     `json:"local_part" v:"required|min-length:1|regex:[\\w-]{1,}" dc:"local_part"`
+	Password      string     `json:"password" v:"required|min-length:8" dc:"Password"`
+	Active        int        `json:"active" v:"required" dc:"Status" d:"1"`
+	IsAdmin       int        `json:"isAdmin" v:"required" dc:"IsAdmin" d:"0"`
+	Quota         int        `json:"quota"  dc:"Quota" d:"5242880"`
+	QuotaActive   int        `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
+	ExpiresAt     *time.Time `json:"expires_at" dc:"Mailbox expiration time; null means permanent"`
 }
 
 type UpdateMailboxRes struct {
@@ -146,3 +152,46 @@ type ImportMailboxReq struct {
 type ImportMailboxRes struct {
 	api_v1.StandardRes
 }
+
+// RecycleStatsReq returns mailbox recycle-bin capacity and processing statistics.
+type RecycleStatsReq struct {
+	g.Meta `path:"/mailbox/recycle/stats" tags:"MailBox Recycle" method:"get" summary:"Get mailbox recycle statistics"`
+}
+
+type RecycleStatsRes struct{ api_v1.StandardRes }
+
+// RecycleListReq lists mailbox recycle-bin items.
+type RecycleListReq struct {
+	g.Meta   `path:"/mailbox/recycle/list" tags:"MailBox Recycle" method:"get" summary:"List mailbox recycle items" in:"query"`
+	Page     int    `json:"page" d:"1" v:"min:1"`
+	PageSize int    `json:"page_size" d:"20" v:"min:1|max:100"`
+	Keyword  string `json:"keyword" v:"max-length:255"`
+	Status   string `json:"status" v:"max-length:32"`
+}
+
+type RecycleListRes struct{ api_v1.StandardRes }
+
+// RecycleRestoreReq restores selected archived mailboxes.
+type RecycleRestoreReq struct {
+	g.Meta `path:"/mailbox/recycle/restore" tags:"MailBox Recycle" method:"post" summary:"Restore mailbox recycle items" in:"body"`
+	Ids    []int64 `json:"ids" v:"required|length:1,100"`
+}
+
+type RecycleRestoreRes struct{ api_v1.StandardRes }
+
+// RecyclePurgeReq permanently removes selected archived mailboxes.
+type RecyclePurgeReq struct {
+	g.Meta       `path:"/mailbox/recycle/purge" tags:"MailBox Recycle" method:"post" summary:"Permanently delete mailbox recycle items" in:"body"`
+	Ids          []int64 `json:"ids" v:"required|length:1,100"`
+	Confirmation string  `json:"confirmation" v:"required"`
+}
+
+type RecyclePurgeRes struct{ api_v1.StandardRes }
+
+// RecycleCleanupReq permanently removes archived items whose purge_at has elapsed.
+type RecycleCleanupReq struct {
+	g.Meta       `path:"/mailbox/recycle/cleanup" tags:"MailBox Recycle" method:"post" summary:"Purge expired mailbox recycle items" in:"body"`
+	Confirmation string `json:"confirmation" v:"required"`
+}
+
+type RecycleCleanupRes struct{ api_v1.StandardRes }

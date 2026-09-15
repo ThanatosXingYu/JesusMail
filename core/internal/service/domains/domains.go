@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/util/grand"
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gregex"
 )
@@ -169,27 +170,40 @@ func Update(ctx context.Context, updateData map[string]interface{}) error {
 }
 
 func Delete(ctx context.Context, domainName string) error {
-	_, err := g.DB().Model("domain").
-		Ctx(ctx).
-		Where("domain", domainName).
-		Delete()
-
-	if err == nil {
-		// remove associated mailboxes
-		_, err = g.DB().Model("mailbox").
-			Ctx(ctx).
-			Where("domain", domainName).
-			Delete()
-
-		// remove associated alias
-		_, err = g.DB().Model("alias").
-			Ctx(ctx).
-			Where("domain", domainName).
-			Delete()
-
+	domainName = strings.ToLower(strings.TrimSpace(domainName))
+	if domainName == "" {
+		return fmt.Errorf("domain cannot be empty")
 	}
 
-	return err
+	rows, err := g.DB().Model("mailbox").Ctx(ctx).
+		Where("domain", domainName).OrderAsc("username").Array("username")
+	if err != nil {
+		return fmt.Errorf("list domain mailboxes before deletion: %w", err)
+	}
+	emails := make([]string, 0, len(rows))
+	for _, row := range rows {
+		if email := strings.TrimSpace(row.String()); email != "" {
+			emails = append(emails, email)
+		}
+	}
+	if _, err := mail_boxes.ArchiveMailboxes(ctx, emails, mail_boxes.ArchiveOptions{
+		DeleteReason: "domain_delete",
+		DeleteSource: "admin",
+	}); err != nil {
+		// Do not remove the domain while any mailbox archive is incomplete. Any
+		// mailbox already archived remains safely recoverable from the recycle bin.
+		return fmt.Errorf("archive domain mailboxes before deletion: %w", err)
+	}
+
+	return g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		if _, err := tx.Model("domain").Ctx(ctx).Where("domain", domainName).Delete(); err != nil {
+			return fmt.Errorf("delete domain: %w", err)
+		}
+		if _, err := tx.Model("alias").Ctx(ctx).Where("domain", domainName).Delete(); err != nil {
+			return fmt.Errorf("delete domain aliases: %w", err)
+		}
+		return nil
+	})
 }
 
 func Get(ctx context.Context, keyword string, page, pageSize int) ([]v1.Domain, int, error) {

@@ -11,4 +11,5 @@ type IActivationV1 interface {
 	Generate(context.Context, *v1.GenerateReq) (*v1.GenerateRes, error)
 	SetGroup(context.Context, *v1.SetGroupReq) (*v1.SetGroupRes, error)
 	Delete(context.Context, *v1.DeleteReq) (*v1.DeleteRes, error)
+	ClearBinding(context.Context, *v1.ClearBindingReq) (*v1.ClearBindingRes, error)
 }

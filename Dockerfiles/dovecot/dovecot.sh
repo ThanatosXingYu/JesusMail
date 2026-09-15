@@ -22,9 +22,9 @@ connect = host=pgsql dbname=${DBNAME} user=${DBUSER} password=${DBPASS}
 
 default_pass_scheme = MD5-CRYPT
 
-user_query = SELECT '/var/vmail/%d/%n' as home, 'maildir:/var/vmail/%d/%n' as mail, 150 AS uid, 8 AS gid, 'maildir:storage=' || quota AS quota FROM mailbox WHERE username = '%u' AND active = 1
+user_query = SELECT '/var/vmail/%d/%n' as home, 'maildir:/var/vmail/%d/%n' as mail, 150 AS uid, 8 AS gid, 'maildir:storage=' || quota AS quota FROM mailbox WHERE username = '%u' AND active = 1 AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
 
-password_query = SELECT username as user, password, '/var/vmail/%d/%n' as userdb_home, 'maildir:/var/vmail/%d/%n' as userdb_mail, 150 as userdb_uid, 8 as userdb_gid FROM mailbox WHERE username = '%u' AND active = 1
+password_query = SELECT username as user, password, '/var/vmail/%d/%n' as userdb_home, 'maildir:/var/vmail/%d/%n' as userdb_mail, 150 as userdb_uid, 8 as userdb_gid FROM mailbox WHERE username = '%u' AND active = 1 AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
 
 
 EOF

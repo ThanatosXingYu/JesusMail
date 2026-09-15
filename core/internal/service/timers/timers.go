@@ -203,6 +203,42 @@ func Start(ctx context.Context) (err error) {
 		log_maintenance.CompressAndCleanupLogs(ctx)
 	})
 
+	archiveExpiredMailboxes := func() {
+		archived, archiveErr := mail_boxes.ArchiveExpiredMailboxes(ctx, 100)
+		if archiveErr != nil {
+			g.Log().Warning(ctx, "Expired mailbox archive task completed with failures:", archiveErr)
+		}
+		if archived > 0 {
+			g.Log().Info(ctx, "Expired mailbox archive task completed; archived:", archived)
+		}
+	}
+	gtimer.AddOnce(10*time.Second, archiveExpiredMailboxes)
+	gtimer.Add(time.Minute, archiveExpiredMailboxes)
+
+	cleanupMailboxRecycle := func() {
+		result, cleanupErr := mail_boxes.CleanupExpiredRecycleItems(ctx, 100)
+		if cleanupErr != nil {
+			g.Log().Warning(ctx, "Mailbox recycle cleanup completed with failures:", cleanupErr)
+		}
+		if result.Succeeded > 0 {
+			g.Log().Info(ctx, "Mailbox recycle cleanup completed; purged:", result.Succeeded)
+		}
+	}
+	gtimer.AddOnce(time.Minute, cleanupMailboxRecycle)
+	gtimer.Add(24*time.Hour, cleanupMailboxRecycle)
+
+	reconcileMailboxLifecycle := func() {
+		result, reconcileErr := mail_boxes.ReconcileStaleLifecycleItems(ctx, 100)
+		if reconcileErr != nil {
+			g.Log().Warning(ctx, "Mailbox lifecycle reconciliation completed with failures:", reconcileErr)
+		}
+		if result.Succeeded > 0 {
+			g.Log().Info(ctx, "Mailbox lifecycle reconciliation completed; recovered:", result.Succeeded)
+		}
+	}
+	gtimer.AddOnce(2*time.Minute, reconcileMailboxLifecycle)
+	gtimer.Add(5*time.Minute, reconcileMailboxLifecycle)
+
 	g.Log().Debug(ctx, "All timers started successfully")
 	return nil
 }

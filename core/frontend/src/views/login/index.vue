@@ -161,7 +161,7 @@ getCode()
 .login-container {
 	--text-dark: var(--color-text-1);
 	--text-light: var(--color-text-2);
-	--accent-green: #25cdb1;
+	--accent-blue: #2563eb;
 	--accent-purple: #7e6ed5;
 	--border-light: #ddd;
 }
@@ -182,7 +182,7 @@ getCode()
 		width: 40vw;
 		height: 40vw;
 		border-radius: 50%;
-		background-color: var(--accent-green);
+		background-color: var(--accent-blue);
 		z-index: 0;
 	}
 	&::after {

@@ -4,7 +4,7 @@ const { loadingBar } = createDiscreteApi(['loadingBar'], {
 	configProviderProps: {
 		themeOverrides: {
 			LoadingBar: {
-				colorLoading: '#20a53a',
+				colorLoading: '#2563EB',
 				colorError: '#ef0808',
 			},
 		},

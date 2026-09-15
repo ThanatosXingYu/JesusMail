@@ -33,6 +33,10 @@ type SetGroupRes struct{ api_v1.StandardRes }
 type DeleteReq struct {
 	g.Meta `path:"/activation/delete" tags:"Activation" method:"post" summary:"Delete activation keys"`
 	Ids    []int64 `json:"ids" v:"required|length:1,500"`
-	Force  bool    `json:"force"`
 }
 type DeleteRes struct{ api_v1.StandardRes }
+type ClearBindingReq struct {
+	g.Meta `path:"/activation/clear_binding" tags:"Activation" method:"post" summary:"Clear activation key mailbox bindings"`
+	Ids    []int64 `json:"ids" v:"required|length:1,500"`
+}
+type ClearBindingRes struct{ api_v1.StandardRes }

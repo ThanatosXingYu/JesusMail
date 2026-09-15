@@ -110,7 +110,7 @@ export const buttonConfig: BaseConfig = {
 	},
 	style: {
 		display: 'inline-block',
-		backgroundColor: '#20A53A',
+		backgroundColor: '#2563EB',
 		color: '#fff',
 		width: 'auto',
 		fontWeight: 'normal',

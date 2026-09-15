@@ -1,173 +1,87 @@
 <div align="center">
   <a name="readme-top"></a>
-  <h1><a href="https://www.billionmail.com/" target="_blank">BillionMail 📧</a></h1>
+  <h1>JesusMail 📧</h1>
+  <p><strong>Posta kutusu dağıtımı ve işletimi için kendi sunucunuzda çalışan e-posta platformu</strong></p>
+  <p>Sürüm 1.0.0</p>
 
-
-## Daha Akıllı Kampanyalar İçin Açık Kaynaklı Bir Posta Sunucusu, Bülten ve E-posta Pazarlama Çözümü
-
-[![][license-shield]][license-link] [![][docs-shield]][docs-link] [![][github-release-shield]][github-release-link] [![][github-stars-shield]][github-stars-link]
-
-English | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | [Türkçe](README-ja.md)
-</div>
-<br/>
-
-<div align="center">
-<a href="https://trendshift.io/repositories/13842" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13842" alt="aaPanel%2FBillionMail | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[English](README.md) | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | Türkçe
 </div>
 
-## BillionMail Nedir?
+## JesusMail nedir?
 
-BillionMail, işletmelerin ve bireylerin e-posta kampanyalarını kolayca yönetmelerine yardımcı olmak için tasarlanmış **geleceğe yönelik açık kaynaklı bir Posta sunucusu ve E-posta pazarlama platformudur**. İster bültenler, ister tanıtım e-postaları veya işlem mesajları gönderiyor olun, bu araç e-posta pazarlama çabalarınız üzerinde **tam kontrol sağlar**. **Gelişmiş analitik** ve **müşteri yönetimi** gibi özelliklerle, e-postaları bir profesyonel gibi oluşturabilir, gönderebilir ve takip edebilirsiniz.
+JesusMail; posta sunucusu, web posta, posta kutusu yönetimi, aktivasyon koduyla teslim ve e-posta kampanyası araçlarını tek bir kendi kendine barındırılan sistemde birleştirir. Pazar yerleri, özel satış kanalları veya bayiler üzerinden yönetilen posta kutuları sunan işletmecilerin oluşturma, etkinleştirme, sona erme, geri dönüşüm ve destek süreçlerini yönetmesine yardımcı olur.
 
-![BillionMail Banner](https://www.billionmail.com/home.png?v1)
+## Başlıca özellikler
 
-# Bir Milyar E-posta Göndermek İçin Sadece 3 Adım!
-**Bir milyar e-posta. Her işletme. Garantili.**
+- Alan adı ve posta kutusu yönetimi
+- Aktivasyon kodu oluşturma, gruplama, dışa aktarma, bağlantı temizleme ve kullanma
+- Yapılandırılabilir sona erme tarihine sahip herkese açık aktivasyon sayfası
+- İlgili web posta hesabına güvenli tek tıkla giriş
+- Varsayılan 30 günlük saklama süresine sahip posta kutusu geri dönüşüm kutusu
+- Kampanyalar, kişiler, şablonlar, teslimat analizi ve ısıtma araçları
+- Entegre Roundcube web posta
+- PostgreSQL, Redis, Postfix, Dovecot ve Rspamd için Docker Compose dağıtımı
 
-### Adım 1️⃣ BillionMail'i Kurun: 
-✅ ✅ Kurulumdan ✅ **başarılı e-posta gönderimine** geçmek **sadece 8️⃣ dakika** sürer
+## Dağıtım akışı
+
+1. Yönetici JesusMail panelinde bir veya daha fazla aktivasyon kodu oluşturur.
+2. Kod, seçilen satış kanalı üzerinden müşteriye teslim edilir.
+3. Müşteri herkese açık aktivasyon sayfasında uygun bir posta kutusu adı ve geçerlilik süresi seçerek kodu kullanır.
+4. Yönetici kod bağlantısını, posta kutusu kaynağını ve sona erme tarihini inceleyebilir.
+5. Kullanıcı kimlik bilgileriyle giriş yapabilir; yönetici destek sırasında tek tıkla girişi kullanabilir.
+6. Kod bağlantısı temizlendiğinde ilgili posta kutusu geri dönüşüm yaşam döngüsüyle kaldırılır ve kod kullanılmamış duruma döner.
+
+## Gereksinimler
+
+- Docker Engine ve Docker Compose v2 bulunan bir Linux sunucusu
+- MX, SPF, DKIM ve DMARC kayıtları yönetilebilen genel bir alan adı
+- Dağıtım için gerekli posta ve yönetim portları
+- Üretim kurulumu veya güncellemesi öncesinde doğrulanmış tam yedek
+
+## Mevcut kaynak dizininden kurulum
+
+Bu özelleştirilmiş sürümün herkese açık depo adresi belgelerde sabitlenmemiştir. JesusMail kaynağını yetkili dağıtım kanalından aldıktan sonra şunları çalıştırın:
+
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && bash install.sh
+cd /path/to/JesusMail
+cp env_init .env
+# Servisleri başlatmadan önce .env içindeki tüm değerleri inceleyin.
+docker compose up -d
 ```
 
+Kurulum betiğinin yapılandırmasını ve uyumluluk davranışını inceledikten sonra şu yöntem de kullanılabilir:
 
-### Adım 2️⃣: Alan Adınızı Bağlayın
-
-- Gönderim alan adını ekleyin
-- DNS kayıtlarını doğrulayın
-- Ücretsiz SSL'yi otomatik etkinleştirin
-
-
-### Adım 3️⃣: Kampanyanızı Oluşturun
-
-- E-postanızı yazın veya yapıştırın
-- Liste ve etiketleri seçin
-- Gönderim zamanını ayarlayın veya hemen gönderin
-
-
-<div align="center">
-  <a href="https://www.youtube.com/embed/UHgxZa_9jGs?si=0-f1B5hDtcWImvQv" target="_blank">
-    <img src="https://img.youtube.com/vi/UHgxZa_9jGs/maxresdefault.jpg" alt="" width="80%">
-    <br />
-    <img src="https://www.iconfinder.com/icons/317714/download/png/16" alt="YouTube" width="16"/>
-    <b>Youtube'da İzle</b>
-  </a>
-</div>
-
-
-## Diğer Kurulum Yöntemleri
-
-### aaPanel'de Tek Tıkla Kurulum
-👉 https://www.aapanel.com/new/download.html (✅aaPanel'e giriş yapın --> 🐳Docker --> 1️⃣Tek Tıkla Kurulum)
-
-
-
-
-**Docker**
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && cp env_init .env && docker compose up -d || docker-compose up -d
+cd /path/to/JesusMail
+bash install.sh
 ```
 
-## Yönetim Scripti
-- Yönetim yardımı
+> Doğrulanmış veritabanı, yapılandırma ve posta verisi yedeği olmadan üretim sistemini güncellemeyin.
 
-  `bm help`
+## Yönetim komutları
 
-- Varsayılan oturum açma bilgilerini görüntüleme
-
-  `bm default`
-
-- Alan adı DNS kaydını gösterme
-
-  `bm show-record`
-
-- BillionMail'i güncelleme
-
-  `bm update`
-
-## Canlı Demo
-BillionMail Demo: [https://demo.billionmail.com/billionmail](https://demo.billionmail.com/billionmail)
-
-Kullanıcı Adı: `billionmail` 
-
-Şifre: `billionmail` 
-
-
-## WebMail
-
-BillionMail, **RoundCube**'u entegre etmiştir, WebMail'e `/roundcube/` üzerinden erişebilirsiniz. .
-
-## Neden BillionMail?
-
-Çoğu e-posta pazarlama platformu ya **pahalı**, ya **kapalı kaynaklı** ya da **temel özelliklerden yoksundur**. BillionMail farklı olmayı hedefliyor::
-
-✅ **Tamamen Açık Kaynaklı** – Gizli maliyetler yok, tedarikçi bağımlılığı yok.
-📊 **Gelişmiş Analitik** – E-posta teslimatını, açılma oranlarını, tıklanma oranlarını ve daha fazlasını takip edin.
-📧 **Sınırsız Gönderim** – Gönderebileceğiniz e-posta sayısında kısıtlama yok.
-🎨 **Özelleştirilebilir** Şablonlar – Yeniden kullanım için özel profesyonel pazarlama şablonları.
-🔒 **Gizlilik Öncelikli** – Verileriniz sizde kalır, üçüncü taraf takibi yok.
-🚀 **Kendi Sunucunuzda Barındırma** – Tam kontrol için kendi sunucunuzda çalıştırın.
-
-## Nasıl Yardımcı Olabilirsiniz 🌟
-
-BillionMail **topluluk odaklı bir projedir** ve başlamak için desteğinize ihtiyacımız var! İşte nasıl yardımcı olabileceğiniz:
-
-1. **Bu Depoyu Yıldızlayın**: Bu depoyu yıldızlayarak ilginizi gösterin.
-2. **Haberi Yayın:** BillionMail'i ağınızla (geliştiriciler, pazarlamacılar ve açık kaynak meraklıları) paylaşın.
-3. **Geri Bildirim Paylaşın:** Bir sorun açarak veya tartışmaya katılarak BillionMail'de görmek istediğiniz özellikleri bize bildirin.
-4. **Katkıda Bulunun:** Geliştirme başladığında, topluluktan gelen katkıları memnuniyetle karşılayacağız. Güncellemeler için takipte kalın!
-
----
-
-📧 **BillionMail – Açık Kaynaklı E-posta Pazarlamasının Geleceği.**
-
-## Sorunlar
-
-Herhangi bir sorunla karşılaşırsanız veya özellik talepleriniz olursa, lütfen [bir sorun açın](https://github.com/aaPanel/BillionMail/issues). Şunları eklediğinizden emin olun:
-
-- Sorunun veya talebin açık bir açıklaması.
-- Sorunu yeniden oluşturma adımları (varsa).
-- Ekran görüntüleri veya hata günlükleri (varsa).
-
-## Şimdi Kurun:
-✅Kurulumdan **başarılı e-posta gönderimine** geçmek **sadece 8 dakika** sürer
 ```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && bash install.sh
+bm help          # Kullanılabilir komutlar
+bm default       # Yönetici erişim bilgileri
+bm show-record   # DNS kayıt gereksinimleri
+bm status        # Konteyner durumu
+bm restart       # JesusMail servislerini yeniden başlat
 ```
 
+Mevcut kurulumlarla güvenli uyumluluğu korumak için bazı servis adları, yollar, veritabanı adları ve ortam değişkenleri dahili uyumluluk tanımlayıcılarını korur. Bunlar uygulama ayrıntılarıdır ve ürün adını temsil etmez.
 
-**Docker ile Kurulum**: (Lütfen Docker ve docker-compose-plugin'i manuel olarak kurun ve .env dosyasını değiştirin)
-```shell
-cd /opt && git clone https://github.com/aaPanel/BillionMail && cd BillionMail && cp env_init .env && docker compose up -d || docker-compose up -d
-```
+## Web posta
 
-## Yıldız Geçmişi
+Roundcube genellikle `/roundcube/` altında kullanılabilir. JesusMail, yetkili yöneticinin posta kutusu parolasını tarayıcı URL'sine koymadan ilgili hesabı açabilmesi için kısa ömürlü ve tek kullanımlık bir giriş bileti oluşturabilir.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=aapanel/billionmail&type=Date)](https://www.star-history.com/#aapanel/billionmail&Date)
+## Üretim güvenliği
+
+Değişiklikten önce tutarlı PostgreSQL dökümünü, Maildir verisini, gerekli kalıcı servis verilerini, `.env` ve Compose dosyalarını, `conf/` dizinini, ters vekil/TLS ayarlarını, imaj kimliklerini ve konteyner inceleme bilgilerini yedekleyin. Kurtarma süreci doğrulanmadan birimleri veya Docker verisini silen komutları çalıştırmayın.
+
+## Katkı ve destek
+
+Sorun bildirirken veya değişiklik önerirken bu deponun Issue ve Pull Request şablonlarını kullanın. Parola, aktivasyon kodu, API anahtarı, özel anahtar, müşteri adresi veya üretim verisi paylaşmayın.
 
 ## Lisans
 
-BillionMail, **AGPLv3 Lisansı** altında lisanslanmıştır. Bu, şunları yapabileceğiniz anlamına gelir
-
-✅ Yazılımı ücretsiz kullanma.
-✅ Kodu değiştirme ve dağıtma.
-✅ Özel olarak kısıtlama olmaksızın kullanma.
-
-Daha fazla ayrıntı için [LICENSE](LICENSE) dosyasına bakın.
-
----
-
-<!-- BillionMail official link -->
-[docs-link]: https://www.billionmail.com/
-
-<!-- BillionMail Other link-->
-[license-link]: https://www.gnu.org/licenses/agpl-3.0.html
-[github-release-link]: https://github.com/aaPanel/BillionMail/releases/latest
-[github-stars-link]: https://github.com/aaPanel/BillionMail
-[github-issues-link]: https://github.com/aaPanel/BillionMail/issues
-
-<!-- Shield link-->
-[docs-shield]: https://img.shields.io/badge/documentation-148F76
-[github-release-shield]: https://img.shields.io/github/v/release/aaPanel/BillionMail
-[github-stars-shield]: https://img.shields.io/github/stars/aaPanel/BillionMail?color=%231890FF&style=flat-square   
-[license-shield]: https://img.shields.io/github/license/aaPanel/BillionMail
+JesusMail, [GNU Affero General Public License v3.0](LICENSE) kapsamında dağıtılır. Üçüncü taraf bileşenlerin kendi lisansları ve bildirimleri geçerliliğini korur.

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
 	messageError: vi.fn(),
 	messageWarning: vi.fn(),
 	copyText: vi.fn(),
+	clearActivationBindings: vi.fn(),
 	deleteActivationKeys: vi.fn(),
 	generateActivationKeys: vi.fn(),
 	getActivationList: vi.fn(),
@@ -28,6 +29,7 @@ vi.mock('@/hooks/useCopy', () => ({
 }))
 
 vi.mock('@/api/modules/activation', () => ({
+	clearActivationBindings: mocks.clearActivationBindings,
 	deleteActivationKeys: mocks.deleteActivationKeys,
 	generateActivationKeys: mocks.generateActivationKeys,
 	getActivationList: mocks.getActivationList,
@@ -227,8 +229,9 @@ describe('原生激活码管理', () => {
 		expect(text).toContain('分组')
 		expect(text).toContain('备注')
 		expect(text).toContain('批量分组')
-		expect(text).toContain('批量删除（仅未使用）')
-		expect(text).toContain('批量强制删除（含流水）')
+		expect(text).toContain('清除绑定')
+		expect(text).toContain('批量删除')
+		expect(text).not.toContain('强制删除')
 		expect(text).toContain('导出当前筛选 CSV')
 
 		const selects = wrapper.findAllComponents(NSelectStub)
@@ -249,7 +252,7 @@ describe('原生激活码管理', () => {
 		expect(countInput.props()).toMatchObject({ min: 1, max: 500, precision: 0 })
 
 		const table = wrapper.getComponent(NDataTableStub)
-		expect(table.props('scrollX')).toBe(1720)
+		expect(table.props('scrollX')).toBe(1790)
 		const titles = (table.props('columns') as Array<{ title?: string }>).map(column => column.title)
 		expect(titles).toContain('操作')
 		expect(titles).toContain('激活码')
@@ -268,13 +271,15 @@ describe('原生激活码管理', () => {
 		expect(mocks.copyText).toHaveBeenCalledWith('UNUSED-CODE')
 	})
 
-	it('未使用激活码的单行删除使用非强制删除并绑定固定 ID', async () => {
+	it('未使用激活码经二次确认后调用统一删除', async () => {
 		const wrapper = await mountPage()
 		const actionColumn = getColumn(wrapper, 'actions')
 		const vnode = actionColumn?.render?.(rows[0], 0) as VNode
+		const actions = vnode.children as Array<VNode | null>
+		const deleteButton = actions.at(-1) as VNode
 
-		expect(vnode.children).toBe('删除')
-		vnode.props?.onClick()
+		expect(deleteButton.children).toBe('删除')
+		deleteButton.props?.onClick()
 		expect(mocks.confirm).toHaveBeenCalledOnce()
 
 		const options = mocks.confirm.mock.calls[0][0]
@@ -282,24 +287,42 @@ describe('原生激活码管理', () => {
 		expect(options.content).toContain('UNUSED-CODE')
 		await options.onConfirm()
 
-		expect(mocks.deleteActivationKeys).toHaveBeenCalledWith({ ids: [11], force: false })
+		expect(mocks.deleteActivationKeys).toHaveBeenCalledWith({ ids: [11] })
 	})
 
-	it('已使用激活码的单行删除明确强制清理流水', async () => {
+	it('已使用激活码删除时保留记录并提示先清除绑定', async () => {
 		const wrapper = await mountPage()
 		const actionColumn = getColumn(wrapper, 'actions')
 		const vnode = actionColumn?.render?.(rows[1], 1) as VNode
+		const actions = vnode.children as VNode[]
+		const deleteButton = actions.at(-1) as VNode
 
-		expect(vnode.children).toBe('删除记录')
-		vnode.props?.onClick()
+		expect(deleteButton.children).toBe('删除')
+		deleteButton.props?.onClick()
 
 		const options = mocks.confirm.mock.calls[0][0]
-		expect(options.title).toBe('删除激活记录')
-		expect(options.content).toContain('USED-CODE')
-		expect(options.content).toContain('关联激活流水')
+		expect(options.title).toBe('删除激活码')
+		expect(options.content).toContain('先执行“清除绑定”')
 		await options.onConfirm()
 
-		expect(mocks.deleteActivationKeys).toHaveBeenCalledWith({ ids: [12], force: true })
+		expect(mocks.deleteActivationKeys).toHaveBeenCalledWith({ ids: [12] })
+	})
+
+	it('已使用激活码可以二次确认后清除邮箱绑定', async () => {
+		const wrapper = await mountPage()
+		const actionColumn = getColumn(wrapper, 'actions')
+		const vnode = actionColumn?.render?.(rows[1], 1) as VNode
+		const actions = vnode.children as VNode[]
+		const clearButton = actions[0] as VNode
+
+		expect(clearButton.children).toBe('清除绑定')
+		clearButton.props?.onClick()
+		const options = mocks.confirm.mock.calls[0][0]
+		expect(options.title).toBe('清除激活码绑定')
+		expect(options.content).toContain('进入回收站')
+		await options.onConfirm()
+
+		expect(mocks.clearActivationBindings).toHaveBeenCalledWith({ ids: [12] })
 	})
 
 	it('批量分组会使用选中 ID，并清理分组名称首尾空格', async () => {

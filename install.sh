@@ -45,7 +45,7 @@ fi
 
 is64bit=$(getconf LONG_BIT)
 if [ "${is64bit}" != '64' ];then
-    echo -e "\033[31m Sorry, BillionMail does not support 32-bit systems \033[0m"
+    echo -e "\033[31m Sorry, JesusMail does not support 32-bit systems \033[0m"
     exit 1
 fi
 
@@ -87,7 +87,7 @@ case $gogo in
         mkdir ./backup
     fi
         mv billionmail.conf ./backup/billionmail.conf_${time}
-    echo "Backup: billionmail.conf --> ./backup/billionmail.conf_${time}"
+    echo "Configuration backup created in ./backup/."
     if [ -f ".env" ]; then
         mv .env env_${time}
         echo "Backup: .env --> ./backup/env_${time}"
@@ -185,7 +185,7 @@ GetSysInfo(){
     echo -e ${SYS_VERSION}
     echo -e Bit:${SYS_BIT} Mem:${MEM_TOTAL}M Core:${CPU_INFO}
     echo -e ${SYS_INFO}
-    echo -e "Please screenshot the above error message and post to the https://github.com/aaPanel/BillionMail/issues for help"
+    echo -e "Please screenshot the error above and contact your JesusMail support channel for help"
 
 }
 
@@ -219,7 +219,7 @@ PORT(){
         if [[ ! -z "$check_command" ]]; then
             echo "Checking the port is used:"
             echo "$check_command"|grep -v "docker-proxy"
-            echo -e "\033[1;31m BillionMail need use port ${SMTP_PORT}|${SMTPS_PORT}|${SUBMISSION_PORT}|${POP_PORT}|${IMAP_PORT}|${IMAPS_PORT}|${POPS_PORT}.\033[0m There are already services ports in the system. "
+            echo -e "\033[1;31m JesusMail need use port ${SMTP_PORT}|${SMTPS_PORT}|${SUBMISSION_PORT}|${POP_PORT}|${IMAP_PORT}|${IMAPS_PORT}|${POPS_PORT}.\033[0m There are already services ports in the system. "
             # exit 1
         fi
     fi
@@ -429,7 +429,7 @@ Docker_Start() {
                     if [ "$?" != "0" ];then
                         docker_status=$(systemctl status docker.service)
                         echo "$docker_status"
-                        Red_Error "docker start failed" "Please try again later execute the restart docker command: systemctl restart docker.service (no content returns normal)" "Finally, re-execute install BillionMail"
+                        Red_Error "docker start failed" "Please try again later execute the restart docker command: systemctl restart docker.service (no content returns normal)" "Finally, re-execute install JesusMail"
                     fi
                 fi
             fi
@@ -1285,7 +1285,7 @@ Billionmail(){
     fi
 
     cat << EOF > billionmail.conf
-# Default BillionMail Username password
+# Default JesusMail administrator credentials
 ADMIN_USERNAME=${ADMIN_USERNAME}
 ADMIN_PASSWORD=${ADMIN_PASSWORD}
 
@@ -1324,7 +1324,7 @@ HTTPS_PORT=${HTTPS_PORT}
 # Set to /billionmail when embedding behind aaPanel path proxy.
 WEB_BASE_PATH=
 
-# Shared secret used by aaPanel to request trusted BillionMail SSO tokens.
+# Shared secret used by aaPanel to request trusted JesusMail SSO tokens.
 # Keep empty to disable aaPanel SSO.
 AAPANEL_SSO_SECRET=
 
@@ -1368,7 +1368,7 @@ EOF
     ${DOCKER_COMPOSE} pull
     ${DOCKER_COMPOSE} up -d
     if [ $? -eq 0 ]; then
-        echo -e "Billionmail installation completed successfully!"
+        echo -e "JesusMail installation completed successfully!"
     else
         echo ""
         echo -e "--------------------------------------------------"
@@ -1453,11 +1453,11 @@ intenal_ip=$(ip addr | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3
 # echo -e "Webmail Username(e-mail): \e[1;33m${mailbox}@${BILLIONMAIL_HOSTNAME}\e[0m Password: \e[1;33m${Generate_mailbox_password}\e[0m"
 # echo -e ""
 if [ ${HTTPS_PORT} = "443" ]; then
-    echo -e "BillionMail Internet address: \e[1;33mhttps://${IPV4_ADDRESS}/${SafePath}\e[0m"
-    echo -e "BillionMail Internal address: \e[1;33mhttps://${intenal_ip}/${SafePath}\e[0m"
+    echo -e "JesusMail Internet address: \e[1;33mhttps://${IPV4_ADDRESS}/${SafePath}\e[0m"
+    echo -e "JesusMail Internal address: \e[1;33mhttps://${intenal_ip}/${SafePath}\e[0m"
 else
-    echo -e "BillionMail Internet address: \e[1;33mhttps://${IPV4_ADDRESS}:${HTTPS_PORT}/${SafePath}\e[0m"
-    echo -e "BillionMail Internal address: \e[1;33mhttps://${intenal_ip}:${HTTPS_PORT}/${SafePath}\e[0m"
+    echo -e "JesusMail Internet address: \e[1;33mhttps://${IPV4_ADDRESS}:${HTTPS_PORT}/${SafePath}\e[0m"
+    echo -e "JesusMail Internal address: \e[1;33mhttps://${intenal_ip}:${HTTPS_PORT}/${SafePath}\e[0m"
 fi
 echo -e "Username: \e[1;33m${ADMIN_USERNAME}\e[0m"
 echo -e "Password: \e[1;33m${ADMIN_PASSWORD}\e[0m"

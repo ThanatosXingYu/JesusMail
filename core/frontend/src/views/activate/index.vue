@@ -216,7 +216,7 @@ const submit = async () => {
 		border-radius: 50%;
 		margin: 4px auto 12px;
 		color: white;
-		background: #18a058;
+		background: var(--color-primary-1);
 		font-size: 38px;
 		line-height: 58px;
 	}

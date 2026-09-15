@@ -66,7 +66,7 @@ if [[ "$PLATFORMS" == "all" || "$PLATFORMS" == "x86" ]]; then
 
     check_file=$(file billionmail-amd64 | grep "x86-64,")
     if [ -z "${check_file}" ];then
-        echo "billionmail-amd64 is not an arm64 file, package failed.";
+        echo "Compiled amd64 binary failed the x86-64 architecture check.";
         exit 0;
     fi
 fi
@@ -84,7 +84,7 @@ if [[ "$PLATFORMS" == "all" || "$PLATFORMS" == "arm" ]]; then
     fi
     check_file=$(file billionmail-arm64 | grep -E "ARM|aarch64")
     if [ -z "${check_file}" ];then
-        echo "billionmail-arm64 is not an arm64 file, package failed.";
+        echo "Compiled arm64 binary failed the ARM architecture check.";
         exit 0;
     fi
 fi

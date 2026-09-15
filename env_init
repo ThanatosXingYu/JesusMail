@@ -37,7 +37,7 @@ HTTPS_PORT=443
 # Set to /billionmail when embedding behind aaPanel path proxy.
 WEB_BASE_PATH=
 
-# Shared secret used by aaPanel to request trusted BillionMail SSO tokens.
+# Shared secret used by aaPanel to request trusted JesusMail SSO tokens.
 # Keep empty to disable aaPanel SSO.
 AAPANEL_SSO_SECRET=
 

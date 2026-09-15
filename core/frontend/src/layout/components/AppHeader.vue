@@ -47,7 +47,7 @@ defineProps({
 
 const { t } = useI18n()
 
-const version = ref('JesusMail 1.0.0')
+const version = ref('JesusMail 5.0.0')
 
 const userStore = useUserStore()
 

@@ -1,7 +1,7 @@
 <template>
 	<div class="p-24px mailbox-page">
 		<div class="bt-title">{{ t('layout.menu.mailboxes') }}</div>
-		<bt-table-layout>
+		<bt-table-layout class="mailbox-table-layout">
 			<template #toolsLeft>
 				<n-flex class="mailbox-tool-group" :wrap="true" :size="8">
 					<n-button type="primary" @click="handleAdd">
@@ -37,7 +37,7 @@
 				</n-flex>
 			</template>
 			<template #table>
-				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1500">
+				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1600">
 					<template #empty>
 						<bt-table-help> </bt-table-help>
 					</template>
@@ -168,13 +168,13 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'password',
 		title: t('mailbox.columns.password'),
-		width: 180,
+		width: 200,
 		render: row => <TablePassword value={row.password || `--`} />,
 	},
 	{
 		key: 'login',
 		title: t('mailbox.columns.loginInfo'),
-		width: 220,
+		width: 300,
 		render: row => {
 			return (
 				<div class="mailbox-login-actions">
@@ -212,7 +212,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'expires_at',
 		title: t('mailbox.columns.expiresAt'),
-		width: 160,
+		width: 170,
 		render: row =>
 			row.expires_at
 				? new Date(row.expires_at).toLocaleString()
@@ -221,7 +221,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'source_type',
 		title: t('mailbox.columns.sourceType'),
-		width: 120,
+		width: 130,
 		render: row => {
 			const sourceType = row.source_type || 'legacy'
 			const translated = t(`mailbox.sourceType.${sourceType}`)
@@ -231,7 +231,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'quota',
 		title: t('mailbox.columns.quota'),
-		width: 140,
+		width: 150,
 		render: row => {
 			if (row.quota_active === 1) {
 				return `${getByteUnit(row.used_quota)} / ${getByteUnit(row.quota)}`
@@ -242,7 +242,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'is_admin',
 		title: t('mailbox.columns.type'),
-		width: 100,
+		width: 110,
 		render: row => {
 			return row.is_admin === 1 ? t('mailbox.userType.admin') : t('mailbox.userType.general')
 		},
@@ -250,7 +250,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'status',
 		title: t('mailbox.columns.status'),
-		width: 80,
+		width: 90,
 		render: row => {
 			return (
 				<NSwitch
@@ -269,7 +269,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 		title: t('common.columns.actions'),
 		key: 'actions',
 		align: 'right',
-		width: 160,
+		width: 180,
 		fixed: 'right',
 		render: row => (
 			<div class="mailbox-row-actions">
@@ -377,6 +377,19 @@ const handleBatchDelete = (keys: string[]) => {
 .mailbox-tool-group {
 	max-width: 100%;
 	align-items: center;
+}
+
+.mailbox-table-layout :deep(.table-layout-toolbar) {
+	flex-wrap: wrap;
+	row-gap: 12px;
+}
+
+.mailbox-table-layout :deep(.table-layout-toolbar > .n-flex) {
+	min-width: 0;
+}
+
+.mailbox-table-layout :deep(.table-layout-toolbar > .n-flex:last-child) {
+	justify-content: flex-end;
 }
 
 .mailbox-login-actions,

@@ -168,7 +168,10 @@ onMounted(() => {
 	}
 
 	.icon {
+		display: block;
 		width: 36px;
+		height: 36px;
+		object-fit: contain;
 	}
 
 	.app-name {

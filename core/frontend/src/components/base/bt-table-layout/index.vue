@@ -1,6 +1,9 @@
 <template>
 	<div>
-		<n-flex v-if="slotLeft || slotRight" class="items-center mb-12px" justify="space-between">
+		<n-flex
+			v-if="slotLeft || slotRight"
+			class="table-layout-toolbar items-center mb-12px"
+			justify="space-between">
 			<n-flex class="items-center" :size="12">
 				<slot name="toolsLeft"></slot>
 			</n-flex>

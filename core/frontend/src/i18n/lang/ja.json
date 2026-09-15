@@ -1066,6 +1066,7 @@
 			"password": "パスワード",
 			"loginInfo": "ログイン情報（WebMail / SMTP）",
 			"quota": "クォータ",
+			"sourceType": "作成元",
 			"type": "タイプ",
 			"status": "ステータス",
 			"expiresAt": "有効期限"
@@ -1073,6 +1074,13 @@
 		"userType": {
 			"admin": "管理者",
 			"general": "一般ユーザー"
+		},
+		"sourceType": {
+			"legacy": "既存データ",
+			"manual": "管理者作成",
+			"activation": "アクティベーション",
+			"batch": "一括作成",
+			"import": "インポート"
 		},
 		"form": {
 			"addTitle": "メールボックス追加",

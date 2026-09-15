@@ -1147,6 +1147,7 @@
 			"password": "密码",
 			"loginInfo": "登录信息（WebMail / SMTP）",
 			"quota": "配额",
+			"sourceType": "来源",
 			"type": "类型",
 			"status": "状态",
 			"expiresAt": "到期时间"
@@ -1154,6 +1155,13 @@
 		"userType": {
 			"admin": "管理员",
 			"general": "普通用户"
+		},
+		"sourceType": {
+			"legacy": "历史数据",
+			"manual": "管理员添加",
+			"activation": "激活码添加",
+			"batch": "批量添加",
+			"import": "导入添加"
 		},
 		"form": {
 			"addTitle": "添加邮箱",

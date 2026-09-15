@@ -2,7 +2,7 @@
 	<div class="activate-page">
 		<n-card class="activate-card" :bordered="false">
 			<div v-if="!email" class="brand">
-				<img src="@/assets/images/logo.svg" alt="JesusMail" />
+				<img src="@/assets/images/logo.png" alt="JesusMail" />
 				<h1>JesusMail</h1>
 				<p>使用激活密钥开通你的邮箱</p>
 			</div>

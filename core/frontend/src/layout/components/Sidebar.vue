@@ -13,7 +13,7 @@
 		<!-- 应用标志和名称 -->
 		<div class="app-logo" :class="{ collapse: isCollapse }">
 			<a href="/">
-				<img class="icon" src="@/assets/images/logo.svg" alt="JesusMail" />
+				<img class="icon" src="@/assets/images/logo.png" alt="JesusMail" />
 				<span v-show="!isCollapse" class="app-name">JesusMail</span>
 			</a>
 		</div>

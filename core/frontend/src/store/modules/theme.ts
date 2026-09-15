@@ -34,7 +34,7 @@ export default defineStore(
 					textColor: getCssVar('--color-text-1'),
 					headerColor: getCssVar('--color-bg-1'),
 					siderColor: getCssVar('--color-bg-1'),
-					siderTextColor: getCssVar('--color-sider-text-1'),
+					siderTextColor: getCssVar('--color-menu-1'),
 				},
 				Menu: {
 					fontSize: '14px',

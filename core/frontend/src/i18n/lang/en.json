@@ -1156,6 +1156,7 @@
 			"password": "Password",
 			"loginInfo": "Login Info(WebMail / SMTP)",
 			"quota": "Quota",
+			"sourceType": "Source",
 			"type": "Type",
 			"status": "Status",
 			"expiresAt": "Expires At"
@@ -1163,6 +1164,13 @@
 		"userType": {
 			"admin": "Admin",
 			"general": "General User"
+		},
+		"sourceType": {
+			"legacy": "Legacy",
+			"manual": "Manual",
+			"activation": "Activation",
+			"batch": "Batch",
+			"import": "Import"
 		},
 		"form": {
 			"addTitle": "Add Mailbox",

@@ -1,27 +1,43 @@
 <template>
-	<div class="p-24px">
+	<div class="p-24px mailbox-page">
 		<div class="bt-title">{{ t('layout.menu.mailboxes') }}</div>
 		<bt-table-layout>
 			<template #toolsLeft>
-				<n-button type="primary" @click="handleAdd">{{ t('mailbox.actions.add') }}</n-button>
-				<n-button @click="handleBatchAdd">{{ $t('mailbox.actions.batchAdd') }}</n-button>
-				<n-button @click="handleImport">{{ $t('common.actions.import') }}</n-button>
-				<n-button @click="handleExport">{{ t('mailbox.actions.exportAll') }}</n-button>
+				<n-flex class="mailbox-tool-group" :wrap="true" :size="8">
+					<n-button type="primary" @click="handleAdd">
+						<i class="i-mdi-plus mailbox-action-icon"></i>
+						{{ t('mailbox.actions.add') }}
+					</n-button>
+					<n-button @click="handleBatchAdd">
+						<i class="i-mdi-account-multiple-plus-outline mailbox-action-icon"></i>
+						{{ $t('mailbox.actions.batchAdd') }}
+					</n-button>
+					<n-button @click="handleImport">
+						<i class="i-mdi-import mailbox-action-icon"></i>
+						{{ $t('common.actions.import') }}
+					</n-button>
+					<n-button @click="handleExport">
+						<i class="i-mdi-export mailbox-action-icon"></i>
+						{{ t('mailbox.actions.exportAll') }}
+					</n-button>
+				</n-flex>
 			</template>
 			<template #toolsRight>
-				<div class="w-220px">
-					<domain-select v-model:value="tableParams.domain" @update:value="() => resetTable()">
-					</domain-select>
-				</div>
-				<bt-search
-					v-model:value="tableParams.keyword"
-					:width="280"
-					:placeholder="t('mailbox.search.usernamePlaceholder')"
-					@search="() => resetTable()">
-				</bt-search>
+				<n-flex class="mailbox-tool-group" :wrap="true" :size="8">
+					<div class="w-220px">
+						<domain-select v-model:value="tableParams.domain" @update:value="() => resetTable()">
+						</domain-select>
+					</div>
+					<bt-search
+						v-model:value="tableParams.keyword"
+						:width="280"
+						:placeholder="t('mailbox.search.usernamePlaceholder')"
+						@search="() => resetTable()">
+					</bt-search>
+				</n-flex>
 			</template>
 			<template #table>
-				<n-data-table v-bind="tableProps" :columns="columns">
+				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1500">
 					<template #empty>
 						<bt-table-help> </bt-table-help>
 					</template>
@@ -137,13 +153,14 @@ const { tableParams, tableProps, pageProps, batchProps, fetchTable, resetTable }
 const columns = ref<DataTableColumns<MailBox>>([
 	{
 		type: 'selection',
-		width: 40,
+		width: 48,
+		fixed: 'left',
 	},
 	{
 		key: 'username',
 		title: t('mailbox.columns.username'),
-		width: '14%',
-		minWidth: 120,
+		width: 220,
+		fixed: 'left',
 		ellipsis: {
 			tooltip: true,
 		},
@@ -151,26 +168,28 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'password',
 		title: t('mailbox.columns.password'),
-		width: '16%',
-		minWidth: 140,
+		width: 180,
 		render: row => <TablePassword value={row.password || `--`} />,
 	},
 	{
 		key: 'login',
 		title: t('mailbox.columns.loginInfo'),
-		minWidth: 180,
+		width: 220,
 		render: row => {
 			return (
-				<NFlex inline={true} justify="center" size={12}>
+				<div class="mailbox-login-actions">
 					<NButton
+						class="mailbox-action-button"
 						text
 						type="primary"
 						loading={Boolean(loginTicketLoading[row.username])}
 						disabled={!isMailboxLoginAvailable(row)}
 						onClick={() => handleOneClickLogin(row)}>
+						<i class="i-mdi-login-variant mailbox-action-icon"></i>
 						{t('mailbox.actions.oneClickLogin')}
 					</NButton>
 					<NButton
+						class="mailbox-action-button"
 						text
 						type="primary"
 						onClick={() => {
@@ -183,27 +202,36 @@ const columns = ref<DataTableColumns<MailBox>>([
 								})
 							)
 						}}>
+						<i class="i-mdi-content-copy mailbox-action-icon"></i>
 						{t('common.actions.copy')}
 					</NButton>
-				</NFlex>
+				</div>
 			)
 		},
 	},
 	{
 		key: 'expires_at',
 		title: t('mailbox.columns.expiresAt'),
-		width: '14%',
-		minWidth: 150,
+		width: 160,
 		render: row =>
 			row.expires_at
 				? new Date(row.expires_at).toLocaleString()
 				: t('mailbox.expiration.permanent'),
 	},
 	{
+		key: 'source_type',
+		title: t('mailbox.columns.sourceType'),
+		width: 120,
+		render: row => {
+			const sourceType = row.source_type || 'legacy'
+			const translated = t(`mailbox.sourceType.${sourceType}`)
+			return translated === `mailbox.sourceType.${sourceType}` ? sourceType : translated
+		},
+	},
+	{
 		key: 'quota',
 		title: t('mailbox.columns.quota'),
-		width: '18%',
-		minWidth: 160,
+		width: 140,
 		render: row => {
 			if (row.quota_active === 1) {
 				return `${getByteUnit(row.used_quota)} / ${getByteUnit(row.quota)}`
@@ -211,18 +239,10 @@ const columns = ref<DataTableColumns<MailBox>>([
 			return <i class="i-common:quota w-20px h-20px"></i>
 		},
 	},
-	// {
-	// 	key: 'quota',
-	// 	title: t('mailbox.columns.quota'),
-	// 	width: '18%',
-	// 	minWidth: 160,
-	// 	render: row => `${getByteUnit(row.quota)}`,
-	// },
 	{
 		key: 'is_admin',
 		title: t('mailbox.columns.type'),
-		width: '12%',
-		minWidth: 100,
+		width: 100,
 		render: row => {
 			return row.is_admin === 1 ? t('mailbox.userType.admin') : t('mailbox.userType.general')
 		},
@@ -230,8 +250,7 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'status',
 		title: t('mailbox.columns.status'),
-		width: '10%',
-		minWidth: 80,
+		width: 80,
 		render: row => {
 			return (
 				<NSwitch
@@ -250,26 +269,31 @@ const columns = ref<DataTableColumns<MailBox>>([
 		title: t('common.columns.actions'),
 		key: 'actions',
 		align: 'right',
-		width: 120,
+		width: 160,
+		fixed: 'right',
 		render: row => (
-			<NFlex inline={true}>
+			<div class="mailbox-row-actions">
 				<NButton
+					class="mailbox-action-button"
 					type="primary"
 					text={true}
 					onClick={() => {
 						handleEdit(row)
 					}}>
+					<i class="i-mdi-pencil-outline mailbox-action-icon"></i>
 					{t('common.actions.edit')}
 				</NButton>
 				<NButton
+					class="mailbox-action-button"
 					type="error"
 					text={true}
 					onClick={() => {
 						handleDelete(row)
 					}}>
+					<i class="i-mdi-delete-outline mailbox-action-icon"></i>
 					{t('common.actions.delete')}
 				</NButton>
-			</NFlex>
+			</div>
 		),
 	},
 ])
@@ -348,3 +372,38 @@ const handleBatchDelete = (keys: string[]) => {
 	})
 }
 </script>
+
+<style scoped>
+.mailbox-tool-group {
+	max-width: 100%;
+	align-items: center;
+}
+
+.mailbox-login-actions,
+.mailbox-row-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	white-space: nowrap;
+}
+
+.mailbox-row-actions {
+	justify-content: flex-end;
+}
+
+.mailbox-action-button {
+	flex: 0 0 auto;
+}
+
+.mailbox-action-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 4px;
+}
+
+@media (max-width: 900px) {
+	.mailbox-page {
+		padding: 16px;
+	}
+}
+</style>

@@ -84,7 +84,7 @@ class jesusmail_sso extends rcube_plugin
             return null;
         }
 
-        $core_url = trim((string) $this->rc->config->get('jesusmail_sso_core_url', self::DEFAULT_CORE_URL));
+        $core_url = trim((string) rcmail::get_instance()->config->get('jesusmail_sso_core_url', self::DEFAULT_CORE_URL));
         if (!$this->valid_core_url($core_url)) {
             return null;
         }

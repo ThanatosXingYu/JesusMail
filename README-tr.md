@@ -4,7 +4,7 @@
   <p><strong>Posta kutusu dağıtımı ve işletimi için kendi sunucunuzda çalışan e-posta platformu</strong></p>
   <p>Sürüm 5.0.0</p>
 
-[English](README.md) | [简体中文](README-zh_CN.md) | [日本語](README-ja.md) | Türkçe
+[简体中文](README.md) | [English](README-en.md) | [日本語](README-ja.md) | Türkçe
 </div>
 
 ## JesusMail nedir?
@@ -15,7 +15,7 @@ JesusMail; posta sunucusu, web posta, posta kutusu yönetimi, aktivasyon koduyla
 
 - Alan adı ve posta kutusu yönetimi
 - Aktivasyon kodu oluşturma, gruplama, dışa aktarma, bağlantı temizleme ve kullanma
-- Yapılandırılabilir sona erme tarihine sahip herkese açık aktivasyon sayfası
+- Kalıcı (süresiz) posta kutuları oluşturan herkese açık aktivasyon sayfası
 - İlgili web posta hesabına güvenli tek tıkla giriş
 - Varsayılan 30 günlük saklama süresine sahip posta kutusu geri dönüşüm kutusu
 - Kampanyalar, kişiler, şablonlar, teslimat analizi ve ısıtma araçları
@@ -26,7 +26,7 @@ JesusMail; posta sunucusu, web posta, posta kutusu yönetimi, aktivasyon koduyla
 
 1. Yönetici JesusMail panelinde bir veya daha fazla aktivasyon kodu oluşturur.
 2. Kod, seçilen satış kanalı üzerinden müşteriye teslim edilir.
-3. Müşteri herkese açık aktivasyon sayfasında uygun bir posta kutusu adı ve geçerlilik süresi seçerek kodu kullanır.
+3. Müşteri herkese açık aktivasyon sayfasında uygun bir posta kutusu adı seçerek kodu kullanır (oluşturulan posta kutusu kalıcıdır ve asla sona ermez).
 4. Yönetici kod bağlantısını, posta kutusu kaynağını ve sona erme tarihini inceleyebilir.
 5. Kullanıcı kimlik bilgileriyle giriş yapabilir; yönetici destek sırasında tek tıkla girişi kullanabilir.
 6. Kod bağlantısı temizlendiğinde ilgili posta kutusu geri dönüşüm yaşam döngüsüyle kaldırılır ve kod kullanılmamış duruma döner.

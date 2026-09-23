@@ -111,11 +111,62 @@ func stripWebBasePathMiddleware(basePath string) ghttp.HandlerFunc {
 	}
 }
 
+// excludedSafePathURIs lists the requests that stay reachable before the visitor opens the
+// console safe path. It always contains every public activation endpoint so the public
+// activation page keeps working when the safe path is enabled.
+func excludedSafePathURIs() map[string]struct{} {
+	excludes := map[string]struct{}{
+		"/favicon.ico":                   {},
+		"/robots.txt":                    {},
+		"/activate":                      {},
+		"/activate/":                     {},
+		"/unsubscribe.html":              {},
+		"/unsubscribe_new.html":          {},
+		"/api/aapanel/sso":               {},
+		"/api/unsubscribe/user_group":    {},
+		"/api/unsubscribe":               {},
+		"/api/unsubscribe_new":           {},
+		"/api/batch_mail/api/send":       {},
+		"/api/batch_mail/api/batch_send": {},
+		"/api/subscribe/confirm":         {},
+		"/api/subscribe/submit":          {},
+		"/api/languages/get":             {},
+		"/already_subscribed.html":       {},
+		"/subscribe_confirm.html":        {},
+		"/subscribe_form.html":           {},
+		"/subscribe_success.html":        {},
+		"/unsubscribe_success.html":      {},
+		"/subscribe_form_code.html":      {},
+	}
+
+	for _, path := range publicActivationAPIPaths {
+		excludes[path] = struct{}{}
+	}
+
+	return excludes
+}
+
+// publicActivationAPIPaths lists the public activation endpoints that must stay reachable
+// for visitors who never pass the console safe path or the console IP whitelist.
+var publicActivationAPIPaths = []string{
+	"/api/public/activation/activate",
+	"/api/public/activation/config",
+	"/public/activation/activate",
+	"/public/activation/config",
+}
+
 func isPublicActivationPath(path string) bool {
-	return path == "/activate" ||
-		path == "/activate/" ||
-		path == "/api/public/activation/activate" ||
-		path == "/api/public/mailbox/login_ticket/consume" ||
+	if path == "/activate" || path == "/activate/" {
+		return true
+	}
+
+	for _, publicPath := range publicActivationAPIPaths {
+		if path == publicPath {
+			return true
+		}
+	}
+
+	return path == "/api/public/mailbox/login_ticket/consume" ||
 		strings.HasPrefix(path, "/static/")
 }
 
@@ -125,6 +176,14 @@ func bindPublicAPI(group *ghttp.RouterGroup) {
 		public_activation.NewV1(),
 		mail_boxes.NewPublicV1(),
 	)
+}
+
+// bindPublicActivationAPI registers only the public activation endpoints. It is mounted a second
+// time without the /api prefix because the public activation page is served through a reverse
+// proxy that only exposes /activate, /static/ and the public activation API.
+func bindPublicActivationAPI(group *ghttp.RouterGroup) {
+	group.Middleware(middlewares.HandleApiResponse)
+	group.Bind(public_activation.NewV1())
 }
 
 func ipWhitelistWithPublicActivation(r *ghttp.Request) {
@@ -233,31 +292,7 @@ var (
 			s.Use(ipWhitelistWithPublicActivation)
 
 			// Define excluded URIs
-			excludesURIs := map[string]struct{}{
-				"/favicon.ico":                             {},
-				"/robots.txt":                              {},
-				"/activate":                                {},
-				"/activate/":                               {},
-				"/unsubscribe.html":                        {},
-				"/unsubscribe_new.html":                    {},
-				"/api/aapanel/sso":                         {},
-				"/api/unsubscribe/user_group":              {},
-				"/api/unsubscribe":                         {},
-				"/api/unsubscribe_new":                     {},
-				"/api/batch_mail/api/send":                 {},
-				"/api/batch_mail/api/batch_send":           {},
-				"/api/subscribe/confirm":                   {},
-				"/api/subscribe/submit":                    {},
-				"/api/languages/get":                       {},
-				"/api/public/activation/activate":          {},
-				"/api/public/mailbox/login_ticket/consume": {},
-				"/already_subscribed.html":                 {},
-				"/subscribe_confirm.html":                  {},
-				"/subscribe_form.html":                     {},
-				"/subscribe_success.html":                  {},
-				"/unsubscribe_success.html":                {},
-				"/subscribe_form_code.html":                {},
-			}
+			excludesURIs := excludedSafePathURIs()
 
 			// Bind Server Hooks
 			s.BindHookHandlerByMap("/*", map[ghttp.HookName]ghttp.HandlerFunc{
@@ -327,6 +362,11 @@ var (
 
 			// Public APIs intentionally exclude administrator JWT/RBAC. Each controller performs its own authentication.
 			s.Group("/api/public", bindPublicAPI)
+
+			// The public activation page is served behind a reverse proxy that only forwards
+			// /activate, /static/ and the un-prefixed public activation API, so the same
+			// controller is also registered under /public.
+			s.Group("/public", bindPublicActivationAPI)
 
 			// Register Apis
 			s.Group("/api", func(group *ghttp.RouterGroup) {

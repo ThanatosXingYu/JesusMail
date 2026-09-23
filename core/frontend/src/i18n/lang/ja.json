@@ -13,6 +13,12 @@
 		"columns": {
 			"actions": "操作"
 		},
+		"unit": {
+			"days": "日",
+			"hours": "時間",
+			"minutes": "分",
+			"seconds": "秒"
+		},
 		"actions": {
 			"view": "閲覧",
 			"edit": "編集",
@@ -103,7 +109,8 @@
 			"mailboxRecycle": "ごみ箱",
 			"sequences": "Sequences",
 			"leads": "Leads",
-			"enrichment": "Enrichment"
+			"enrichment": "Enrichment",
+			"sendApi": "送信API"
 		}
 	},
 	"login": {
@@ -546,6 +553,20 @@
 				"overwriteLabel": "既存ユーザーを上書き",
 				"overwriteDescription": "インポート時にインポートデータに従ってリスト内の既存の顧客情報を上書きするかどうか",
 				"subscriptionStatus": "購読状況",
+				"status": "状態",
+				"exampleCsvLabel": "CSVの例",
+				"overwriteOptions": {
+					"no": "いいえ",
+					"yes": "はい"
+				},
+				"subscriptionOptions": {
+					"subscribe": "購読する",
+					"unsubscribe": "購読解除"
+				},
+				"statusOptions": {
+					"confirmed": "確認済み",
+					"unconfirmed": "未確認"
+				},
 				"validation": {
 					"groupRequired": "グループを選択してください",
 					"dataRequired": "1行につき1メールでデータを貼り付けてください",

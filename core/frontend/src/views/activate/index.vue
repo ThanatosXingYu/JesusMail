@@ -10,10 +10,8 @@
 				<div class="success-icon">✓</div>
 				<h2>你的邮箱已就绪</h2>
 				<div class="email">{{ email }}</div>
-				<p>登录密码为你刚才设置的密码，请妥善保管。本次激活密钥已作废，请勿重复使用。</p>
-				<n-button type="primary" size="large" block tag="a" href="/roundcube/"
-					>前往登录邮箱</n-button
-				>
+				<p>登录密码为你刚才设置的密码，请妥善保管。邮箱永久有效，不会过期。本次激活密钥已作废，请勿重复使用。</p>
+				<n-button type="primary" size="large" block tag="a" href="/roundcube/">前往登录邮箱</n-button>
 			</div>
 			<n-form
 				v-else
@@ -36,7 +34,7 @@
 							maxlength="30"
 							placeholder="3-30 位字母、数字或 . _ -"
 							@update:value="form.prefix = form.prefix.toLowerCase()" />
-						<n-input-group-label>@mail.qlu.edu.kg</n-input-group-label>
+						<n-input-group-label>{{ domainSuffix }}</n-input-group-label>
 					</n-input-group>
 				</n-form-item>
 				<n-form-item label="设置密码" path="password">
@@ -56,57 +54,44 @@
 						placeholder="再次输入密码"
 						@keyup.enter="submit" />
 				</n-form-item>
-				<n-form-item label="邮箱有效期" path="duration_days">
-					<div class="w-full">
-						<n-date-picker
-							:value="expirationDate"
-							type="date"
-							format="yyyy-MM-dd"
-							:clearable="false"
-							:is-date-disabled="isExpirationDateDisabled"
-							class="w-full"
-							@update:value="handleExpirationDateChange">
-						</n-date-picker>
-						<div class="expiry-tip">
-							当前有效期 {{ form.duration_days }} 天；到期后邮箱账号与邮件将进入 30 天回收期。
-						</div>
-					</div>
+				<n-form-item label="邮箱有效期">
+					<div class="expiry-tip">永久有效：激活成功后邮箱不会过期，可长期使用。</div>
 				</n-form-item>
 				<n-button type="primary" size="large" block :loading="loading" attr-type="submit"
 					>立即开通邮箱</n-button
 				>
 			</n-form>
-			<div class="foot"><router-link to="/login">管理员登录</router-link></div>
+			<div class="foot">
+				<a href="/roundcube/" rel="noopener">用户登录</a>
+			</div>
 		</n-card>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import type { FormInst, FormRules } from 'naive-ui'
-import { addDays, differenceInCalendarDays, startOfDay } from 'date-fns'
-import { activateMailbox } from '@/api/modules/activation'
+import { activateMailbox, getActivationConfig } from '@/api/modules/activation'
 
 const formRef = ref<FormInst | null>(null)
 const loading = ref(false)
 const email = ref('')
-const form = reactive({ key: '', prefix: '', password: '', password2: '', duration_days: 30 })
-const getToday = () => startOfDay(new Date())
-const expirationDate = ref(addDays(getToday(), form.duration_days).getTime())
+const domain = ref('')
+const form = reactive({ key: '', prefix: '', password: '', password2: '' })
 
-const getDurationDays = (timestamp: number) => differenceInCalendarDays(timestamp, getToday())
+const domainSuffix = computed(() => (domain.value ? `@${domain.value}` : '@...'))
 
-const isExpirationDateDisabled = (timestamp: number) => {
-	const durationDays = getDurationDays(timestamp)
-	return durationDays < 1 || durationDays > 31
+const fetchConfig = async () => {
+	try {
+		const data = await getActivationConfig()
+		if (data?.domain) {
+			domain.value = data.domain
+		}
+	} catch {
+		// 配置获取失败时保持占位域名，用户提交后仍会得到正确结果
+	}
 }
 
-const handleExpirationDateChange = (timestamp: number | null) => {
-	if (timestamp === null) return
-	const durationDays = getDurationDays(timestamp)
-	if (durationDays < 1 || durationDays > 31) return
-	expirationDate.value = startOfDay(timestamp).getTime()
-	form.duration_days = durationDays
-}
+onMounted(fetchConfig)
 
 const rules: FormRules = {
 	key: [
@@ -143,15 +128,8 @@ const rules: FormRules = {
 			trigger: ['blur', 'input'],
 		},
 	],
-	duration_days: [
-		{
-			required: true,
-			validator: (_rule, value: number) => Number.isInteger(value) && value >= 1 && value <= 31,
-			message: '邮箱有效期必须为 1-31 天',
-			trigger: ['change'],
-		},
-	],
 }
+
 const submit = async () => {
 	await formRef.value?.validate()
 	loading.value = true
@@ -160,9 +138,11 @@ const submit = async () => {
 			key: form.key,
 			prefix: form.prefix,
 			password: form.password,
-			duration_days: form.duration_days,
 		})) as { email: string }
 		email.value = data.email
+		if (data.email.includes('@')) {
+			domain.value = data.email.slice(data.email.indexOf('@') + 1)
+		}
 	} finally {
 		loading.value = false
 	}
@@ -203,7 +183,6 @@ const submit = async () => {
 	}
 }
 .expiry-tip {
-	margin-top: 8px;
 	color: var(--color-text-3);
 	font-size: 12px;
 	line-height: 1.6;

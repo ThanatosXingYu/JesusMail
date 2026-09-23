@@ -53,6 +53,22 @@ server {
 }
 ```
 
+## Public activation page paths
+
+The public activation page (`/activate`) is a separate single-page entry point. A reverse proxy that only exposes selected paths must forward every path it uses:
+
+| Path | Purpose |
+|---|---|
+| `/activate` | Public activation page (SPA entry) |
+| `/static/*` | Frontend assets |
+| `/favicon.ico` | Site icon |
+| `/api/languages/get` | Language discovery |
+| `/public/activation/activate` | Redeem an activation key |
+| `/public/activation/config` | Public activation settings |
+| `/api/public/activation/activate`, `/api/public/activation/config` | The same endpoints with the `/api` prefix |
+
+JesusMail accepts both the `/public/...` and the `/api/public/...` prefix for the public activation API, because the production bundle is built without an API prefix. If a proxy forwards only one of them, activation fails with a 404.
+
 ## Caddy
 
 ```caddyfile

@@ -155,30 +155,33 @@ func allowAttempt(ctx context.Context, ip string, redis redisScriptEvaluator) (b
 	return result.Int64() <= 8, nil
 }
 
-func expirationFromDuration(now time.Time, durationDays int) (*time.Time, error) {
-	if durationDays < 1 || durationDays > 31 {
-		return nil, errors.New("邮箱有效期必须为 1-31 天")
-	}
-	expiresAt := now.AddDate(0, 0, durationDays)
-	return &expiresAt, nil
+// PublicConfig exposes the public activation configuration required by the activation page.
+// It never contains secrets, only values that are already part of the public product setup.
+type PublicConfig struct {
+	Domain string `json:"domain"`
+	Quota  int64  `json:"quota"`
 }
 
-func Activate(ctx context.Context, keycode, prefix, password, ip string, durationDays int) (string, error) {
+// PublicConfig returns the activation domain and mailbox quota used by public activations.
+func PublicConfigInfo() PublicConfig {
+	return PublicConfig{Domain: Domain(), Quota: quota()}
+}
+
+// Activate redeems an activation key and creates a permanent mailbox.
+// Mailboxes activated through an activation key never expire: ExpiresAt stays nil,
+// which the mailbox service treats as "permanent".
+func Activate(ctx context.Context, keycode, prefix, password, ip string) (string, error) {
 	keycode, prefix, err := Validate(keycode, prefix, password)
 	if err != nil {
 		return "", err
 	}
 	now := time.Now().UTC()
-	expiresAt, err := expirationFromDuration(now, durationDays)
-	if err != nil {
-		return "", err
-	}
 	domain := Domain()
 	email := prefix + "@" + domain
 	mailbox := &mailboxv1.Mailbox{
 		Username: email, Password: password, FullName: prefix, IsAdmin: 0,
 		Quota: quota(), LocalPart: prefix, Domain: domain, Active: 1, QuotaActive: 1,
-		ExpiresAt: expiresAt, SourceType: "activation",
+		ExpiresAt: nil, SourceType: "activation",
 	}
 
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {

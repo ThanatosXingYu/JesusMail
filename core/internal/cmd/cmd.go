@@ -285,7 +285,7 @@ var (
 			// Use Redis for session storage
 			// s.SetSessionStorage(gsession.NewStorageRedis(g.Redis()))
 
-			// Allow BillionMail to run behind a path-prefix reverse proxy.
+			// Allow JesusMail to run behind a path-prefix reverse proxy.
 			s.Use(stripWebBasePathMiddleware(webBasePath))
 
 			// Keep the public activation flow reachable when the console IP whitelist is enabled.

@@ -1165,6 +1165,8 @@
 			"username": "用户名",
 			"password": "密码",
 			"loginInfo": "登录信息（WebMail / SMTP）",
+			"receivedCount": "已收邮件",
+			"sentCount": "已发邮件",
 			"quota": "配额",
 			"sourceType": "来源",
 			"type": "类型",

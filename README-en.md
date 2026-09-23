@@ -13,7 +13,7 @@ JesusMail combines a mail server, webmail, mailbox administration, activation-co
 
 ## Main capabilities
 
-- Mailbox and domain administration
+- Mailbox and domain administration, with per-mailbox successful sent/received log-record counts
 - Activation-code creation, grouping, export, binding reset, and redemption
 - Public mailbox activation with permanent (non-expiring) mailboxes
 - One-click sign-in to the corresponding webmail account
@@ -21,6 +21,10 @@ JesusMail combines a mail server, webmail, mailbox administration, activation-co
 - Campaigns, contacts, templates, delivery analytics, and warm-up tools
 - Integrated Roundcube webmail
 - Docker Compose deployment with PostgreSQL, Redis, Postfix, Dovecot, and Rspamd
+
+## Mailbox traffic counters
+
+The mailbox table shows successful sent/received records for each address on the current page (`status = sent`, DSN `2.x`). Counts come from retained Postfix log tables, **not lifetime totals or current mailbox contents**: pruning decreases them, and the latest-record-per-queue-ID model can undercount multi-recipient deliveries. If statistics fail, the mailbox list remains available and displays zero for that request; check the service log before interpreting zero as a complete audit result. Login information has a copy button; one-click login is in the Actions column.
 
 ## Distribution workflow
 

@@ -1086,6 +1086,8 @@
 			"username": "ユーザー名",
 			"password": "パスワード",
 			"loginInfo": "ログイン情報（WebMail / SMTP）",
+			"receivedCount": "受信数",
+			"sentCount": "送信数",
 			"quota": "クォータ",
 			"sourceType": "作成元",
 			"type": "タイプ",

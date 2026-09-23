@@ -44,6 +44,7 @@ func init() {
 			`-- Indexes
 			CREATE INDEX IF NOT EXISTS senders_logTime_size_sender ON mailstat_senders (log_time, size, sender)`,
 			`CREATE INDEX IF NOT EXISTS senders_logTime_millis ON mailstat_senders (log_time_millis)`,
+			`CREATE INDEX IF NOT EXISTS senders_sender_message_id ON mailstat_senders (sender, postfix_message_id)`,
 
 			`-- Mail sending records (unique records, keep latest)
 			CREATE TABLE IF NOT EXISTS mailstat_send_mails (
@@ -82,6 +83,7 @@ func init() {
 			`-- Indexes
 			CREATE INDEX IF NOT EXISTS receiveMails_logTime_status_recipient ON mailstat_receive_mails (log_time, status, recipient)`,
 			`CREATE INDEX IF NOT EXISTS receiveMails_logTime_millis ON mailstat_receive_mails (log_time_millis)`,
+			`CREATE INDEX IF NOT EXISTS receiveMails_recipient_status ON mailstat_receive_mails (recipient, status)`,
 
 			`-- Mail deferred records
 			CREATE TABLE IF NOT EXISTS mailstat_deferred_mails (

@@ -89,7 +89,7 @@ func validateAaPanelSSORequest(ctx context.Context, username string) error {
 	return nil
 }
 
-// AaPanelSSO signs in a trusted aaPanel request without exposing BillionMail credentials.
+// AaPanelSSO signs in a trusted aaPanel request without exposing JesusMail credentials.
 func (c *ControllerV1) AaPanelSSO(ctx context.Context, req *v1.AaPanelSSOReq) (res *v1.AaPanelSSORes, err error) {
 	res = &v1.AaPanelSSORes{}
 	username := strings.TrimSpace(req.Username)

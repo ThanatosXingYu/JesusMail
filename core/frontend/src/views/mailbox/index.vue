@@ -37,7 +37,7 @@
 				</n-flex>
 			</template>
 			<template #table>
-				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1600">
+				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1770">
 					<template #empty>
 						<bt-table-help> </bt-table-help>
 					</template>
@@ -174,20 +174,10 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'login',
 		title: t('mailbox.columns.loginInfo'),
-		width: 300,
+		width: 120,
 		render: row => {
 			return (
 				<NFlex class="mailbox-login-actions" inline={true} align="center">
-					<NButton
-						class="shrink-0"
-						text
-						type="primary"
-						loading={Boolean(loginTicketLoading[row.username])}
-						disabled={!isMailboxLoginAvailable(row)}
-						onClick={() => handleOneClickLogin(row)}>
-						<i class="i-mdi-login-variant mr-4px"></i>
-						{t('mailbox.actions.oneClickLogin')}
-					</NButton>
 					<NButton
 						class="shrink-0"
 						text
@@ -208,6 +198,18 @@ const columns = ref<DataTableColumns<MailBox>>([
 				</NFlex>
 			)
 		},
+	},
+	{
+		key: 'received_count',
+		title: t('mailbox.columns.receivedCount'),
+		width: 100,
+		render: row => Number(row.received_count ?? 0).toLocaleString(),
+	},
+	{
+		key: 'sent_count',
+		title: t('mailbox.columns.sentCount'),
+		width: 100,
+		render: row => Number(row.sent_count ?? 0).toLocaleString(),
 	},
 	{
 		key: 'expires_at',
@@ -269,10 +271,20 @@ const columns = ref<DataTableColumns<MailBox>>([
 		title: t('common.columns.actions'),
 		key: 'actions',
 		align: 'right',
-		width: 180,
+		width: 290,
 		fixed: 'right',
 		render: row => (
 			<NFlex class="mailbox-row-actions" inline={true} justify="end">
+				<NButton
+					class="shrink-0"
+					text
+					type="primary"
+					loading={Boolean(loginTicketLoading[row.username])}
+					disabled={!isMailboxLoginAvailable(row)}
+					onClick={() => handleOneClickLogin(row)}>
+					<i class="i-mdi-login-variant mr-4px"></i>
+					{t('mailbox.actions.oneClickLogin')}
+				</NButton>
 				<NButton
 					class="shrink-0"
 					type="primary"

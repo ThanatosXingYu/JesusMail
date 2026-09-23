@@ -1155,6 +1155,8 @@
 			"username": "Username",
 			"password": "Password",
 			"loginInfo": "Login Info(WebMail / SMTP)",
+			"receivedCount": "Received",
+			"sentCount": "Sent",
 			"quota": "Quota",
 			"sourceType": "Source",
 			"type": "Type",

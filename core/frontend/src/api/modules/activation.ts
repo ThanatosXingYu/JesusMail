@@ -20,12 +20,16 @@ export interface ActivationList {
 	list: ActivationKey[]
 }
 
-export const activateMailbox = (params: {
-	key: string
-	prefix: string
-	password: string
-	duration_days: number
-}) =>
+export interface ActivationConfig {
+	domain: string
+	quota: number
+}
+
+// 激活页公开配置：用于展示真实的激活域名，避免前端硬编码域名
+export const getActivationConfig = () => instance.get<ActivationConfig>('/public/activation/config')
+
+// 激活成功后邮箱为永久有效，无需提交有效期
+export const activateMailbox = (params: { key: string; prefix: string; password: string }) =>
 	instance.post('/public/activation/activate', params)
 
 export const getActivationStats = () => instance.get('/activation/stats')

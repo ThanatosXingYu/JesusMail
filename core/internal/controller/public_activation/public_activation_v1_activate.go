@@ -27,7 +27,7 @@ func (c *ControllerV1) Activate(ctx context.Context, req *v1.ActivateReq) (res *
 		res.Msg = "尝试次数过多，请 10 分钟后再试"
 		return res, nil
 	}
-	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, ip, req.DurationDays)
+	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, ip)
 	if err != nil {
 		res.Code = 422
 		switch {
@@ -41,6 +41,16 @@ func (c *ControllerV1) Activate(ctx context.Context, req *v1.ActivateReq) (res *
 	}
 	res.SetSuccess("邮箱激活成功")
 	res.Data = g.Map{"email": email, "webmail_url": "/roundcube/", "domain": activation.Domain()}
+	return res, nil
+}
+
+// Config exposes the public activation settings (activation domain and mailbox quota)
+// so the activation page never needs a hardcoded domain.
+func (c *ControllerV1) Config(ctx context.Context, req *v1.ConfigReq) (res *v1.ConfigRes, err error) {
+	res = &v1.ConfigRes{}
+	config := activation.PublicConfigInfo()
+	res.SetSuccess("success")
+	res.Data = g.Map{"domain": config.Domain, "quota": config.Quota}
 	return res, nil
 }
 

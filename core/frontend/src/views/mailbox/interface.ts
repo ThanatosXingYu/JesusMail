@@ -25,6 +25,8 @@ export interface MailBox {
 	expires_at: string | null
 	source_type: string
 	activation_key_id: number | null
+	sent_count: number
+	received_count: number
 }
 
 export interface MailboxLoginTicket {

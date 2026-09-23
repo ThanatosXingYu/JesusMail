@@ -8,6 +8,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gogf/gf/v2/frame/g"
+
 	"billionmail-core/api/mail_boxes/v1"
 )
 
@@ -29,12 +31,26 @@ func (c *ControllerV1) GetMailbox(ctx context.Context, req *v1.GetMailboxReq) (r
 		return nil, err
 	}
 
-	// transform mailbox list to include MX records
+	// Aggregate only the current page, rather than scanning mail logs once per mailbox.
+	usernames := make([]string, len(mailboxList))
+	for i, mailbox := range mailboxList {
+		usernames[i] = mailbox.Username
+	}
+	stats, err := mail_boxes.GetMailStats(ctx, usernames)
+	if err != nil {
+		// Statistics are supplementary; keep the mailbox list usable if mail logs are unavailable.
+		g.Log().Warningf(ctx, "get mailbox mail statistics: %v", err)
+		stats = nil
+	}
+
+	// transform mailbox list to include MX records and successful mail-log counts
 	mailboxListWithMx := make([]v1.MailboxWithMxRecord, len(mailboxList))
 	for i, mailbox := range mailboxList {
 		mailboxListWithMx[i] = v1.MailboxWithMxRecord{
-			Mailbox:  mailbox,
-			MxRecord: GenerateSPFRecord(mailbox.Domain), // 使用 GenerateSPFRecord 获取 MX 记录
+			Mailbox:       mailbox,
+			MxRecord:      GenerateSPFRecord(mailbox.Domain), // 使用 GenerateSPFRecord 获取 MX 记录
+			SentCount:     stats[mailbox.Username].Sent,
+			ReceivedCount: stats[mailbox.Username].Received,
 		}
 		// Handle sensitive information
 		mailboxListWithMx[i].Password, _ = mail_boxes.PasswdDecode(ctx, mailboxListWithMx[i].PasswordEncode)

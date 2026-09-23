@@ -876,7 +876,7 @@ MODIFY_SAFE_ENTRANCE() {
     bash bm.sh default
 }
 
-# Rebuild the BillionMail project
+# Rebuild the JesusMail project
  REBUILD_PROJECT() {
     echo "Rebuilding JesusMail..."
     echo -e "\033[31mWarning: This operation will rebuild all containers, service will be unavailable during the rebuild process. \033[0m"
@@ -891,14 +891,14 @@ MODIFY_SAFE_ENTRANCE() {
     fi
  }
 
-# Restart the BillionMail project
+# Restart the JesusMail project
 RESTART_PROJECT() {
     echo "Restarting JesusMail..."
     sleep 1
     ${DOCKER_COMPOSE} restart
 }
 
-# Stop the BillionMail project
+# Stop the JesusMail project
 STOP_PROJECT() {
     echo "Stop JesusMail..."
     sleep 1

@@ -8,7 +8,7 @@ import (
 func init() {
 	registerHandler(func() {
 		sqlList := []string{
-			`-- BillionMail Options
+			`-- JesusMail Options
 			CREATE TABLE IF NOT EXISTS bm_options (
 				name VARCHAR(255) NOT NULL PRIMARY KEY,
 				value TEXT NOT NULL

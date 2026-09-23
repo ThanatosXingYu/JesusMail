@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gogf/gf/v2/container/gvar"
 )
@@ -249,22 +248,26 @@ func TestDeleteActivationKeysLocksAndSkipsOnlyUsed(t *testing.T) {
 	}
 }
 
-func TestExpirationFromDurationBoundaries(t *testing.T) {
-	now := time.Date(2026, time.September, 15, 12, 30, 0, 0, time.UTC)
-	for _, days := range []int{0, 32} {
-		if _, err := expirationFromDuration(now, days); err == nil {
-			t.Fatalf("expirationFromDuration(%d) accepted invalid duration", days)
-		}
+func TestPublicConfigInfoReportsDomainAndQuota(t *testing.T) {
+	t.Setenv("JESUSMAIL_ACTIVATION_DOMAIN", "Mail.Example.COM")
+	t.Setenv("JESUSMAIL_ACTIVATION_QUOTA", "4096")
+
+	config := PublicConfigInfo()
+	if config.Domain != "mail.example.com" {
+		t.Fatalf("PublicConfigInfo().Domain = %q, want %q", config.Domain, "mail.example.com")
 	}
-	for _, days := range []int{1, 31} {
-		expiresAt, err := expirationFromDuration(now, days)
-		if err != nil {
-			t.Fatalf("expirationFromDuration(%d) unexpected error: %v", days, err)
-		}
-		want := now.AddDate(0, 0, days)
-		if !expiresAt.Equal(want) {
-			t.Fatalf("expirationFromDuration(%d) = %s, want %s", days, expiresAt, want)
-		}
+	if config.Quota != 4096 {
+		t.Fatalf("PublicConfigInfo().Quota = %d, want %d", config.Quota, 4096)
+	}
+}
+
+func TestPublicConfigInfoFallsBackToDefaults(t *testing.T) {
+	config := PublicConfigInfo()
+	if config.Domain != defaultDomain {
+		t.Fatalf("PublicConfigInfo().Domain = %q, want %q", config.Domain, defaultDomain)
+	}
+	if config.Quota != defaultQuota {
+		t.Fatalf("PublicConfigInfo().Quota = %d, want %d", config.Quota, defaultQuota)
 	}
 }
 

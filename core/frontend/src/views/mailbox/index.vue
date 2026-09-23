@@ -5,19 +5,19 @@
 			<template #toolsLeft>
 				<n-flex class="mailbox-tool-group" :wrap="true" :size="8">
 					<n-button type="primary" @click="handleAdd">
-						<i class="i-mdi-plus mailbox-action-icon"></i>
+						<i class="i-mdi-plus mr-4px"></i>
 						{{ t('mailbox.actions.add') }}
 					</n-button>
 					<n-button @click="handleBatchAdd">
-						<i class="i-mdi-account-multiple-plus-outline mailbox-action-icon"></i>
+						<i class="i-mdi-account-multiple-plus-outline mr-4px"></i>
 						{{ $t('mailbox.actions.batchAdd') }}
 					</n-button>
 					<n-button @click="handleImport">
-						<i class="i-mdi-import mailbox-action-icon"></i>
+						<i class="i-mdi-import mr-4px"></i>
 						{{ $t('common.actions.import') }}
 					</n-button>
 					<n-button @click="handleExport">
-						<i class="i-mdi-export mailbox-action-icon"></i>
+						<i class="i-mdi-export mr-4px"></i>
 						{{ t('mailbox.actions.exportAll') }}
 					</n-button>
 				</n-flex>
@@ -37,7 +37,7 @@
 				</n-flex>
 			</template>
 			<template #table>
-				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1600">
+				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1770">
 					<template #empty>
 						<bt-table-help> </bt-table-help>
 					</template>
@@ -174,22 +174,12 @@ const columns = ref<DataTableColumns<MailBox>>([
 	{
 		key: 'login',
 		title: t('mailbox.columns.loginInfo'),
-		width: 300,
+		width: 120,
 		render: row => {
 			return (
-				<div class="mailbox-login-actions">
+				<NFlex class="mailbox-login-actions" inline={true} align="center">
 					<NButton
-						class="mailbox-action-button"
-						text
-						type="primary"
-						loading={Boolean(loginTicketLoading[row.username])}
-						disabled={!isMailboxLoginAvailable(row)}
-						onClick={() => handleOneClickLogin(row)}>
-						<i class="i-mdi-login-variant mailbox-action-icon"></i>
-						{t('mailbox.actions.oneClickLogin')}
-					</NButton>
-					<NButton
-						class="mailbox-action-button"
+						class="shrink-0"
 						text
 						type="primary"
 						onClick={() => {
@@ -202,12 +192,24 @@ const columns = ref<DataTableColumns<MailBox>>([
 								})
 							)
 						}}>
-						<i class="i-mdi-content-copy mailbox-action-icon"></i>
+						<i class="i-mdi-content-copy mr-4px"></i>
 						{t('common.actions.copy')}
 					</NButton>
-				</div>
+				</NFlex>
 			)
 		},
+	},
+	{
+		key: 'received_count',
+		title: t('mailbox.columns.receivedCount'),
+		width: 100,
+		render: row => Number(row.received_count ?? 0).toLocaleString(),
+	},
+	{
+		key: 'sent_count',
+		title: t('mailbox.columns.sentCount'),
+		width: 100,
+		render: row => Number(row.sent_count ?? 0).toLocaleString(),
 	},
 	{
 		key: 'expires_at',
@@ -269,31 +271,41 @@ const columns = ref<DataTableColumns<MailBox>>([
 		title: t('common.columns.actions'),
 		key: 'actions',
 		align: 'right',
-		width: 180,
+		width: 290,
 		fixed: 'right',
 		render: row => (
-			<div class="mailbox-row-actions">
+			<NFlex class="mailbox-row-actions" inline={true} justify="end">
 				<NButton
-					class="mailbox-action-button"
+					class="shrink-0"
+					text
+					type="primary"
+					loading={Boolean(loginTicketLoading[row.username])}
+					disabled={!isMailboxLoginAvailable(row)}
+					onClick={() => handleOneClickLogin(row)}>
+					<i class="i-mdi-login-variant mr-4px"></i>
+					{t('mailbox.actions.oneClickLogin')}
+				</NButton>
+				<NButton
+					class="shrink-0"
 					type="primary"
 					text={true}
 					onClick={() => {
 						handleEdit(row)
 					}}>
-					<i class="i-mdi-pencil-outline mailbox-action-icon"></i>
+					<i class="i-mdi-pencil-outline mr-4px"></i>
 					{t('common.actions.edit')}
 				</NButton>
 				<NButton
-					class="mailbox-action-button"
+					class="shrink-0"
 					type="error"
 					text={true}
 					onClick={() => {
 						handleDelete(row)
 					}}>
-					<i class="i-mdi-delete-outline mailbox-action-icon"></i>
+					<i class="i-mdi-delete-outline mr-4px"></i>
 					{t('common.actions.delete')}
 				</NButton>
-			</div>
+			</NFlex>
 		),
 	},
 ])
@@ -392,27 +404,11 @@ const handleBatchDelete = (keys: string[]) => {
 	justify-content: flex-end;
 }
 
-.mailbox-login-actions,
-.mailbox-row-actions {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	white-space: nowrap;
-}
-
-.mailbox-row-actions {
-	justify-content: flex-end;
-}
-
-.mailbox-action-button {
-	flex: 0 0 auto;
-}
-
-.mailbox-action-icon {
-	width: 16px;
-	height: 16px;
-	margin-right: 4px;
-}
+/*
+ * JSX 渲染的表格单元格元素不会带上 data-v-* 作用域属性，
+ * 因此这里不再依赖 scoped 选择器给按钮/图标留间距，
+ * 统一改用 NFlex 的 gap 与 UnoCSS 工具类（mr-4px / shrink-0）。
+ */
 
 @media (max-width: 900px) {
 	.mailbox-page {

@@ -567,7 +567,26 @@
 				"fileTypeHint": "文件类型：csv，不超过5 MB",
 				"overwriteLabel": "覆盖现有用户",
 				"overwriteDescription": "在导入时是否按照导入数据来覆盖列表中存在的客户信息",
-				"subscriptionStatus": "订阅状态"
+				"subscriptionStatus": "订阅状态",
+				"status": "状态",
+				"exampleCsvLabel": "CSV 示例",
+				"overwriteOptions": {
+					"no": "否",
+					"yes": "是"
+				},
+				"subscriptionOptions": {
+					"subscribe": "订阅",
+					"unsubscribe": "退订"
+				},
+				"statusOptions": {
+					"confirmed": "已确认",
+					"unconfirmed": "未确认"
+				},
+				"validation": {
+					"groupRequired": "请选择分组",
+					"dataRequired": "请粘贴数据，每行一个邮箱",
+					"fileRequired": "请上传文件"
+				}
 			},
 			"batchSetTag": {
 				"title": "批量设置标签",
@@ -1146,6 +1165,8 @@
 			"username": "用户名",
 			"password": "密码",
 			"loginInfo": "登录信息（WebMail / SMTP）",
+			"receivedCount": "已收邮件",
+			"sentCount": "已发邮件",
 			"quota": "配额",
 			"sourceType": "来源",
 			"type": "类型",

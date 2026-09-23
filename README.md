@@ -218,7 +218,7 @@ node build-for-git.js    # 同步 dist 到 core/public/dist
 - 激活页需要nginx 透出 `/activate`、`/static/`、`/public/activation/*`（以及 `/api/public/activation/*`）；生产构建的激活页会请求不带 `/api` 前缀的 `/public/activation/...`，**两个前缀都要反代**，否则激活会 404。
 - 域名下打开后台后「不跳转、功能异常」通常是访问了不透出的路径导致的，属预期行为，请改用 IP 端口访问后台。
 
-宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
+宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。仓库的 `private-baseline/server-config/nginx/mail.qlu.edu.kg.conf` 是主站历史参考快照（现已移除与扩展文件重复的激活路由），**不可直接覆盖线上主站配置**；先检查现网配置、备份，再逐项合并和执行 `nginx -t`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
 
 ---
 

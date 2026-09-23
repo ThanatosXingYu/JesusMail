@@ -1,13 +1,13 @@
 package mail_services
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/mail_service"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/mail_services/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/mail_services/v1"
+	"jesusmail-core/internal/service/public"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 )

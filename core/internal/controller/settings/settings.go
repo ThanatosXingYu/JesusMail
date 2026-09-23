@@ -5,9 +5,9 @@
 package settings
 
 import (
-	v1 "billionmail-core/api/settings/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -104,7 +104,7 @@ func convertEnvToConfig(envMap map[string]string) *v1.SystemConfig {
 	config.AdminUsername = envMap["ADMIN_USERNAME"]
 	config.AdminPassword = envMap["ADMIN_PASSWORD"]
 	config.SafePath = envMap["SafePath"]
-	config.Hostname = envMap["BILLIONMAIL_HOSTNAME"]
+	config.Hostname = envMap["JESUSMAIL_HOSTNAME"]
 
 	// Database configuration
 	config.DBName = envMap["DBNAME"]
@@ -202,7 +202,7 @@ func validateConfigValue(key, value string) error {
 			return fmt.Errorf("password length must be at least 4 characters")
 		}
 
-	case "BILLIONMAIL_HOSTNAME", "billionmail_hostname":
+	case "JESUSMAIL_HOSTNAME", "hostname":
 		// Hostname: allowed letters, numbers, dots, hyphens
 		if !public.IsValidHostname(value) {
 			return fmt.Errorf("hostname format is incorrect")

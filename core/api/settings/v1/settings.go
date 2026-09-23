@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"billionmail-core/utility/types/api_v1"
+	"jesusmail-core/utility/types/api_v1"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -34,7 +34,7 @@ type SystemConfig struct {
 	SafePath      string `json:"safe_path" dc:"safe path"`
 
 	// Domain name configuration
-	Hostname string `json:"billionmail_hostname" dc:"billionmail hostname"`
+	Hostname string `json:"hostname" dc:"mail hostname"`
 
 	// Database configuration
 	DBName string `json:"db_name" dc:"db name"`

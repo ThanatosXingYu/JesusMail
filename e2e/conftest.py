@@ -84,7 +84,7 @@ async def db():
 
     db_url = os.getenv(
         "DATABASE_URL_RAW",
-        "postgresql://billionmail:billionmail@localhost:25432/billionmail",
+        "postgresql://jesusmail:jesusmail@localhost:25432/jesusmail",
     )
     conn = await asyncpg.connect(db_url)
     yield conn

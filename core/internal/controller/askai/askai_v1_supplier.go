@@ -1,10 +1,10 @@
 package askai
 
 import (
-	v1 "billionmail-core/api/askai/v1"
-	"billionmail-core/internal/service/askai"
-	"billionmail-core/internal/service/public"
-	"billionmail-core/utility/types/api_v1"
+	v1 "jesusmail-core/api/askai/v1"
+	"jesusmail-core/internal/service/askai"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/utility/types/api_v1"
 	"context"
 	"errors"
 )

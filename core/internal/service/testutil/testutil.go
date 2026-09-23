@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"billionmail-core/internal/model/entity"
+	"jesusmail-core/internal/model/entity"
 )
 
 // --- Test Context ---

@@ -1,11 +1,11 @@
 package mail_service
 
 import (
-	v1 "billionmail-core/api/domains/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/acme"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/acme"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"os"

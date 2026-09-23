@@ -1,7 +1,6 @@
 package public
 
 import (
-	"billionmail-core/internal/consts"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
@@ -10,6 +9,7 @@ import (
 	"encoding/pem"
 	"github.com/gogf/gf/v2/frame/g"
 	"io/fs"
+	"jesusmail-core/internal/consts"
 	"math/big"
 	random "math/rand"
 	"net"
@@ -143,14 +143,14 @@ func (sp *selfSignedCertProvider) loadRootCertificate(rootCa, rootKey []byte) (*
 
 // generateCACertTemplate generates CA certificate template
 func (sp *selfSignedCertProvider) generateCACertTemplate() *x509.Certificate {
-	commonName := "Billion-Mail"
+	commonName := "JesusMail"
 	rd := random.New(random.NewSource(time.Now().UnixNano()))
 	cer := &x509.Certificate{
 		SerialNumber: big.NewInt(rd.Int63()), // Certificate serial number
 		Subject: pkix.Name{
 			Country:            []string{"HK"},
-			Organization:       []string{"aaPanel"},
-			OrganizationalUnit: []string{"aaPanel"},
+			Organization:       []string{"JesusMail"},
+			OrganizationalUnit: []string{"JesusMail"},
 			Province:           []string{"HongKong"},
 			CommonName:         commonName,
 			Locality:           []string{"HongKong"},
@@ -161,7 +161,7 @@ func (sp *selfSignedCertProvider) generateCACertTemplate() *x509.Certificate {
 		IsCA:                  true,                                                                       // Is CA certificate
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}, // Certificate purposes
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		EmailAddresses:        []string{"billionmail@aapanel.com"},
+		EmailAddresses:        []string{"postmaster@example.com"},
 	}
 
 	return cer
@@ -177,14 +177,14 @@ func (sp *selfSignedCertProvider) generateCertTemplate() *x509.Certificate {
 		return nil
 	}
 
-	commonName := "Billion-Mail"
+	commonName := "JesusMail"
 	rd := random.New(random.NewSource(time.Now().UnixNano()))
 	cer := &x509.Certificate{
 		SerialNumber: big.NewInt(rd.Int63()), // Certificate serial number
 		Subject: pkix.Name{
 			Country:            []string{"HK"},
-			Organization:       []string{"aaPanel"},
-			OrganizationalUnit: []string{"aaPanel"},
+			Organization:       []string{"JesusMail"},
+			OrganizationalUnit: []string{"JesusMail"},
 			Province:           []string{"HongKong"},
 			CommonName:         commonName,
 			Locality:           []string{"HongKong"},
@@ -195,7 +195,7 @@ func (sp *selfSignedCertProvider) generateCertTemplate() *x509.Certificate {
 		IsCA:                  false,                                                                      // Is CA certificate
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}, // Certificate purposes
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageDataEncipherment,
-		EmailAddresses:        []string{"billionmail@aapanel.com"},
+		EmailAddresses:        []string{"postmaster@example.com"},
 		IPAddresses:           []net.IP{net.ParseIP(serverIp), net.ParseIP(localIp)}, // Supported IP addresses
 		DNSNames:              []string{},                                            // Supported domains
 	}

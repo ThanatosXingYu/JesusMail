@@ -1,7 +1,7 @@
 package files
 
 import (
-	"billionmail-core/api/files/v1"
+	"jesusmail-core/api/files/v1"
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

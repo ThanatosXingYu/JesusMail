@@ -1,13 +1,13 @@
 package relay
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcache"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
 	"strings"
 	"sync"
 	"time"
@@ -76,7 +76,7 @@ func TestSmtpConnection(host, port, user, password string) *SmtpConnectionTestRe
 	sender := mail_service.NewEmailSender()
 	sender.Host = host
 	sender.Port = port
-	sender.Email = "test_connection@billionmail.com" // Temporary email for testing
+	sender.Email = "test_connection@example.com" // Temporary email for testing
 
 	// Handle authentication based on whether credentials are provided
 	isAuthRequired := user != "" && password != ""

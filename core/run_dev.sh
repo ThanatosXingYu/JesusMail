@@ -6,11 +6,11 @@ echo "Compiling JesusMail core..."
 ARCH=$(uname -m)
 PLATFORMS="all"
 if [[ "$ARCH" == "x86_64" ]]; then
-    BINARY="billionmail-amd64"
+    BINARY="jesusmail-amd64"
     PLATFORMS="x86"
     echo "Detect x86_64 architecture, using amd64 binary"
 elif [[ "$ARCH" == "arm64" || "$ARCH" == "aarch64" ]]; then
-    BINARY="billionmail-arm64"
+    BINARY="jesusmail-arm64"
     PLATFORMS="arm"
     echo "Detect arm64/aarch64 architecture, using arm64 binary"
 else
@@ -25,37 +25,37 @@ echo "Copying the compiled JesusMail core to the core container..."
 
 echo "Copying the compiled binary from the build container to the core container..."
 
-# Copy the compiled binary to the billionmail-core-billionmail-1 container
-docker cp $BINARY billionmail-core-billionmail-1:/opt/billionmail/core/billionmail
+# Copy the compiled binary to the jesusmail-core-jesusmail-1 container
+docker cp $BINARY jesusmail-core-jesusmail-1:/opt/jesusmail/core/jesusmail
 
 
 echo "Removing the existing frontend bundle from the core container..."
 
-# Remove the public/dist/ directory from the billionmail-core-billionmail-1 container
-docker exec billionmail-core-billionmail-1 sh -c "rm -rf /opt/billionmail/core/public/dist"
+# Remove the public/dist/ directory from the jesusmail-core-jesusmail-1 container
+docker exec jesusmail-core-jesusmail-1 sh -c "rm -rf /opt/jesusmail/core/public/dist"
 
 
 echo "Copying the frontend bundle to the core container..."
 
-# Copy the public directory to the billionmail-core-billionmail-1 container
-docker cp public/. billionmail-core-billionmail-1:/opt/billionmail/core/public/
+# Copy the public directory to the jesusmail-core-jesusmail-1 container
+docker cp public/. jesusmail-core-jesusmail-1:/opt/jesusmail/core/public/
 
 
 echo "Copying the manifest to the core container..."
 
-# Copy the manifest/ directory to the billionmail-core-billionmail-1 container
-docker cp manifest/. billionmail-core-billionmail-1:/opt/billionmail/core/manifest/
+# Copy the manifest/ directory to the jesusmail-core-jesusmail-1 container
+docker cp manifest/. jesusmail-core-jesusmail-1:/opt/jesusmail/core/manifest/
 
 
 echo "Copying the templates to the core container..."
 
-# Copy the template/ directory to the billionmail-core-billionmail-1 container
-docker cp template/. billionmail-core-billionmail-1:/opt/billionmail/core/template/
+# Copy the template/ directory to the jesusmail-core-jesusmail-1 container
+docker cp template/. jesusmail-core-jesusmail-1:/opt/jesusmail/core/template/
 
 
 echo "Restarting the JesusMail core container..."
 
-# Restart the billionmail-core-billionmail-1 container to apply changes
-docker restart billionmail-core-billionmail-1
+# Restart the jesusmail-core-jesusmail-1 container to apply changes
+docker restart jesusmail-core-jesusmail-1
 
 echo "JesusMail core has been successfully compiled and deployed."

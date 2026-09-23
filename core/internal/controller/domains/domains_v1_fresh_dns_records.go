@@ -1,12 +1,12 @@
 package domains
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 
-	"billionmail-core/api/domains/v1"
+	"jesusmail-core/api/domains/v1"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

@@ -5,7 +5,7 @@
 package rbac
 
 import (
-	"billionmail-core/api/rbac"
+	"jesusmail-core/api/rbac"
 )
 
 // ControllerV1 RBAC controller

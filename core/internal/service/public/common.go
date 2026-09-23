@@ -1,9 +1,9 @@
 package public
 
 import (
-	v1 "billionmail-core/api/domains/v1"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/utility/types/api_v1"
+	v1 "jesusmail-core/api/domains/v1"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/utility/types/api_v1"
 	"bufio"
 	"context"
 	"crypto/md5"
@@ -44,7 +44,7 @@ import (
 
 	"github.com/g0rbe/go-chattr"
 
-	"billionmail-core/internal/consts"
+	"jesusmail-core/internal/consts"
 )
 
 // Check if it is a development environment
@@ -2741,9 +2741,9 @@ func GethostUrl() string {
 		}
 	}
 
-	hostname := MustGetDockerEnv("BILLIONMAIL_HOSTNAME", "")
+	hostname := MustGetDockerEnv("JESUSMAIL_HOSTNAME", "")
 	if hostname == "" {
-		hostname, _ = DockerEnv("BILLIONMAIL_HOSTNAME")
+		hostname, _ = DockerEnv("JESUSMAIL_HOSTNAME")
 	}
 
 	if hostname != "" && hostname != "mail.example.com" {

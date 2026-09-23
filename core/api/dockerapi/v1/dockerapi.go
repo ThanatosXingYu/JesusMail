@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"billionmail-core/utility/types/api_v1"
+	"jesusmail-core/utility/types/api_v1"
 	"github.com/docker/docker/api/types/container"
 	"github.com/gogf/gf/v2/frame/g"
 )

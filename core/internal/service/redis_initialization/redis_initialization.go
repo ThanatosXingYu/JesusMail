@@ -1,7 +1,7 @@
 package redis_initialization
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gredis"

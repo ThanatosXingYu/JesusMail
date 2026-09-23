@@ -18,7 +18,7 @@ func init() {
 		for _, sql := range sqlList {
 			_, err := g.DB().Exec(context.Background(), sql)
 			if err != nil {
-				g.Log().Error(context.Background(), "Failed to create billion-mail options table:", err)
+				g.Log().Error(context.Background(), "Failed to create mail options table:", err)
 				return
 			}
 		}

@@ -1,12 +1,12 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/batch_mail/v1"
+	"jesusmail-core/api/batch_mail/v1"
 )
 
 func (c *ControllerV1) GetUserGroups(ctx context.Context, req *v1.GetUserGroupsReq) (res *v1.GetUserGroupsRes, err error) {

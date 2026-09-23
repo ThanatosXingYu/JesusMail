@@ -1,15 +1,15 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/batch_mail"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/batch_mail"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/service/email_template"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/service/email_template"
 )
 
 func (c *ControllerV1) CreateTask(ctx context.Context, req *v1.CreateTaskReq) (res *v1.CreateTaskRes, err error) {

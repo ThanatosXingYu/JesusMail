@@ -1,14 +1,14 @@
 package overview
 
 import (
-	"billionmail-core/internal/service/maillog_stat"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/maillog_stat"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/util/gconv"
 	"time"
 
-	"billionmail-core/api/overview/v1"
+	"jesusmail-core/api/overview/v1"
 )
 
 func (c *ControllerV1) FailedList(ctx context.Context, req *v1.FailedListReq) (res *v1.FailedListRes, err error) {

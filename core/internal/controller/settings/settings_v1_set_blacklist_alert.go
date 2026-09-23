@@ -1,12 +1,12 @@
 package settings
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/settings/v1"
+	"jesusmail-core/api/settings/v1"
 )
 
 func (c *ControllerV1) SetBlacklistAlert(ctx context.Context, req *v1.SetBlacklistAlertReq) (res *v1.SetBlacklistAlertRes, err error) {

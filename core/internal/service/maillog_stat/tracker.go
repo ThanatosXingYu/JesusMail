@@ -1,8 +1,8 @@
 package maillog_stat
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/contact_activity"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/contact_activity"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"

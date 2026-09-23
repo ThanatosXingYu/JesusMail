@@ -1,8 +1,8 @@
 package askai
 
 import (
-	v1 "billionmail-core/api/askai/v1"
-	"billionmail-core/utility/types/api_v1"
+	v1 "jesusmail-core/api/askai/v1"
+	"jesusmail-core/utility/types/api_v1"
 )
 
 type IAskAiV1 interface {

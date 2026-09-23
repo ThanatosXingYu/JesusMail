@@ -7,7 +7,7 @@ package mail_services
 import (
 	"context"
 
-	"billionmail-core/api/mail_services/v1"
+	"jesusmail-core/api/mail_services/v1"
 )
 
 type IMailServicesV1 interface {

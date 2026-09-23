@@ -1,8 +1,8 @@
 package warmup
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model/entity"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model/entity"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"

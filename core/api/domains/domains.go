@@ -7,7 +7,7 @@ package domains
 import (
 	"context"
 
-	"billionmail-core/api/domains/v1"
+	"jesusmail-core/api/domains/v1"
 )
 
 type IDomainsV1 interface {

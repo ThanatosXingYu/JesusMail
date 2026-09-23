@@ -1,12 +1,12 @@
 <?php
 /**
  * QLU Mail 邮箱账号激活页
- * 流程：用户输入一次性激活密钥 + 自定义前缀 + 自设密码 → 调 BillionMail API 创建邮箱
+ * 流程：用户输入一次性激活密钥 + 自定义前缀 + 自设密码 → 调 JesusMail API 创建邮箱
  * 存储：MySQL（mail 库 activation_keys / activation_logs），不依赖 TXT
  */
 
 /* ==================== 配置 ==================== */
-const BM_API_BASE   = 'https://127.0.0.1:41443'; // BillionMail 管理后台（容器内端口）
+const BM_API_BASE   = 'https://127.0.0.1:41443'; // JesusMail 管理后台（容器内端口）
 define('BM_API_TOKEN', getenv('BM_API_TOKEN') ?: '');
 const MAIL_DOMAIN   = 'mail.qlu.edu.kg';         // 邮箱后缀（须与后台已添加的域名一致）
 const MAILBOX_QUOTA = 33554432;                  // 新邮箱配额：32MB
@@ -21,7 +21,7 @@ const LOCK_SECONDS = 600;          // 超限后锁定时长（秒）
 const RESERVED_PREFIX = [
     'admin', 'administrator', 'root', 'abuse', 'postmaster', 'webmaster',
     'hostmaster', 'mailer-daemon', 'noreply', 'no-reply', 'support', 'info',
-    'billing', 'contact', 'security', 'billion', 'mail', 'test', 'activate',
+    'billing', 'contact', 'security', 'mail', 'test', 'activate',
 ];
 
 /* ==================== 初始化 ==================== */
@@ -85,7 +85,7 @@ function release_key(string $key, string $email): void {
     } catch (Throwable $e) { /* 回滚失败仅影响该码可用性，不阻塞 */ }
 }
 
-/* ==================== BillionMail API ==================== */
+/* ==================== JesusMail API ==================== */
 
 function http_api(string $method, string $path, array $payload = [], ?string $token = null): array {
     $ch = curl_init(BM_API_BASE . $path);

@@ -1,21 +1,21 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/batch_mail"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/batch_mail"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/mail_service"
 	"database/sql"
 	"strings"
 
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/batch_mail/v1"
+	"jesusmail-core/api/batch_mail/v1"
 )
 
 func (c *ControllerV1) SendTestEmail(ctx context.Context, req *v1.SendTestEmailReq) (res *v1.SendTestEmailRes, err error) {

@@ -1,13 +1,13 @@
 package email_template
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"regexp"
 	"strings"
 
-	"billionmail-core/api/email_template/v1"
+	"jesusmail-core/api/email_template/v1"
 )
 
 type ScoreItem struct {

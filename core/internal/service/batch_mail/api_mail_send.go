@@ -2,11 +2,11 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/maillog_stat"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/maillog_stat"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"strings"

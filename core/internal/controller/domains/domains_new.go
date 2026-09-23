@@ -5,7 +5,7 @@
 package domains
 
 import (
-	"billionmail-core/api/domains"
+	"jesusmail-core/api/domains"
 )
 
 type ControllerV1 struct{}

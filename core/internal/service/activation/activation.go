@@ -1,8 +1,8 @@
 package activation
 
 import (
-	mailboxv1 "billionmail-core/api/mail_boxes/v1"
-	"billionmail-core/internal/service/mail_boxes"
+	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/service/mail_boxes"
 	"context"
 	"crypto/rand"
 	"errors"
@@ -63,7 +63,7 @@ var (
 		"admin": {}, "administrator": {}, "root": {}, "abuse": {}, "postmaster": {},
 		"webmaster": {}, "hostmaster": {}, "mailer-daemon": {}, "noreply": {}, "no-reply": {},
 		"support": {}, "info": {}, "billing": {}, "contact": {}, "security": {},
-		"billion": {}, "mail": {}, "test": {}, "activate": {},
+		"mail": {}, "test": {}, "activate": {},
 	}
 )
 

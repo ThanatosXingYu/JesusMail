@@ -1,8 +1,8 @@
 package abnormal_recipient
 
 import (
-	"billionmail-core/api/abnormal_recipient/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/abnormal_recipient/v1"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"strconv"
 )

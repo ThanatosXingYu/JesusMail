@@ -1,10 +1,10 @@
 package contact
 
 import (
-	"billionmail-core/api/contact/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/contact/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"database/sql"
 	"fmt"

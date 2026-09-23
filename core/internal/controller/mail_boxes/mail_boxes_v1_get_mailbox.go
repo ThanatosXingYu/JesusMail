@@ -1,16 +1,16 @@
 package mail_boxes
 
 import (
-	domainsV1 "billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/mail_boxes"
-	"billionmail-core/internal/service/public"
+	domainsV1 "jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/mail_boxes"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/mail_boxes/v1"
+	"jesusmail-core/api/mail_boxes/v1"
 )
 
 func (c *ControllerV1) GetMailbox(ctx context.Context, req *v1.GetMailboxReq) (res *v1.GetMailboxRes, err error) {

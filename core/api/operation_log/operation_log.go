@@ -7,7 +7,7 @@ package operation_log
 import (
 	"context"
 
-	"billionmail-core/api/operation_log/v1"
+	"jesusmail-core/api/operation_log/v1"
 )
 
 type IOperationLogV1 interface {

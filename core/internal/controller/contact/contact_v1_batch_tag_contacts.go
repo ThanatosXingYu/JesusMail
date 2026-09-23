@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/contact/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/contact/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 )
 
 func (c *ControllerV1) BatchTagContacts(ctx context.Context, req *v1.BatchTagContactsReq) (res *v1.BatchTagContactsRes, err error) {

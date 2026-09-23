@@ -1,14 +1,14 @@
 package settings
 
 import (
-	"billionmail-core/internal/consts"
+	"jesusmail-core/internal/consts"
 	"context"
 	"time"
 
 	"github.com/gogf/gf/os/gtimer"
 
-	"billionmail-core/api/settings/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/service/public"
 	"strings"
 
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -84,7 +84,7 @@ func convertJsonKeyToEnvKey(jsonKey string, value string, envMap map[string]stri
 		"admin_username":       "ADMIN_USERNAME",
 		"admin_password":       "ADMIN_PASSWORD",
 		"safe_path":            "SafePath",
-		"billionmail_hostname": "BILLIONMAIL_HOSTNAME",
+		"hostname": "JESUSMAIL_HOSTNAME",
 		"db_name":              "DBNAME",
 		"db_user":              "DBUSER",
 		"db_pass":              "DBPASS",

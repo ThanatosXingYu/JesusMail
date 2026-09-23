@@ -1,9 +1,9 @@
 package maillog_stat
 
 import (
-	"billionmail-core/internal/consts"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"sort"

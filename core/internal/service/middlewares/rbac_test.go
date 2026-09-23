@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"billionmail-core/internal/model"
+	"jesusmail-core/internal/model"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

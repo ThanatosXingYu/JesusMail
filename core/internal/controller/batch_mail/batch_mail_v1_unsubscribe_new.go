@@ -1,13 +1,13 @@
 package batch_mail
 
 import (
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/controller/subscribe_list"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/batch_mail"
-	"billionmail-core/internal/service/contact_activity"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/controller/subscribe_list"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/batch_mail"
+	"jesusmail-core/internal/service/contact_activity"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/os/gtimer"

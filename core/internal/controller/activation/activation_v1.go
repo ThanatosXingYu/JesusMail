@@ -1,8 +1,8 @@
 package activation
 
 import (
-	"billionmail-core/api/activation/v1"
-	service "billionmail-core/internal/service/activation"
+	"jesusmail-core/api/activation/v1"
+	service "jesusmail-core/internal/service/activation"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 )

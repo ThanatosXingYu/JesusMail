@@ -1,7 +1,7 @@
 package relay
 
 import (
-	"billionmail-core/internal/model/entity"
+	"jesusmail-core/internal/model/entity"
 	"strings"
 	"testing"
 
@@ -99,8 +99,8 @@ func TestCommentOutOldTransportMaps(t *testing.T) {
 }
 
 func TestEnsureSmtpsConfigInMasterCf(t *testing.T) {
-	markerBegin := "# BEGIN BILLIONMAIL SMTPS CONFIG - DO NOT EDIT THIS MARKER"
-	markerEnd := "# END BILLIONMAIL SMTPS CONFIG - DO NOT EDIT THIS MARKER"
+	markerBegin := "# BEGIN JESUSMAIL SMTPS CONFIG - DO NOT EDIT THIS MARKER"
+	markerEnd := "# END JESUSMAIL SMTPS CONFIG - DO NOT EDIT THIS MARKER"
 	smtpsService := `smtps     unix  -       -       n       -       -       smtp
     -o smtp_tls_wrappermode=yes
     -o smtp_tls_security_level=encrypt`

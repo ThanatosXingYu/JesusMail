@@ -5,7 +5,7 @@
 package abnormal_recipient
 
 import (
-	"billionmail-core/api/abnormal_recipient"
+	"jesusmail-core/api/abnormal_recipient"
 )
 
 type ControllerV1 struct{}

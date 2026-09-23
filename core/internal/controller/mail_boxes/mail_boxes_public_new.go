@@ -1,6 +1,6 @@
 package mail_boxes
 
-import api "billionmail-core/api/mail_boxes"
+import api "jesusmail-core/api/mail_boxes"
 
 type PublicControllerV1 struct{}
 

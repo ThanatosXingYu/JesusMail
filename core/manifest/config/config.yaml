@@ -28,7 +28,7 @@ server:
   # Sessions Configuration
   sessionMaxAge: "30d"
   sessionCookieMaxAge: "30d" # Session cookie maximum age, default is 30 days
-  sessionIdName: "billion_mail"
+  sessionIdName: "jesus_mail"
   sessionCookieOutput: true
   sessionPath: "data/session"
 

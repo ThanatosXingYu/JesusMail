@@ -1,10 +1,10 @@
 package mail_service
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model/entity"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model/entity"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"

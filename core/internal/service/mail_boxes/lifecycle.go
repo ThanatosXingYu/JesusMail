@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	mailboxv1 "billionmail-core/api/mail_boxes/v1"
-	"billionmail-core/internal/service/public"
+	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/service/public"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"

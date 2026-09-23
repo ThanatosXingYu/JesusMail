@@ -1,12 +1,12 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"time"
 
-	"billionmail-core/api/batch_mail/v1"
+	"jesusmail-core/api/batch_mail/v1"
 )
 
 func (c *ControllerV1) TaskOverview(ctx context.Context, req *v1.TaskOverviewReq) (res *v1.TaskOverviewRes, err error) {

@@ -1,7 +1,7 @@
 package domains
 
 import (
-	"billionmail-core/internal/model"
+	"jesusmail-core/internal/model"
 	"strings"
 	"testing"
 

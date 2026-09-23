@@ -19,7 +19,7 @@ E2E_TEMPLATE_HTML = """<html><body>
 E2E_GROUP_NAME = "E2E Test Group"
 E2E_CONTACT_EMAIL = "e2e-recipient@example.com"
 E2E_API_NAME = "E2E Test API"
-E2E_DOMAIN = "test.billionmail.com"
+E2E_DOMAIN = "test.jesusmail.com"
 E2E_SENDER_LOCAL = "e2e-sender"
 E2E_SENDER_PASSWORD = "e2eTest1234!"
 
@@ -135,7 +135,7 @@ async def seed_test_data(bm_client: httpx.AsyncClient, db=None) -> dict:
                 "template_id": data["template_id"],
                 "group_id": data["group_id"],
                 "subject": "E2E API Test: {{ .Subscriber.Email }}",
-                "addresser": "e2e-sender@test.billionmail.com",
+                "addresser": "e2e-sender@test.jesusmail.com",
                 "full_name": "E2E Sender",
                 "unsubscribe": 1,
                 "active": 1,
@@ -159,7 +159,7 @@ async def seed_test_data(bm_client: httpx.AsyncClient, db=None) -> dict:
                     break
             logger.info("[SEED] Created API template, key=%s", data.get("api_key", "")[:10])
 
-    data["sender_email"] = "e2e-sender@test.billionmail.com"
+    data["sender_email"] = "e2e-sender@test.jesusmail.com"
     data["recipient_email"] = E2E_CONTACT_EMAIL
     data["timestamp"] = int(time.time())
 

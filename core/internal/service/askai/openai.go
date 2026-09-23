@@ -1,12 +1,12 @@
 package askai
 
 import (
-	"billionmail-core/internal/service/public"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"jesusmail-core/internal/service/public"
 	"os"
 	"reflect"
 	"strconv"
@@ -187,7 +187,11 @@ func (o *OpenAI) HttpRequestTool(url string) string {
 	}
 
 	// 2. 缓存不存在或无效，发起请求
-	toUrl := FILE_CDN_API + "/bot?url=" + url
+	base := fileAPIBase()
+	if base == "" {
+		return ""
+	}
+	toUrl := base + "/bot?url=" + url
 	res, err := public.HttpGetSrc(toUrl, 120)
 	if err != nil || len(res) <= 100 {
 		// 请求失败或内容过短，直接返回空

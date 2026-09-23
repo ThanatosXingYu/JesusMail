@@ -1,6 +1,6 @@
 package model
 
-import "billionmail-core/internal/model/entity"
+import "jesusmail-core/internal/model/entity"
 
 // Account defines the account model
 type Account entity.Account

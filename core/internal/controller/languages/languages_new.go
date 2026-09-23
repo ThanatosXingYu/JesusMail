@@ -5,7 +5,7 @@
 package languages
 
 import (
-	"billionmail-core/api/languages"
+	"jesusmail-core/api/languages"
 )
 
 type ControllerV1 struct{}

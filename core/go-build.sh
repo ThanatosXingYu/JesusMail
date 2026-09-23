@@ -55,16 +55,16 @@ if [[ "$PLATFORMS" == "all" || "$PLATFORMS" == "x86" ]]; then
 
     # amd64
     echo "build start amd64"
-    rm -f billionmail-amd64
+    rm -f jesusmail-amd64
     export GOOS=linux
     export GOARCH=amd64
-    go build -ldflags="-s -w" -o billionmail-amd64 main.go
-    if [ ! -f "billionmail-amd64" ]; then
+    go build -ldflags="-s -w" -o jesusmail-amd64 main.go
+    if [ ! -f "jesusmail-amd64" ]; then
         echo "build amd64 failed"
         exit 1
     fi
 
-    check_file=$(file billionmail-amd64 | grep "x86-64,")
+    check_file=$(file jesusmail-amd64 | grep "x86-64,")
     if [ -z "${check_file}" ];then
         echo "Compiled amd64 binary failed the x86-64 architecture check.";
         exit 0;
@@ -74,19 +74,19 @@ fi
 if [[ "$PLATFORMS" == "all" || "$PLATFORMS" == "arm" ]]; then
     # arm64
     echo "build start arm64"
-    rm -f billionmail-arm64
+    rm -f jesusmail-arm64
     export GOOS=linux
     export GOARCH=arm64
-    go build -ldflags="-s -w" -o billionmail-arm64 main.go
-    if [ ! -f "billionmail-arm64" ]; then
+    go build -ldflags="-s -w" -o jesusmail-arm64 main.go
+    if [ ! -f "jesusmail-arm64" ]; then
         echo "build arm64 failed"
         exit 1
     fi
-    check_file=$(file billionmail-arm64 | grep -E "ARM|aarch64")
+    check_file=$(file jesusmail-arm64 | grep -E "ARM|aarch64")
     if [ -z "${check_file}" ];then
         echo "Compiled arm64 binary failed the ARM architecture check.";
         exit 0;
     fi
 fi
 
-ls -al billionmail-*
+ls -al jesusmail-*

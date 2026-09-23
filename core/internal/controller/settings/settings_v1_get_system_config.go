@@ -1,9 +1,9 @@
 package settings
 
 import (
-	"billionmail-core/api/settings/v1"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"encoding/json"
 

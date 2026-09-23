@@ -5,7 +5,7 @@
 package tags
 
 import (
-	"billionmail-core/api/tags"
+	"jesusmail-core/api/tags"
 )
 
 type ControllerV1 struct{}

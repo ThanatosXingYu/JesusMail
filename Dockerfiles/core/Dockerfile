@@ -1,3 +1,12 @@
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
+ARG TARGETOS=linux
+ARG TARGETARCH
+WORKDIR /src
+COPY core/go.mod core/go.sum ./
+RUN go mod download
+COPY core/ ./
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w" -o /out/jesusmail .
+
 FROM alpine:3.20
 
 LABEL maintainer="JesusMail Project"
@@ -9,18 +18,18 @@ ENV LC_ALL=C.UTF-8
 
 # Platform-specific binary copy
 ARG TARGETARCH
-COPY core/billionmail-${TARGETARCH} /opt/billionmail/core/billionmail
-COPY core/manifest /opt/billionmail/core/manifest
-COPY core/languages /opt/billionmail/core/languages
-COPY core/public /opt/billionmail/core/public
-COPY core/resource /opt/billionmail/core/resource
-COPY core/template /opt/billionmail/core/template
+COPY --from=builder /out/jesusmail /opt/jesusmail/core/jesusmail
+COPY core/manifest /opt/jesusmail/core/manifest
+COPY core/languages /opt/jesusmail/core/languages
+COPY core/public /opt/jesusmail/core/public
+COPY core/resource /opt/jesusmail/core/resource
+COPY core/template /opt/jesusmail/core/template
 
 # Copy file
 # COPY repositories /etc/apk/repositories
-COPY stop-supervisor.sh /stop-supervisor.sh
-COPY core.sh /core.sh
-COPY restart_fail2ban.sh /restart_fail2ban.sh
+COPY Dockerfiles/core/stop-supervisor.sh /stop-supervisor.sh
+COPY Dockerfiles/core/core.sh /core.sh
+COPY Dockerfiles/core/restart_fail2ban.sh /restart_fail2ban.sh
 
 # Install dependencies (using Alpine's apk package manager)
 RUN apk add --no-cache \
@@ -36,12 +45,12 @@ RUN apk add --no-cache \
     iptables \
     ipset \
     && rm -rf /var/cache/apk/* \
-    && chmod +x /stop-supervisor.sh /core.sh /restart_fail2ban.sh /opt/billionmail/core/billionmail
+    && chmod +x /stop-supervisor.sh /core.sh /restart_fail2ban.sh /opt/jesusmail/core/jesusmail
 
 # Copy file
 
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY fail2ban.conf /etc/fail2ban/fail2ban.conf
+COPY Dockerfiles/core/supervisord.conf /etc/supervisor/supervisord.conf
+COPY Dockerfiles/core/fail2ban.conf /etc/fail2ban/fail2ban.conf
 
 
 ENTRYPOINT ["/core.sh"]

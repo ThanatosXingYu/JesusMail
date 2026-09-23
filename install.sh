@@ -2,14 +2,14 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-CONTAINER_PROJECT_NAME=billionmail
-PGSQL_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-pgsql-billionmail-1"
-DOVECOT_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-dovecot-billionmail-1"
-POSTFIX_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-postfix-billionmail-1"
-RSPAMD_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-rspamd-billionmail-1"
+CONTAINER_PROJECT_NAME=jesusmail
+PGSQL_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-pgsql-jesusmail-1"
+DOVECOT_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-dovecot-jesusmail-1"
+POSTFIX_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-postfix-jesusmail-1"
+RSPAMD_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-rspamd-jesusmail-1"
 create_time=$(date +%s)
-DBNAME=billionmail
-DBUSER=billionmail
+DBNAME=jesusmail
+DBUSER=jesusmail
 SMTP_PORT=25
 SMTPS_PORT=465
 SUBMISSION_PORT=587
@@ -68,25 +68,25 @@ while [ ${#} -gt 0 ]; do
             exit 0
             ;;
         -d|--domain)
-            BILLIONMAIL_HOSTNAME=$2
+            JESUSMAIL_HOSTNAME=$2
             shift 1
             ;;
         -t|--TZ)
-            BILLIONMAIL_TIME_ZONE=$2
+            JESUSMAIL_TIME_ZONE=$2
             shift 1
             ;;
     esac
     shift 1
 done
 
-if [ -f "billionmail.conf" ]; then
+if [ -f "jesusmail.conf" ]; then
 read -r -p "Check that the configuration file exists, will you continue to overwrite the file?? [y/N] " gogo
 case $gogo in
     [Yy][eE][sS]|[Yy])
     if [ ! -d "./backup/" ]; then
         mkdir ./backup
     fi
-        mv billionmail.conf ./backup/billionmail.conf_${time}
+        mv jesusmail.conf ./backup/jesusmail.conf_${time}
     echo "Configuration backup created in ./backup/."
     if [ -f ".env" ]; then
         mv .env env_${time}
@@ -99,41 +99,41 @@ case $gogo in
 esac
 fi
 
-# while [ -z "${BILLIONMAIL_HOSTNAME}" ]; do
+# while [ -z "${JESUSMAIL_HOSTNAME}" ]; do
 # echo "Press Enter to confirm the detected value '[value]', or enter a custom value."
 # echo -e ""
 #     echo -e "Mail Server hostname (FQDN), \e[0;33mAs: example.com\e[0m"
 #     echo -e ""
-#     read -p "Please enter the Mail Server hostname (FQDN: e.g. example.com): " -e BILLIONMAIL_HOSTNAME
-#     #if [[ ! "${BILLIONMAIL_HOSTNAME}" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$ ]]; then
-#     if [[ ! "${BILLIONMAIL_HOSTNAME}" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
-#         echo -e "\e[31m(${BILLIONMAIL_HOSTNAME}) is not a FQDN!\e[0m"
+#     read -p "Please enter the Mail Server hostname (FQDN: e.g. example.com): " -e JESUSMAIL_HOSTNAME
+#     #if [[ ! "${JESUSMAIL_HOSTNAME}" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$ ]]; then
+#     if [[ ! "${JESUSMAIL_HOSTNAME}" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
+#         echo -e "\e[31m(${JESUSMAIL_HOSTNAME}) is not a FQDN!\e[0m"
 #         echo "Please change it to a FQDN"
 #         exit 1
-#     elif [[ "${BILLIONMAIL_HOSTNAME: -1}" == "." ]]; then
-#         echo "(${BILLIONMAIL_HOSTNAME}) is ending with a dot. This is not a valid FQDN!"
+#     elif [[ "${JESUSMAIL_HOSTNAME: -1}" == "." ]]; then
+#         echo "(${JESUSMAIL_HOSTNAME}) is ending with a dot. This is not a valid FQDN!"
 #         exit 1
 
 #     fi
 # done
 
-if [ -z "${BILLIONMAIL_HOSTNAME}" ]; then
-    BILLIONMAIL_HOSTNAME="example.com"
+if [ -z "${JESUSMAIL_HOSTNAME}" ]; then
+    JESUSMAIL_HOSTNAME="example.com"
 fi
 
 # Count number of dots in the domain
-DOT_COUNT=$(echo "${BILLIONMAIL_HOSTNAME}" | tr -cd '.' | wc -c)
+DOT_COUNT=$(echo "${JESUSMAIL_HOSTNAME}" | tr -cd '.' | wc -c)
 
 # If only one dot, prepend "mail."
 if [ "${DOT_COUNT}" -eq 1 ]; then
-    ADD_MAIL_BILLIONMAIL_HOSTNAME="mail.${BILLIONMAIL_HOSTNAME}"
-    echo "Postfix myhostname configuration use: ${ADD_MAIL_BILLIONMAIL_HOSTNAME}"
+    ADD_MAIL_JESUSMAIL_HOSTNAME="mail.${JESUSMAIL_HOSTNAME}"
+    echo "Postfix myhostname configuration use: ${ADD_MAIL_JESUSMAIL_HOSTNAME}"
 fi
 
-# Ensure ADD_MAIL_BILLIONMAIL_HOSTNAME is always set (fallback to original if empty)
-if [ -z "${ADD_MAIL_BILLIONMAIL_HOSTNAME}" ]; then
-    ADD_MAIL_BILLIONMAIL_HOSTNAME="${BILLIONMAIL_HOSTNAME}"
-    echo "Postfix myhostname configuration use: ${ADD_MAIL_BILLIONMAIL_HOSTNAME}"
+# Ensure ADD_MAIL_JESUSMAIL_HOSTNAME is always set (fallback to original if empty)
+if [ -z "${ADD_MAIL_JESUSMAIL_HOSTNAME}" ]; then
+    ADD_MAIL_JESUSMAIL_HOSTNAME="${JESUSMAIL_HOSTNAME}"
+    echo "Postfix myhostname configuration use: ${ADD_MAIL_JESUSMAIL_HOSTNAME}"
 fi
 
 if [ -a /etc/timezone ]; then
@@ -142,23 +142,23 @@ elif [ -a /etc/localtime ]; then
     SYSTEM_TIME_ZONE=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
 fi
 
-# while [ -z "${BILLIONMAIL_TIME_ZONE}" ]; do
+# while [ -z "${JESUSMAIL_TIME_ZONE}" ]; do
 #     echo -e ""
 #     echo -e "See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of timezones"
 #     echo -e "Use a column named "TZ identifier" + note the column named "Notes""
 #     echo -e "Please enter your time zone"
 #     echo -e ""
 #     if [ -z "${SYSTEM_TIME_ZONE}" ]; then
-#         read -p "Timezone: " -e BILLIONMAIL_TIME_ZONE
+#         read -p "Timezone: " -e JESUSMAIL_TIME_ZONE
 #     else
-#         read -p "Timezone [${SYSTEM_TIME_ZONE}]: " -e BILLIONMAIL_TIME_ZONE
-#         [ -z "${BILLIONMAIL_TIME_ZONE}" ] && BILLIONMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
+#         read -p "Timezone [${SYSTEM_TIME_ZONE}]: " -e JESUSMAIL_TIME_ZONE
+#         [ -z "${JESUSMAIL_TIME_ZONE}" ] && JESUSMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
 #     fi
 # done
 
-BILLIONMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
-if [ -z "${BILLIONMAIL_TIME_ZONE}" ]; then
-    BILLIONMAIL_TIME_ZONE="America/New_York"
+JESUSMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
+if [ -z "${JESUSMAIL_TIME_ZONE}" ]; then
+    JESUSMAIL_TIME_ZONE="America/New_York"
 fi
 
 DBPASS_file=DBPASS_file.pl
@@ -1031,17 +1031,17 @@ Check_Connect_PgSql(){
 
 Domain_DKIM_record(){
     ## DKIM key generation
-    docker exec -i -e BILLIONMAIL_HOSTNAME=${BILLIONMAIL_HOSTNAME} ${RSPAMD_CONTAINER_NAME} bash -c 'cat << "EOF" > /tmp/1.sh
+    docker exec -i -e JESUSMAIL_HOSTNAME=${JESUSMAIL_HOSTNAME} ${RSPAMD_CONTAINER_NAME} bash -c 'cat << "EOF" > /tmp/1.sh
 #!/bin/bash
-if [ ! -d "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/" ]; then
-    mkdir -p "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/"
+if [ ! -d "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/" ]; then
+    mkdir -p "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/"
 fi
-if [ -f "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/default.private" ] && [ -f "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/default.pub" ]; then
+if [ -f "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/default.private" ] && [ -f "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/default.pub" ]; then
     #echo "DKIM key already exists, skipping generation."
     exit 0
 fi
 
-rspamadm dkim_keygen -s 'default' -b 1024 -d {domain} -k "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/default.private" > "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/default.pub"
+rspamadm dkim_keygen -s 'default' -b 1024 -d {domain} -k "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/default.private" > "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/default.pub"
 if [ $? -eq 0 ]; then
     # Define the root directory for private keys
     DKIM_KEYS_DIR="/var/lib/rspamd/dkim"
@@ -1087,10 +1087,10 @@ else
     echo -e "DKIM key generation failed!"
     exit 1
 fi
-chmod 755 -R "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/"
+chmod 755 -R "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/"
 EOF'
-    docker exec -i -e BILLIONMAIL_HOSTNAME=${BILLIONMAIL_HOSTNAME} ${RSPAMD_CONTAINER_NAME} bash /tmp/1.sh && rm -f /tmp/1.sh
-    DKIM_RECORD=$(docker exec ${RSPAMD_CONTAINER_NAME} cat "/var/lib/rspamd/dkim/${BILLIONMAIL_HOSTNAME}/default.pub")
+    docker exec -i -e JESUSMAIL_HOSTNAME=${JESUSMAIL_HOSTNAME} ${RSPAMD_CONTAINER_NAME} bash /tmp/1.sh && rm -f /tmp/1.sh
+    DKIM_RECORD=$(docker exec ${RSPAMD_CONTAINER_NAME} cat "/var/lib/rspamd/dkim/${JESUSMAIL_HOSTNAME}/default.pub")
     # echo "DKIM RECORD: ${DKIM_RECORD}"
 }
 
@@ -1111,10 +1111,10 @@ Domain_record() {
     echo -e "\e[31mPlease add the following record to your domain name\e[0m"
     echo -e "==========================================================="
     echo -e " Type | Host record    |    IPv4 address   |"
-    echo -e "  \e[1;33mA\e[0m   | \e[1;33mmail.${BILLIONMAIL_HOSTNAME}\e[0m | \e[1;33m${IPV4_ADDRESS}\e[0m |"
+    echo -e "  \e[1;33mA\e[0m   | \e[1;33mmail.${JESUSMAIL_HOSTNAME}\e[0m | \e[1;33m${IPV4_ADDRESS}\e[0m |"
     echo -e "==========================================================="
     echo -e " Type | Host record | MX priority |  Record value    "
-    echo -e "  \e[1;33mMX\e[0m  |     \e[1;33m@\e[0m       |      \e[1;33m10\e[0m     | \e[1;33mmail.${BILLIONMAIL_HOSTNAME}\e[0m "
+    echo -e "  \e[1;33mMX\e[0m  |     \e[1;33m@\e[0m       |      \e[1;33m10\e[0m     | \e[1;33mmail.${JESUSMAIL_HOSTNAME}\e[0m "
     echo -e "==========================================================="
     if [ "${IPV4_ADDRESS}" ]; then
         echo -e " Type | Host record |    Record value   |"
@@ -1125,7 +1125,7 @@ Domain_record() {
     fi
     echo -e "==========================================================="
     echo -e " Type | Host record |    Record value     |"
-    echo -e "  \e[1;33mTXT\e[0m |   \e[1;33m_dmarc\e[0m    | \e[1;33mv=DMARC1;p=quarantine;rua=mailto:admin@${BILLIONMAIL_HOSTNAME}\e[0m |"
+    echo -e "  \e[1;33mTXT\e[0m |   \e[1;33m_dmarc\e[0m    | \e[1;33mv=DMARC1;p=quarantine;rua=mailto:admin@${JESUSMAIL_HOSTNAME}\e[0m |"
     echo -e "==========================================================="
 
     Domain_DKIM_record
@@ -1137,11 +1137,11 @@ Domain_record() {
         echo -e "  \e[1;33mTXT\e[0m | \e[1;33mdefault._domainkey\e[0m | \e[1;33m${DKIM_RECORD}\e[0m |<-- Start from \"v=DKIM1\" end, A single line."
         echo -e "==========================================================="
     else
-        echo -e "${BILLIONMAIL_HOSTNAME} DKIM key generation failed!"
+        echo -e "${JESUSMAIL_HOSTNAME} DKIM key generation failed!"
     fi
 }
 
-Init_Billionmail()
+Init_JesusMail()
 {
     # SQL file path
     SQL_FILE="./init.sql"
@@ -1162,12 +1162,12 @@ Init_Billionmail()
             Red_Error "Database import failed!"
         fi
         echo "Creating domain..."
-        BILLIONMAIL_HOSTNAME=$(echo "${BILLIONMAIL_HOSTNAME}" | tr '[:upper:]' '[:lower:]')
-        Check_domain=$(docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM domain WHERE domain = '${BILLIONMAIL_HOSTNAME}';" | grep -w "^ ${BILLIONMAIL_HOSTNAME}")
+        JESUSMAIL_HOSTNAME=$(echo "${JESUSMAIL_HOSTNAME}" | tr '[:upper:]' '[:lower:]')
+        Check_domain=$(docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM domain WHERE domain = '${JESUSMAIL_HOSTNAME}';" | grep -w "^ ${JESUSMAIL_HOSTNAME}")
         if [ -z "${Check_domain}" ]; then
             # Create a domain
             docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "INSERT INTO domain (domain, a_record, mailboxes, mailbox_quota, quota, rate_limit, create_time, active)
-            VALUES ('${BILLIONMAIL_HOSTNAME}', 'mail.${BILLIONMAIL_HOSTNAME}', 500, 5368709120, 5368709120, 12, ${create_time}, 1);"
+            VALUES ('${JESUSMAIL_HOSTNAME}', 'mail.${JESUSMAIL_HOSTNAME}', 500, 5368709120, 5368709120, 12, ${create_time}, 1);"
             if [ $? -eq 0 ]; then
                 echo "Domain creation was successful!"
                 Domain_DKIM_record
@@ -1192,8 +1192,8 @@ Init_Billionmail()
             echo "Generate_mailbox_password: ${Generate_mailbox_password}"
             echo "mailbox_password: ${Encrypt_mailbox_password}"
         else
-            # Generate the default password after failure: BILLIONMAIL
-            Generate_mailbox_password="BILLIONMAIL"
+            # Generate the default password after failure: JESUSMAIL
+            Generate_mailbox_password="JESUSMAIL"
             Encrypt_mailbox_password='$1$ELBUCcYE$TbdGKBvLkFbjQguDbi3s01'
             echo "Generate_mailbox_password--default: ${Generate_mailbox_password}"
             Default_password=1
@@ -1215,19 +1215,19 @@ Init_Billionmail()
             password_encode="516b6c4d54456c50546b31425355773d"
         fi
 
-        Check_mailbox=$(docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM mailbox WHERE username = '${mailbox}@${BILLIONMAIL_HOSTNAME}';" | grep -w "${mailbox}@${BILLIONMAIL_HOSTNAME}")
+        Check_mailbox=$(docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM mailbox WHERE username = '${mailbox}@${JESUSMAIL_HOSTNAME}';" | grep -w "${mailbox}@${JESUSMAIL_HOSTNAME}")
         if [ -z "${Check_mailbox}" ]; then
             INSERT_mailbox='INSERT INTO mailbox (username, password, password_encode, full_name, is_admin, maildir, quota, local_part, domain, create_time, update_time, active)
             VALUES (
-                '\'${mailbox}@${BILLIONMAIL_HOSTNAME}\'',
+                '\'${mailbox}@${JESUSMAIL_HOSTNAME}\'',
                 '\'${Encrypt_mailbox_password}\'',
                 '\'${password_encode}\'',
                 '\'${mailbox}\'',
                 0,
-                '\'${mailbox}@${BILLIONMAIL_HOSTNAME}/\'',
+                '\'${mailbox}@${JESUSMAIL_HOSTNAME}/\'',
                 5368709120,
                 '\'${mailbox}\'',
-                '\'${BILLIONMAIL_HOSTNAME}\'',
+                '\'${JESUSMAIL_HOSTNAME}\'',
                 '${create_time}',
                 '${create_time}',
                 1
@@ -1239,7 +1239,7 @@ Init_Billionmail()
             else
                 Red_Error "Mailbox creation failed!"
             fi
-            #docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM mailbox WHERE username = '${mailbox}@${BILLIONMAIL_HOSTNAME}';"
+            #docker exec -i -e PGPASSWORD=${DBPASS} ${PGSQL_CONTAINER_NAME} psql -U ${DBUSER} -d ${DBNAME} -c "SELECT * FROM mailbox WHERE username = '${mailbox}@${JESUSMAIL_HOSTNAME}';"
         else
             echo ""${Check_mailbox}" Mailbox already exists!"
         fi
@@ -1251,7 +1251,7 @@ Init_Billionmail()
 }
 
 
-Billionmail(){
+JesusMail(){
     Check_Port=$(ss -tlnp | grep -E ":(${HTTP_PORT})\b")
     if [ ! -z "${Check_Port}" ]; then
         HTTP_PORT=5678
@@ -1284,7 +1284,7 @@ Billionmail(){
         done
     fi
 
-    cat << EOF > billionmail.conf
+    cat << EOF > jesusmail.conf
 # Default JesusMail administrator credentials
 ADMIN_USERNAME=${ADMIN_USERNAME}
 ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -1292,8 +1292,8 @@ ADMIN_PASSWORD=${ADMIN_PASSWORD}
 # Manage Safe entrance
 SafePath=${SafePath}
 
-# BILLIONMAIL_HOSTNAME configuration, Postfix myhostname configuration
-BILLIONMAIL_HOSTNAME=${ADD_MAIL_BILLIONMAIL_HOSTNAME}
+# JESUSMAIL_HOSTNAME configuration, Postfix myhostname configuration
+JESUSMAIL_HOSTNAME=${ADD_MAIL_JESUSMAIL_HOSTNAME}
 
 # pgsql NAME and USER and PASSWORD configuration
 
@@ -1321,7 +1321,7 @@ HTTP_PORT=${HTTP_PORT}
 HTTPS_PORT=${HTTPS_PORT}
 
 # Web deployment base path. Keep empty for root deployment.
-# Set to /billionmail when embedding behind aaPanel path proxy.
+# Set to /jesusmail when embedding behind aaPanel path proxy.
 WEB_BASE_PATH=
 
 # Shared secret used by aaPanel to request trusted JesusMail SSO tokens.
@@ -1332,7 +1332,7 @@ AAPANEL_SSO_SECRET=
 # See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of timezones"
 # echo -e "Use a column named "TZ identifier" + note the column named "Notes""
 
-TZ=${BILLIONMAIL_TIME_ZONE}
+TZ=${JESUSMAIL_TIME_ZONE}
 
 # Default containers IPV4 intranet segment
 IPV4_NETWORK=172.66.1
@@ -1344,7 +1344,7 @@ FAIL2BAN_INIT=y
 RETENTION_DAYS=7
 
 EOF
-    \cp -rf billionmail.conf .env
+    \cp -rf jesusmail.conf .env
     if [ ! -f ".env" ]; then
         echo -e "Error: Failed to create .env file"
         exit 1
@@ -1356,7 +1356,7 @@ EOF
     fi
     openssl genrsa -out ${SSL_path}/key.pem 2048
     openssl req -x509 -new -nodes -key ${SSL_path}/key.pem -sha256 -days 3650 -out ${SSL_path}/cert.pem \
-    -subj "/C=US/ST=State/L=City/O=${BILLIONMAIL_HOSTNAME}/OU=${BILLIONMAIL_HOSTNAME}/CN=*.${BILLIONMAIL_HOSTNAME}" -nodes
+    -subj "/C=US/ST=State/L=City/O=${JESUSMAIL_HOSTNAME}/OU=${JESUSMAIL_HOSTNAME}/CN=*.${JESUSMAIL_HOSTNAME}" -nodes
     mkdir ssl
     cp -d -n ${SSL_path}/* ssl/
 
@@ -1365,8 +1365,7 @@ EOF
         ls -al
         Red_Error "docker-compose.yml not found."
     fi
-    ${DOCKER_COMPOSE} pull
-    ${DOCKER_COMPOSE} up -d
+    ${DOCKER_COMPOSE} up -d --build
     if [ $? -eq 0 ]; then
         echo -e "JesusMail installation completed successfully!"
     else
@@ -1382,10 +1381,10 @@ EOF
 
     # echo -e "Initialize the data..."
     # sleep 5
-    # Init_Billionmail
+    # Init_JesusMail
 
     [ ! -d "/opt" ] && mkdir /opt
-    echo "${PWD_d}" > /opt/PWD-Billion-Mail.txt
+    echo "${PWD_d}" > /opt/PWD-JesusMail.txt
     ln -sf ${PWD_d}/bm.sh /usr/bin/bm
     chmod +x ${PWD_d}/bm.sh
 
@@ -1423,7 +1422,7 @@ Install_Main(){
    
     Docker_Start
 
-    Billionmail
+    JesusMail
     
     Set_Firewall
     
@@ -1450,7 +1449,7 @@ intenal_ip=$(ip addr | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3
 # else
 #     echo -e "Webmail address: \e[1;33mhttps://${IPV4_ADDRESS}:${HTTP_PORT}/roundcube/\e[0m"
 # fi
-# echo -e "Webmail Username(e-mail): \e[1;33m${mailbox}@${BILLIONMAIL_HOSTNAME}\e[0m Password: \e[1;33m${Generate_mailbox_password}\e[0m"
+# echo -e "Webmail Username(e-mail): \e[1;33m${mailbox}@${JESUSMAIL_HOSTNAME}\e[0m Password: \e[1;33m${Generate_mailbox_password}\e[0m"
 # echo -e ""
 if [ ${HTTPS_PORT} = "443" ]; then
     echo -e "JesusMail Internet address: \e[1;33mhttps://${IPV4_ADDRESS}/${SafePath}\e[0m"
@@ -1465,4 +1464,4 @@ echo -e ""
 echo -e "Tip: Use \e[33m bm \e[0m or \e[33mbash bm.sh\e[0m to View login info etc."
 
 # Install
-curl -o /dev/null -fsSLk --connect-time 10 -X POST "https://www.aapanel.com/api/panel/panel_count_daily?name=billionmail" >/dev/null 2>&1
+curl -o /dev/null -fsSLk --connect-time 10 -X POST "https://www.aapanel.com/api/panel/panel_count_daily?name=jesusmail" >/dev/null 2>&1

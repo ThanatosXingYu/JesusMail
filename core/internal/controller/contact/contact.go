@@ -5,7 +5,7 @@
 package contact
 
 import (
-	"billionmail-core/internal/model/entity"
+	"jesusmail-core/internal/model/entity"
 	"bytes"
 	"encoding/csv"
 	"fmt"

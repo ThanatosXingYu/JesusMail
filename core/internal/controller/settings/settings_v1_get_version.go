@@ -1,11 +1,11 @@
 package settings
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/settings/v1"
+	"jesusmail-core/api/settings/v1"
 )
 
 func (c *ControllerV1) GetVersion(ctx context.Context, req *v1.GetVersionReq) (res *v1.GetVersionRes, err error) {

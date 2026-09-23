@@ -33,7 +33,7 @@ import { getSettingsStore } from '../store'
 const { currentDomain, networkForm } = getSettingsStore()
 
 const handleUpdateDomain = async () => {
-	await setSystemConfigKey({ key: 'billionmail_hostname', value: networkForm.value.domain })
+	await setSystemConfigKey({ key: 'hostname', value: networkForm.value.domain })
 	// const newPath =
 	// 	location.protocol + '//' + networkForm.value.domain + ':' + location.port + location.pathname
 	// location.href = newPath

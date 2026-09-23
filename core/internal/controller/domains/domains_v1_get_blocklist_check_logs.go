@@ -1,8 +1,8 @@
 package domains
 
 import (
-	"billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/os/gfile"

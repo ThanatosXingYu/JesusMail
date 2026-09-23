@@ -1,10 +1,10 @@
 package relay
 
 import (
-	"billionmail-core/api/relay/v1"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/public"
-	relay_service "billionmail-core/internal/service/relay"
+	"jesusmail-core/api/relay/v1"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/public"
+	relay_service "jesusmail-core/internal/service/relay"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gcache"

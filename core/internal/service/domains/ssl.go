@@ -1,15 +1,15 @@
 package domains
 
 import (
-	"billionmail-core/api/domains/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/acme"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
-	"billionmail-core/internal/service/rbac"
+	"jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/acme"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/internal/service/rbac"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -288,10 +288,10 @@ func ApplyConsoleCert(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	hostname := envMap["BILLIONMAIL_HOSTNAME"]
+	hostname := envMap["JESUSMAIL_HOSTNAME"]
 
 	if hostname == "" {
-		return gerror.New("BILLIONMAIL_HOSTNAME environment variable is not set")
+		return gerror.New("JESUSMAIL_HOSTNAME environment variable is not set")
 	}
 	//mailDomain := public.FormatMX(hostname)
 

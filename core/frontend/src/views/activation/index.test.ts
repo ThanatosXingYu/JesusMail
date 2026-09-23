@@ -1,6 +1,7 @@
 import { defineComponent, h, nextTick, type VNode } from 'vue'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { NTag } from 'naive-ui'
 import type { ActivationKey, ActivationList } from '@/api/modules/activation'
 
 const mocks = vi.hoisted(() => ({
@@ -100,6 +101,7 @@ const NDataTableStub = defineComponent({
 		data: { type: Array, default: () => [] },
 		checkedRowKeys: { type: Array, default: () => [] },
 		scrollX: Number,
+		flexHeight: Boolean,
 	},
 	emits: ['update:checked-row-keys'],
 	template: '<div data-test="activation-table" />',
@@ -215,6 +217,25 @@ describe('原生激活码管理', () => {
 		mocks.deleteActivationKeys.mockResolvedValue({ deleted: 1, skipped_used: 0 })
 		mocks.generateActivationKeys.mockResolvedValue({ created: 1 })
 		mocks.setActivationGroup.mockResolvedValue({ updated: 1 })
+	})
+
+	it('列表固定在页面内滚动，未使用为绿、已使用为红', async () => {
+		const wrapper = await mountPage()
+		const table = wrapper.getComponent(NDataTableStub)
+		expect(wrapper.classes()).toContain('activation-admin')
+		expect(wrapper.find('.activation-list-card').exists()).toBe(true)
+		expect(wrapper.find('.pager').exists()).toBe(true)
+		expect(table.props('flexHeight')).toBe(true)
+		expect(table.classes()).toContain('activation-table')
+
+		const statusColumn = getColumn(wrapper, 'status')
+		const unused = statusColumn?.render?.(rows[0], 0) as VNode
+		const used = statusColumn?.render?.(rows[1], 1) as VNode
+		expect(unused.type).toBe(NTag)
+		expect(unused.props?.type).toBe('success')
+		expect(unused.props?.color).toMatchObject({ textColor: '#166534', color: '#dcfce7' })
+		expect(used.props?.type).toBe('error')
+		expect(used.props?.color).toMatchObject({ textColor: '#991b1b', color: '#fee2e2' })
 	})
 
 	it('保留旧管理页的生成、筛选、批量操作、导出、统计和操作列', async () => {

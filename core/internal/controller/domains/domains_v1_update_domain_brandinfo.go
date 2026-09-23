@@ -1,15 +1,15 @@
 package domains
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/util/gconv"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/domains/v1"
+	"jesusmail-core/api/domains/v1"
 )
 
 func (c *ControllerV1) UpdateDomainBrandinfo(ctx context.Context, req *v1.UpdateDomainBrandinfoReq) (res *v1.UpdateDomainBrandinfoRes, err error) {

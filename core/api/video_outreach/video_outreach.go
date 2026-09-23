@@ -3,7 +3,7 @@ package video_outreach
 import (
 	"context"
 
-	v1 "billionmail-core/api/video_outreach/v1"
+	v1 "jesusmail-core/api/video_outreach/v1"
 )
 
 type IVideoOutreachV1 interface {

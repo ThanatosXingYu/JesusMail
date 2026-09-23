@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

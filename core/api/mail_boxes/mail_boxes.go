@@ -7,7 +7,7 @@ package mail_boxes
 import (
 	"context"
 
-	"billionmail-core/api/mail_boxes/v1"
+	"jesusmail-core/api/mail_boxes/v1"
 )
 
 type IMailBoxesV1 interface {

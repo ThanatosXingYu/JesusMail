@@ -1,8 +1,8 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/testutil"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/testutil"
 	"context"
 	"fmt"
 	"sync"

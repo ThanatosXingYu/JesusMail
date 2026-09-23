@@ -10,10 +10,10 @@
 
 面向学生/用户的自助邮箱系统：
 
-- **登录页**：`https://mail.qlu.edu.kg/roundcube/`（Roundcube 网页邮箱，已去 BillionMail 品牌化，改名 QLU Mail）
+- **登录页**：`https://mail.qlu.edu.kg/roundcube/`（Roundcube 网页邮箱，已去 JesusMail 品牌化，改名 QLU Mail）
 - **激活页**：`https://mail.qlu.edu.kg/activate.php`（用户凭一次性激活码自助注册邮箱，自定义前缀 + 自设密码）
-- **激活码管理页**：内嵌在 BillionMail 管理后台（`https://<SERVER_IP>:41443/`）左侧菜单"激活码管理"，负责激活码的生成/分组/删除/导出
-- **管理后台**：BillionMail 原生后台（域名/邮箱/群发管理），8080 端口已关闭，仅保留 41443（HTTPS）
+- **激活码管理页**：内嵌在 JesusMail 管理后台（`https://<SERVER_IP>:41443/`）左侧菜单"激活码管理"，负责激活码的生成/分组/删除/导出
+- **管理后台**：JesusMail 原生后台（域名/邮箱/群发管理），8080 端口已关闭，仅保留 41443（HTTPS）
 
 ## 二、请求路由（关键！改动前先看这个）
 
@@ -23,7 +23,7 @@ Nginx 站点配置：`/www/server/panel/vhost/nginx/mail.qlu.edu.kg.conf`（自�
 |---|---|
 | `http://*.qlu.edu.kg/*` | 301 强制跳 HTTPS |
 | `https://mail.qlu.edu.kg/` | 301 → `/roundcube/`（登录页） |
-| `/roundcube/...` | 反向代理 → `https://127.0.0.1:41443`（BillionMail core 容器） |
+| `/roundcube/...` | 反向代理 → `https://127.0.0.1:41443`（JesusMail core 容器） |
 | `/activate.php`、`/keys_api.php`、`/assets/*` | 宿主机 PHP 8.2 / 静态文件（**不进 Docker**） |
 | `/activate_data/...` | 一律 404（数据目录禁止 HTTP 访问） |
 | `README.md` 等敏感文件 | 404（宝塔默认规则自带拦截，所以本文档公网下载不到） |
@@ -39,12 +39,12 @@ Nginx 站点配置：`/www/server/panel/vhost/nginx/mail.qlu.edu.kg.conf`（自�
 | `activate_data/keys.txt.migrated.bak` | 历史 TXT 密钥池归档（已全部迁入 MySQL，仅留档） |
 | `README.md` | 本文档 |
 
-### BillionMail Docker 目录 `/www/dk_project/dk_app/billionmail/billionmail_P4xa/`
+### JesusMail Docker 目录 `/www/dk_project/dk_app/jesusmail/jesusmail_P4xa/`
 | 文件 | 说明 |
 |---|---|
-| `docker-compose.yml` | **改动过三处**：① 删掉 core 服务的 8080 端口映射（只留 41443）；② 增加 `conf/custom-ui` 目录挂载 + `conf/custom-ui/index.html` 挂载为后台首页；③ webmail 服务增加 4 个**单文件只读挂载**（login.html / menu.html / logo.svg / favicon.ico，见下）。原始备份：`/root/billionmail-compose.bak.20260903174048.yml` |
-| `conf/webmail-skin/` | **持久化皮肤目录（关键）**：`templates/login.html`（激活入口）、`templates/includes/menu.html`（删关于按钮）、`images/logo.svg`、`images/favicon.ico`。以**单文件只读 bind mount** 挂进 webmail 容器，重启/重建都不被覆盖。改这些文件后 `docker compose restart webmail-billionmail` 生效 |
-| `.env` | 容器环境变量（PostgreSQL/Redis 密码等）。⚠️ `BILLIONMAIL_HOSTNAME=mail.maill.qlu.edu.kg` 有拼写错误（多一个 l），暂未改 |
+| `docker-compose.yml` | **改动过三处**：① 删掉 core 服务的 8080 端口映射（只留 41443）；② 增加 `conf/custom-ui` 目录挂载 + `conf/custom-ui/index.html` 挂载为后台首页；③ webmail 服务增加 4 个**单文件只读挂载**（login.html / menu.html / logo.svg / favicon.ico，见下）。原始备份：`/root/jesusmail-compose.bak.20260903174048.yml` |
+| `conf/webmail-skin/` | **持久化皮肤目录（关键）**：`templates/login.html`（激活入口）、`templates/includes/menu.html`（删关于按钮）、`images/logo.svg`、`images/favicon.ico`。以**单文件只读 bind mount** 挂进 webmail 容器，重启/重建都不被覆盖。改这些文件后 `docker compose restart webmail-jesusmail` 生效 |
+| `.env` | 容器环境变量（PostgreSQL/Redis 密码等）。⚠️ `JESUSMAIL_HOSTNAME=mail.maill.qlu.edu.kg` 有拼写错误（多一个 l），暂未改 |
 | `conf/webmail/custom.inc.php` | Roundcube 品牌/插件/改密配置（product_name=QLU Mail，display_product_info=0） |
 | `conf/webmail/extra.php` | 品牌持久化兜底（防 custom.inc.php 被后台重写还原） |
 | `conf/custom-ui/index.html` | 后台首页（原版 + 注入了一行 `<script src="/custom/inject.js?v=2">`） |
@@ -63,7 +63,7 @@ Nginx 站点配置：`/www/server/panel/vhost/nginx/mail.qlu.edu.kg.conf`（自�
 - `activation_logs`：激活流水（keycode, email, ip, created_at），强制删除激活码时自动清理孤儿流水
 - 当前状态（2026-09-04）：共 102 个码，未使用 101，已使用 1；其中"闲鱼"分组 99 个
 
-## 五、BillionMail 后台 API（激活页/管理页依赖的接口）
+## 五、JesusMail 后台 API（激活页/管理页依赖的接口）
 
 基地址 `https://127.0.0.1:41443/api`，鉴权 `Authorization: Bearer <JWT>`：
 
@@ -75,7 +75,7 @@ Nginx 站点配置：`/www/server/panel/vhost/nginx/mail.qlu.edu.kg.conf`（自�
 | `GET /api/mailbox/list?page=&page_size=&keyword=` | 列表/查重（keyword 精确到完整地址） |
 | `GET /api/settings/get_version` | 轻量接口，keys_api.php 用它验证 token 有效性 |
 
-**重要：激活页使用独立 API Token，不再用账密登录**。Token 存在 BillionMail 的 PostgreSQL 表 `billionmail.bm_options`（name=`API_TOKEN`），无过期时间（payload 无 exp）。代码通过环境变量 `BM_API_TOKEN` 读取。管理页（keys.html）仍从后台 localStorage 取用户登录态 JWT，keys_api.php 用它做鉴权。**后台管理密码已改为 `<REDACTED>` / `<REDACTED>`（通过私密配置管理）**，与 API Token 解耦。
+**重要：激活页使用独立 API Token，不再用账密登录**。Token 存在 JesusMail 的 PostgreSQL 表 `jesusmail.bm_options`（name=`API_TOKEN`），无过期时间（payload 无 exp）。代码通过环境变量 `BM_API_TOKEN` 读取。管理页（keys.html）仍从后台 localStorage 取用户登录态 JWT，keys_api.php 用它做鉴权。**后台管理密码已改为 `<REDACTED>` / `<REDACTED>`（通过私密配置管理）**，与 API Token 解耦。
 
 ## 六、业务规则（激活页现行规则）
 
@@ -91,20 +91,20 @@ Nginx 站点配置：`/www/server/panel/vhost/nginx/mail.qlu.edu.kg.conf`（自�
 
 ## 八、运维注意事项（重要）
 
-1. **宝塔 Docker 应用商店升级/重装 BillionMail 会重写 compose**：8080 端口映射会回来、custom-ui 挂载和 webmail-skin 单文件挂载都会丢。恢复：对照 `/root/billionmail-compose.bak.*` 把挂载加回去、删 8080 行，然后 `cd /www/dk_project/dk_app/billionmail/billionmail_P4xa && docker compose up -d` 重建全部容器
+1. **宝塔 Docker 应用商店升级/重装 JesusMail 会重写 compose**：8080 端口映射会回来、custom-ui 挂载和 webmail-skin 单文件挂载都会丢。恢复：对照 `/root/jesusmail-compose.bak.*` 把挂载加回去、删 8080 行，然后 `cd /www/dk_project/dk_app/jesusmail/jesusmail_P4xa && docker compose up -d` 重建全部容器
 2. **改 inject.js / keys.html 立即生效**（目录挂载）；**改 custom-ui/index.html 需强制重建 core 容器**才生效（单文件挂载绑 inode，sed -i 换 inode 后容器内不变）。改 inject.js 后记得把 index.html 里的 `?v=2` 版本号 +1 防浏览器缓存
-3. **改 Roundcube 皮肤（conf/webmail-skin 下 4 个文件）后**：`docker compose restart webmail-billionmail` 即可，**不用清模板缓存**（这些是源模板不是缓存）；若改了 Roundcube 编辑器内编的配置才需要清 core 容器缓存 `docker exec billionmail_p4xa-billionmail_P4xa-1 sh -c 'rm -rf /tmp/roundcube-temp/*'`
+3. **改 Roundcube 皮肤（conf/webmail-skin 下 4 个文件）后**：`docker compose restart webmail-jesusmail` 即可，**不用清模板缓存**（这些是源模板不是缓存）；若改了 Roundcube 编辑器内编的配置才需要清 core 容器缓存 `docker exec jesusmail_p4xa-jesusmail_P4xa-1 sh -c 'rm -rf /tmp/roundcube-temp/*'`
 4. **后台账号密码已移至私密配置（.env 的 ADMIN_*）**；激活页开户走的是独立 API Token（见第五节），与后台密码解耦，改后台密码不影响激活页
-5. **管理页依赖后台 DOM 类名**（.n-menu / .n-menu-item / .n-layout-sider / .n-layout-header）。BillionMail 大版本升级若改前端结构，菜单注入可能失效——届时直接访问 `/custom/keys.html` 仍可用，再适配 inject.js 即可
+5. **管理页依赖后台 DOM 类名**（.n-menu / .n-menu-item / .n-layout-sider / .n-layout-header）。JesusMail 大版本升级若改前端结构，菜单注入可能失效——届时直接访问 `/custom/keys.html` 仍可用，再适配 inject.js 即可
 6. **登录页模板里的链接必须写完整域名**（见第三节），Roundcube 会给 `/` 开头的相对链接自动加皮肤前缀
-7. `.env` 里 `BILLIONMAIL_HOSTNAME=mail.maill.qlu.edu.kg` 拼写错误未修（当前 SMTP 横幅显示正常，但建议改回 mail.qlu.edu.kg 后重建 postfix）
+7. `.env` 里 `JESUSMAIL_HOSTNAME=mail.maill.qlu.edu.kg` 拼写错误未修（当前 SMTP 横幅显示正常，但建议改回 mail.qlu.edu.kg 后重建 postfix）
 8. 服务器 3.8G 内存无 Swap，Docker 邮件栈空载约 375MB，高峰期偏紧，建议加 2G Swap
 9. 激活码 CSV 导出文件含明文激活码（如 `/root/闲鱼分组激活码_20260903.csv`），外发注意保管
 10. **网站 PHP 文件属主必须是 www:www（权限 640 即可）**，否则 PHP-FPM（以 www 用户运行）读不到文件会 403 "Access denied"；README.md、activate_data 归 root（600/700），不让 PHP 进程读写，仅 root 可读
 
 ## 九、已完成改动时间线
 
-- **09-03 下午**：绑定域名 mail.qlu.edu.kg（Nginx 反代 /roundcube → 41443）；Roundcube 去 BillionMail 品牌（QLU Mail + 新 logo/favicon）；登录页加激活入口；激活页 v1（TXT 存储，一码一次）；抓取并实测 BillionMail API
+- **09-03 下午**：绑定域名 mail.qlu.edu.kg（Nginx 反代 /roundcube → 41443）；Roundcube 去 JesusMail 品牌（QLU Mail + 新 logo/favicon）；登录页加激活入口；激活页 v1（TXT 存储，一码一次）；抓取并实测 JesusMail API
 - **09-03 傍晚**：关闭 8080 端口映射；重建容器后 SMTP 横幅恢复正常（mail.qlu.edu.kg）
 - **09-03 晚**：左侧菜单删"关于"；激活码迁 MySQL（mail 库两张表，TXT 归档）；后台内嵌激活码管理页 v1（生成/删除/关联邮箱）
 - **09-04 凌晨**：管理页改内嵌模式（不弹新页）；排序改 ID 升序；分组功能（生成带组/筛选/批量分组）；修复登录页激活链接 404（Roundcube 模板引擎路径改写坑）

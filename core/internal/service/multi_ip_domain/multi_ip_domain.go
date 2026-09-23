@@ -1,9 +1,9 @@
 package multi_ip_domain
 
 import (
-	v1 "billionmail-core/api/domains/v1"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/domains/v1"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -64,7 +64,7 @@ func (s *MultiIPDomainService) generateNetworkConfig(ctx context.Context, tx gdb
 	smtpServerName := fmt.Sprintf("smtp_bind_ip_%s_%s", strings.ReplaceAll(outboundIP, ".", "_"), timestamp)
 
 	//  docker-compose.yml:  network_name  	 aliases
-	networkName := "billionmail-net-" + timestamp
+	networkName := "jesusmail-net-" + timestamp
 	aliasesStr := "aliases-" + strings.ReplaceAll(domain, ".", "-")
 
 	// Query used subnets
@@ -413,7 +413,7 @@ func addNewRules(ctx context.Context, dk *docker.DockerAPI, configs []SubnetIP) 
 
 		// Construct iptables SNAT rule
 		cmdStr := fmt.Sprintf(
-			`chroot /host_root /sbin/iptables -t nat -I POSTROUTING -s %s -j SNAT --to-source %s -m comment --comment "billionmail-outbound"`,
+			`chroot /host_root /sbin/iptables -t nat -I POSTROUTING -s %s -j SNAT --to-source %s -m comment --comment "jesusmail-outbound"`,
 			subnet, outboundIP,
 		)
 
@@ -432,7 +432,7 @@ func addNewRules(ctx context.Context, dk *docker.DockerAPI, configs []SubnetIP) 
 	return nil
 }
 
-// Delete all SNAT rules with the "billionmail-outbound" comment
+// Delete all SNAT rules with the "jesusmail-outbound" comment
 func deleteOldRules(ctx context.Context, dk *docker.DockerAPI) error {
 
 	// List rules in POSTROUTING chain with line numbers
@@ -448,7 +448,7 @@ func deleteOldRules(ctx context.Context, dk *docker.DockerAPI) error {
 
 	var ruleNumbers []int
 	lines := strings.Split(result.Output, "\n")
-	comment := "billionmail-outbound"
+	comment := "jesusmail-outbound"
 
 	// Scan all lines to find matching rules
 	for _, line := range lines {

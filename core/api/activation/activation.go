@@ -1,7 +1,7 @@
 package activation
 
 import (
-	"billionmail-core/api/activation/v1"
+	"jesusmail-core/api/activation/v1"
 	"context"
 )
 

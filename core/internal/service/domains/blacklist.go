@@ -1,9 +1,9 @@
 package domains
 
 import (
-	"billionmail-core/internal/model"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/model"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"encoding/json"
 	"fmt"

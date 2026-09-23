@@ -1,17 +1,17 @@
 #!/bin/bash
 
-if [ -f "/opt/billionmail/.env" ]; then
-    if ! grep -q "ADMIN_USERNAME" /opt/billionmail/.env; then
+if [ -f "/opt/jesusmail/.env" ]; then
+    if ! grep -q "ADMIN_USERNAME" /opt/jesusmail/.env; then
         ADMIN_USERNAME=$(LC_ALL=C </dev/urandom tr -dc A-Za-z0-9 2> /dev/null | head -c 8)
 
         # Default administrator account password 
-        echo "ADMIN_USERNAME=${ADMIN_USERNAME}" >> /opt/billionmail/.env
+        echo "ADMIN_USERNAME=${ADMIN_USERNAME}" >> /opt/jesusmail/.env
     fi
 
-    if ! grep -q "ADMIN_PASSWORD" /opt/billionmail/.env; then
+    if ! grep -q "ADMIN_PASSWORD" /opt/jesusmail/.env; then
         ADMIN_PASSWORD=$(LC_ALL=C </dev/urandom tr -dc A-Za-z0-9 2> /dev/null | head -c 8)
         # Default administrator account password 
-        echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> /opt/billionmail/.env
+        echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> /opt/jesusmail/.env
     fi
 fi
 
@@ -35,7 +35,7 @@ fi
 # Enable fail2ban Access restrictions, specify that the IP exceeds the access limit
 if [[ ${FAIL2BAN_INIT} == "y" ]]; then
     ## Copy fail2ban Jail
-    cp -rf /opt/billionmail/conf/core/fail2ban_init/jail.d/*-accesslimit.conf /etc/fail2ban/jail.d/
+    cp -rf /opt/jesusmail/conf/core/fail2ban_init/jail.d/*-accesslimit.conf /etc/fail2ban/jail.d/
 
     if ! grep -q "restart_fail2ban.sh" /var/spool/cron/crontabs/root; then
         chmod +x /restart_fail2ban.sh
@@ -53,28 +53,28 @@ fi
 
 ## Copy fail2ban Filter
 # if [ ! -f "/etc/fail2ban/filter.d/core-limit-filter.conf" ]; then
-#     cp -f /opt/billionmail/conf/core/fail2ban_init/filter.d/core-limit-filter.conf /etc/fail2ban/filter.d/core-limit-filter.conf
+#     cp -f /opt/jesusmail/conf/core/fail2ban_init/filter.d/core-limit-filter.conf /etc/fail2ban/filter.d/core-limit-filter.conf
 # fi
-cp -rf /opt/billionmail/conf/core/fail2ban_init/filter.d/*.conf /etc/fail2ban/filter.d/
+cp -rf /opt/jesusmail/conf/core/fail2ban_init/filter.d/*.conf /etc/fail2ban/filter.d/
 
-if [ ! -d "/opt/billionmail/conf/askai/" ]; then
-    mkdir -p /opt/billionmail/conf/askai
+if [ ! -d "/opt/jesusmail/conf/askai/" ]; then
+    mkdir -p /opt/jesusmail/conf/askai
 fi
 
-if [ ! -d "/opt/billionmail/core/template/" ]; then
-    mkdir /opt/billionmail/core/template
+if [ ! -d "/opt/jesusmail/core/template/" ]; then
+    mkdir /opt/jesusmail/core/template
 fi
 
-if [ ! -d "/opt/billionmail/core/logs/" ]; then
-    mkdir /opt/billionmail/core/logs
+if [ ! -d "/opt/jesusmail/core/logs/" ]; then
+    mkdir /opt/jesusmail/core/logs
 fi
 
-if [ ! -f "/opt/billionmail/core/logs/access-$(date -u +"%Y%m%d").log" ]; then
-    touch /opt/billionmail/core/logs/access-$(date -u +"%Y%m%d").log
+if [ ! -f "/opt/jesusmail/core/logs/access-$(date -u +"%Y%m%d").log" ]; then
+    touch /opt/jesusmail/core/logs/access-$(date -u +"%Y%m%d").log
 fi
 
-cd /opt/billionmail/core/
-chmod +x billionmail
+cd /opt/jesusmail/core/
+chmod +x jesusmail
 
 
 exec "$@"

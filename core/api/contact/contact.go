@@ -7,7 +7,7 @@ package contact
 import (
 	"context"
 
-	"billionmail-core/api/contact/v1"
+	"jesusmail-core/api/contact/v1"
 )
 
 type IContactV1 interface {

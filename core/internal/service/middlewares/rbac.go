@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"billionmail-core/internal/model"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/model"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"strings"
@@ -12,7 +12,7 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"billionmail-core/internal/service/rbac"
+	"jesusmail-core/internal/service/rbac"
 )
 
 // PathToRouteInfo converts path to module, action, and resource

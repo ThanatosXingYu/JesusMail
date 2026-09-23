@@ -1,9 +1,9 @@
 package batch_mail
 
 import (
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 )

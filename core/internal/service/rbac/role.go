@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"billionmail-core/internal/model"
+	"jesusmail-core/internal/model"
 	"context"
 	"time"
 

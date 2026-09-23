@@ -1,8 +1,8 @@
 package dockerapi
 
 import (
-	"billionmail-core/api/dockerapi/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/dockerapi/v1"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 )

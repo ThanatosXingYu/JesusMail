@@ -1,12 +1,12 @@
 package settings
 
 import (
-	"billionmail-core/internal/consts"
+	"jesusmail-core/internal/consts"
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/settings/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/service/public"
 	"fmt"
 )
 

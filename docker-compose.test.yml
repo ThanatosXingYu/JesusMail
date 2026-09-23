@@ -6,7 +6,7 @@ services:
       - "1025:1025"
       - "8025:8025"
     networks:
-      billionmail-network:
+      jesusmail-network:
         aliases:
           - mailpit
 
@@ -18,11 +18,11 @@ services:
       - ./e2e/mocks/wiremock:/home/wiremock
     command: ["--verbose"]
     networks:
-      billionmail-network:
+      jesusmail-network:
         aliases:
           - mockserver
 
-  postfix-billionmail:
+  postfix-jesusmail:
     volumes:
       - postfix-spool:/var/spool/postfix
       - ./conf/postfix/main.test.cf:/etc/postfix/main.cf:ro

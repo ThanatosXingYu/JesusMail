@@ -1,6 +1,6 @@
 package activation
 
-import api "billionmail-core/api/activation"
+import api "jesusmail-core/api/activation"
 
 type ControllerV1 struct{}
 

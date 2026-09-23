@@ -1,5 +1,5 @@
 services:
-    pgsql-billionmail:
+    pgsql-jesusmail:
       image: postgres:17.4-alpine
       hostname: pgsql
       volumes:
@@ -16,7 +16,7 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    redis-billionmail:
+    redis-jesusmail:
       image: redis:7.4.2-alpine
       hostname: redis
       entrypoint: ["/bin/sh","/redis-conf.sh"]
@@ -34,11 +34,11 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    rspamd-billionmail:
-      image: billionmail/rspamd:1.2
+    rspamd-jesusmail:
+      image: jesusmail/rspamd:1.2
       hostname: rspamd
       depends_on:
-        - redis-billionmail
+        - redis-jesusmail
       environment:
         - TZ=${TZ}
         - REDISPASS=${REDISPASS}
@@ -52,12 +52,12 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    dovecot-billionmail:
-      image: billionmail/dovecot:1.5
+    dovecot-jesusmail:
+      image: jesusmail/dovecot:1.5
       hostname: dovecot
       depends_on:
-        - pgsql-billionmail
-        - redis-billionmail
+        - pgsql-jesusmail
+        - redis-jesusmail
       cap_add:
         - NET_BIND_SERVICE
       volumes:
@@ -75,7 +75,7 @@ services:
         - DBUSER=${DBUSER}
         - DBPASS=${DBPASS}
         - TZ=${TZ}
-        - BILLIONMAIL_HOSTNAME=${BILLIONMAIL_HOSTNAME}
+        - JESUSMAIL_HOSTNAME=${JESUSMAIL_HOSTNAME}
         - REDISPASS=${REDISPASS}
       ports:
         - "${IMAP_PORT:-143}:143"
@@ -91,11 +91,11 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    postfix-billionmail:
-      image: billionmail/postfix:1.6
+    postfix-jesusmail:
+      image: jesusmail/postfix:1.6
       hostname: postfix
       depends_on:
-        pgsql-billionmail:
+        pgsql-jesusmail:
           condition: service_started
       volumes:
         - ${APP_PATH}/conf/postfix/main.cf:/etc/postfix/main.cf
@@ -114,7 +114,7 @@ services:
         - DBUSER=${DBUSER}
         - DBPASS=${DBPASS}
         - REDISPASS=${REDISPASS}
-        - BILLIONMAIL_HOSTNAME=${BILLIONMAIL_HOSTNAME}
+        - JESUSMAIL_HOSTNAME=${JESUSMAIL_HOSTNAME}
       cap_add:
         - NET_BIND_SERVICE
       ports:
@@ -125,13 +125,13 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    webmail-billionmail:
+    webmail-jesusmail:
       image: roundcube/roundcubemail:1.6.10-fpm-alpine
       hostname: roundcube
       depends_on:
-        - pgsql-billionmail
-        - dovecot-billionmail
-        - postfix-billionmail
+        - pgsql-jesusmail
+        - dovecot-jesusmail
+        - postfix-jesusmail
       volumes:
         - ${APP_PATH}/data/webmail-data:/var/www/html
         - ${APP_PATH}/conf/webmail-skin/templates/login.html:/var/www/html/skins/elastic/templates/login.html:ro
@@ -158,28 +158,28 @@ services:
       labels:
         createdBy: "bt_apps"
 
-    billionmail_P4xa:
+    jesusmail_P4xa:
       image: jessusmail/core:4.9.4-native-activation-20260914T172518Z
       hostname: core-manage
       depends_on:
-        - pgsql-billionmail
+        - pgsql-jesusmail
       volumes:
         - ${APP_PATH}/data/ssl:/etc/ssl/mail
         - ${APP_PATH}/ssl-self-signed:/etc/ssl/ssl-self-signed
         - ${APP_PATH}/conf/core/fail2ban/filter.d:/etc/fail2ban/filter.d
         - ${APP_PATH}/conf/core/fail2ban/jail.d:/etc/fail2ban/jail.d
         - ${APP_PATH}/data/logs/fail2ban:/var/log/fail2ban
-        - ${APP_PATH}/data/postgresql-socket:/opt/billionmail/postgresql-socket
-        - ${APP_PATH}/data/php-sock:/opt/billionmail/php-sock
-        - ${APP_PATH}/data/rspamd-data:/opt/billionmail/rspamd-data
-        - ${APP_PATH}/data/webmail-data:/opt/billionmail/webmail-data
-        - ${APP_PATH}/conf/webmail-skin/images/logo.svg:/opt/billionmail/webmail-data/skins/elastic/images/logo.svg:ro
-        - ${APP_PATH}/conf/webmail-skin/images/favicon.ico:/opt/billionmail/webmail-data/skins/elastic/images/favicon.ico:ro
-        - ${APP_PATH}/.env:/opt/billionmail/.env
-        - ${APP_PATH}/conf:/opt/billionmail/conf
-        - ${APP_PATH}/data/logs:/opt/billionmail/logs
-        - ${APP_PATH}/data/logs/core:/opt/billionmail/core/logs
-        - ${APP_PATH}/data/core-data:/opt/billionmail/core/data
+        - ${APP_PATH}/data/postgresql-socket:/opt/jesusmail/postgresql-socket
+        - ${APP_PATH}/data/php-sock:/opt/jesusmail/php-sock
+        - ${APP_PATH}/data/rspamd-data:/opt/jesusmail/rspamd-data
+        - ${APP_PATH}/data/webmail-data:/opt/jesusmail/webmail-data
+        - ${APP_PATH}/conf/webmail-skin/images/logo.svg:/opt/jesusmail/webmail-data/skins/elastic/images/logo.svg:ro
+        - ${APP_PATH}/conf/webmail-skin/images/favicon.ico:/opt/jesusmail/webmail-data/skins/elastic/images/favicon.ico:ro
+        - ${APP_PATH}/.env:/opt/jesusmail/.env
+        - ${APP_PATH}/conf:/opt/jesusmail/conf
+        - ${APP_PATH}/data/logs:/opt/jesusmail/logs
+        - ${APP_PATH}/data/logs/core:/opt/jesusmail/core/logs
+        - ${APP_PATH}/data/core-data:/opt/jesusmail/core/data
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
         - TZ=${TZ}

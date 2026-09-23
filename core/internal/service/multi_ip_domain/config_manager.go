@@ -1,11 +1,12 @@
 package multi_ip_domain
 
 import (
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"io/ioutil"
+	"jesusmail-core/internal/consts"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"net"
 	"os"
 	"path/filepath"
@@ -28,8 +29,8 @@ var (
 )
 
 const (
-	masterCfBlockMarkerStart = "# BEGIN BILLIONMAIL multi-ip services"
-	masterCfBlockMarkerEnd   = "# END BILLIONMAIL multi-ip services"
+	masterCfBlockMarkerStart = "# BEGIN JESUSMAIL multi-ip services"
+	masterCfBlockMarkerEnd   = "# END JESUSMAIL multi-ip services"
 )
 
 // ConfigManager
@@ -158,7 +159,7 @@ func (m *ConfigManager) updateDockerCompose(ctx context.Context, configs []map[s
 	outputPath := filepath.Join(public.HostWorkDir, "docker-compose_addnetwork.yml")
 
 	// 设置临时文件路径
-	// 容器内路径：/opt/billionmail/core/data (通过 public.AbsPath 获取)
+	// 容器内路径：/opt/jesusmail/core/data (通过 public.AbsPath 获取)
 	// 宿主机路径：./core-data (相对于 docker-compose.yml 所在目录)
 	containerDataPath := public.AbsPath("../core/data/")
 	hostDataPath := filepath.Join(public.HostWorkDir, "core-data") // 宿主机的实际映射路径
@@ -252,7 +253,7 @@ func (m *ConfigManager) modifyDockerComposeText(ctx context.Context, originalCon
 		return "", err
 	}
 
-	// === 2. Modify networks configuration of the postfix-billionmail service ===
+	// === 2. Modify networks configuration of the postfix-jesusmail service ===
 	finalContent, err := m.modifyPostfixNetworksText(modifiedContent, configs)
 	if err != nil {
 		return "", err
@@ -292,20 +293,20 @@ func (m *ConfigManager) addCustomNetworksText(lines []string, configs []map[stri
 		// Copy content before the networks section
 		result = append(result, lines[:networksStartIdx+1]...)
 
-		// Copy existing billionmail-network configuration and detect indentation style
-		billionmailNetworkLines := []string{}
-		inBillionmailNetwork := false
+		// Copy existing jesusmail-network configuration and detect indentation style
+		jesusmailNetworkLines := []string{}
+		inJesusMailNetwork := false
 
 		for i := networksStartIdx + 1; i < len(lines) && (networksEndIdx == -1 || i < networksEndIdx); i++ {
 			line := lines[i]
-			if strings.Contains(line, "billionmail-network:") {
-				inBillionmailNetwork = true
+			if strings.Contains(line, consts.DEFAULT_NETWORK_NAME+":") {
+				inJesusMailNetwork = true
 				// Detect indentation level of network name
 				baseIndent = line[:len(line)-len(strings.TrimLeft(line, " \t"))]
-				billionmailNetworkLines = append(billionmailNetworkLines, line)
-			} else if inBillionmailNetwork {
+				jesusmailNetworkLines = append(jesusmailNetworkLines, line)
+			} else if inJesusMailNetwork {
 				if strings.TrimSpace(line) == "" {
-					billionmailNetworkLines = append(billionmailNetworkLines, line)
+					jesusmailNetworkLines = append(jesusmailNetworkLines, line)
 				} else {
 					// Detect indentation of configuration items (e.g., driver: bridge)
 					lineIndent := line[:len(line)-len(strings.TrimLeft(line, " \t"))]
@@ -313,13 +314,13 @@ func (m *ConfigManager) addCustomNetworksText(lines []string, configs []map[stri
 						if configIndent == "    " { // Only update if using default value
 							configIndent = lineIndent
 						}
-						billionmailNetworkLines = append(billionmailNetworkLines, line)
+						jesusmailNetworkLines = append(jesusmailNetworkLines, line)
 					} else if len(lineIndent) == len(baseIndent) && strings.TrimSpace(line) != "" {
 						// Encountered another network definition at the same level, stop
 						break
 					} else if len(lineIndent) > len(baseIndent) {
-						// Continue collecting billionmail-network configurations
-						billionmailNetworkLines = append(billionmailNetworkLines, line)
+						// Continue collecting jesusmail-network configurations
+						jesusmailNetworkLines = append(jesusmailNetworkLines, line)
 					} else {
 						// Encountered lower-level configuration, stop
 						break
@@ -328,7 +329,7 @@ func (m *ConfigManager) addCustomNetworksText(lines []string, configs []map[stri
 			}
 		}
 
-		result = append(result, billionmailNetworkLines...)
+		result = append(result, jesusmailNetworkLines...)
 
 		// Ensure correct indentation style (use default if not detected)
 		if baseIndent == "" {
@@ -387,17 +388,17 @@ func (m *ConfigManager) addCustomNetworksText(lines []string, configs []map[stri
 	return result, nil
 }
 
-// modifyPostfixNetworksText 修改postfix-billionmail服务的networks配置
+// modifyPostfixNetworksText 修改postfix-jesusmail服务的networks配置
 func (m *ConfigManager) modifyPostfixNetworksText(lines []string, configs []map[string]interface{}) ([]string, error) {
 	result := make([]string, 0, len(lines)+20)
 
-	// Find the postfix-billionmail service section
+	// Find the postfix-jesusmail service section
 	postfixStartIdx := -1
 	postfixNetworksStartIdx := -1
 	postfixNetworksEndIdx := -1
 
 	for i, line := range lines {
-		if strings.Contains(line, "postfix-billionmail:") {
+		if strings.Contains(line, consts.SERVICES.Postfix+":") {
 			postfixStartIdx = i
 		} else if postfixStartIdx != -1 && strings.Contains(line, "networks:") {
 			postfixNetworksStartIdx = i
@@ -409,7 +410,7 @@ func (m *ConfigManager) modifyPostfixNetworksText(lines []string, configs []map[
 	}
 
 	if postfixStartIdx == -1 {
-		return lines, fmt.Errorf("postfix-billionmail service not found")
+		return lines, fmt.Errorf("%s service not found", consts.SERVICES.Postfix)
 	}
 
 	// Copy content up to the postfix networks section
@@ -417,11 +418,11 @@ func (m *ConfigManager) modifyPostfixNetworksText(lines []string, configs []map[
 		result = append(result, lines[:postfixNetworksStartIdx+1]...)
 	} else {
 		// If there is no networks configuration, it needs to be added
-		return lines, fmt.Errorf("postfix-billionmail networks section not found")
+		return lines, fmt.Errorf("%s networks section not found", consts.SERVICES.Postfix)
 	}
 
-	// Add default billionmail-network configuration with fixed IP
-	result = append(result, "        billionmail-network:")
+	// Add default jesusmail-network configuration with fixed IP
+	result = append(result, "        "+consts.DEFAULT_NETWORK_NAME+":")
 	result = append(result, "          aliases:")
 	result = append(result, "            - postfix")
 	result = append(result, "          ipv4_address: 172.66.1.100")
@@ -471,9 +472,9 @@ func (m *ConfigManager) rebuildPostfixServiceNetworks(config map[string]interfac
 		return fmt.Errorf("missing 'services' in config")
 	}
 
-	postfix, ok := services["postfix-billionmail"].(map[string]interface{})
+	postfix, ok := services[consts.SERVICES.Postfix].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("postfix-billionmail service not found")
+		return fmt.Errorf("%s service not found", consts.SERVICES.Postfix)
 	}
 
 	// Get current networks (preserve original)
@@ -482,9 +483,9 @@ func (m *ConfigManager) rebuildPostfixServiceNetworks(config map[string]interfac
 		networks = make(map[string]interface{})
 	}
 
-	// === 1. Remove all custom networks (except default billionmail-network) ===
+	// === 1. Remove all custom networks (except default jesusmail-network) ===
 	for name := range networks {
-		if name != "billionmail-network" {
+		if name != consts.DEFAULT_NETWORK_NAME {
 			delete(networks, name)
 			g.Log().Debugf(context.Background(), "Removed old custom network: %s", name)
 		}
@@ -533,18 +534,18 @@ func (m *ConfigManager) rebuildTopLevelNetworks(config map[string]interface{}, c
 	}
 
 	// Keep default network
-	defaultNet, hasDefault := networks["billionmail-network"]
+	defaultNet, hasDefault := networks[consts.DEFAULT_NETWORK_NAME]
 
 	// Clear custom networks
 	for name := range networks {
-		if name != "billionmail-network" {
+		if name != consts.DEFAULT_NETWORK_NAME {
 			delete(networks, name)
 		}
 	}
 
 	// Re-add default network
 	if hasDefault {
-		networks["billionmail-network"] = defaultNet
+		networks[consts.DEFAULT_NETWORK_NAME] = defaultNet
 	}
 
 	// Add networks defined in configs
@@ -611,14 +612,14 @@ func (m *ConfigManager) rebuildPostfixServiceNetworks1(dockerConfig map[string]i
 	if !ok {
 		return fmt.Errorf("missing 'services' section in docker-compose.yml")
 	}
-	postfixService, ok := services["postfix-billionmail"].(map[string]interface{})
+	postfixService, ok := services[consts.SERVICES.Postfix].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("Postfix service 'postfix-billionmail' configuration does not exist")
+		return fmt.Errorf("Postfix service %q configuration does not exist", consts.SERVICES.Postfix)
 	}
 
 	// Create a new network mapping, starting with the default network
 	newNetworks := map[string]interface{}{
-		"billionmail-network": map[string]interface{}{
+		consts.DEFAULT_NETWORK_NAME: map[string]interface{}{
 			"aliases": []string{"postfix"},
 		},
 	}

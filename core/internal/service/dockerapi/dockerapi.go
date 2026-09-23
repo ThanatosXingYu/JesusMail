@@ -1,8 +1,8 @@
 package docker
 
 import (
-	v1 "billionmail-core/api/dockerapi/v1"
-	"billionmail-core/internal/consts"
+	v1 "jesusmail-core/api/dockerapi/v1"
+	"jesusmail-core/internal/consts"
 	"bytes"
 	"context"
 	"encoding/json"

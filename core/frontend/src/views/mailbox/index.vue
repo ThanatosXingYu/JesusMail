@@ -37,11 +37,18 @@
 				</n-flex>
 			</template>
 			<template #table>
-				<n-data-table class="mailbox-table" v-bind="tableProps" :columns="columns" :scroll-x="1770">
-					<template #empty>
-						<bt-table-help> </bt-table-help>
-					</template>
-				</n-data-table>
+				<div class="mailbox-table-viewport">
+					<n-data-table
+						class="mailbox-table"
+						v-bind="tableProps"
+						:columns="columns"
+						:scroll-x="1710"
+						flex-height>
+						<template #empty>
+							<bt-table-help> </bt-table-help>
+						</template>
+					</n-data-table>
+				</div>
 			</template>
 			<template #pageLeft>
 				<bt-table-batch v-bind="batchProps" :options="batchOptions" @select="handleBatchSelect">
@@ -271,10 +278,10 @@ const columns = ref<DataTableColumns<MailBox>>([
 		title: t('common.columns.actions'),
 		key: 'actions',
 		align: 'right',
-		width: 290,
+		width: 230,
 		fixed: 'right',
 		render: row => (
-			<NFlex class="mailbox-row-actions" inline={true} justify="end">
+			<NFlex class="mailbox-row-actions" inline={true} justify="end" size={8}>
 				<NButton
 					class="shrink-0"
 					text
@@ -386,6 +393,37 @@ const handleBatchDelete = (keys: string[]) => {
 </script>
 
 <style scoped>
+.mailbox-page {
+	box-sizing: border-box;
+	height: calc(100dvh - 48px);
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.mailbox-table-layout {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.mailbox-table-viewport {
+	flex: 1;
+	min-height: 0;
+	min-width: 0;
+}
+
+.mailbox-table {
+	height: 100%;
+}
+
+.mailbox-table-layout :deep(.table-layout-toolbar),
+.mailbox-table-layout :deep(.table-layout-pager) {
+	flex: none;
+}
+
 .mailbox-tool-group {
 	max-width: 100%;
 	align-items: center;

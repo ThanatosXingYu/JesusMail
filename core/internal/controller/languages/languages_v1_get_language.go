@@ -1,11 +1,11 @@
 package languages
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/languages/v1"
+	"jesusmail-core/api/languages/v1"
 )
 
 func (c *ControllerV1) GetLanguage(ctx context.Context, req *v1.GetLanguageReq) (res *v1.GetLanguageRes, err error) {

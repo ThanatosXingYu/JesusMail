@@ -1,11 +1,11 @@
 package contact
 
 import (
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"context"
 
-	"billionmail-core/api/contact/v1"
+	"jesusmail-core/api/contact/v1"
 )
 
 func (c *ControllerV1) ListContactsGroups(ctx context.Context, req *v1.ListContactsGroupsReq) (res *v1.ListContactsGroupsRes, err error) {

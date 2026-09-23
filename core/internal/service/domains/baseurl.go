@@ -1,9 +1,9 @@
 package domains
 
 import (
-	v1 "billionmail-core/api/domains/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -133,7 +133,7 @@ func buildBaseURL(hostname string) (s string) {
 	}
 
 	if hostname == "" {
-		hostname, err = public.DockerEnv("BILLIONMAIL_HOSTNAME")
+		hostname, err = public.DockerEnv("JESUSMAIL_HOSTNAME")
 		if hostname != "" && hostname != "mail.example.com" {
 			s = scheme + "://" + hostname
 		} else {

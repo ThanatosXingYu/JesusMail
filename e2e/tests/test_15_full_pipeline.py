@@ -52,7 +52,7 @@ async def test_full_pipeline(bm_api, fb_api, mailpit, db, seed_data):
     # 4. Verify FrostByte tracking webhook works
     tracking_resp = await api.post(
         fb_api,
-        "/webhooks/billionmail/tracking",
+        "/webhooks/jesusmail/tracking",
         json={
             "event": "open",
             "message_id": "pipeline-test-msg",
@@ -65,7 +65,7 @@ async def test_full_pipeline(bm_api, fb_api, mailpit, db, seed_data):
     # 5. Verify reply webhook works
     reply_resp = await api.post(
         fb_api,
-        "/webhooks/billionmail/reply",
+        "/webhooks/jesusmail/reply",
         json={
             "message_id": "pipeline-test-msg",
             "from_email": "jane@e2etest.example.com",

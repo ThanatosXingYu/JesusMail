@@ -1,8 +1,8 @@
 package contact
 
 import (
-	v1 "billionmail-core/api/contact/v1"
-	"billionmail-core/internal/model/entity"
+	v1 "jesusmail-core/api/contact/v1"
+	"jesusmail-core/internal/model/entity"
 	"context"
 	"database/sql"
 	"encoding/json"

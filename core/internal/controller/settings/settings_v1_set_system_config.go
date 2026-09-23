@@ -1,8 +1,8 @@
 package settings
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/os/gtimer"
 	"github.com/gogf/gf/v2/os/gfile"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/settings/v1"
+	"jesusmail-core/api/settings/v1"
 )
 
 func (c *ControllerV1) SetSystemConfig(ctx context.Context, req *v1.SetSystemConfigReq) (res *v1.SetSystemConfigRes, err error) {
@@ -38,7 +38,7 @@ func (c *ControllerV1) SetSystemConfig(ctx context.Context, req *v1.SetSystemCon
 		}
 	}
 	if req.Hostname != "" {
-		if err := validateConfigValue("BILLIONMAIL_HOSTNAME", req.Hostname); err != nil {
+		if err := validateConfigValue("JESUSMAIL_HOSTNAME", req.Hostname); err != nil {
 			res.SetError(gerror.New(public.LangCtx(ctx, "Parameter validation failed: {}", err)))
 			return res, nil
 		}
@@ -99,8 +99,8 @@ func updateEnvMap(envMap map[string]string, req *v1.SetSystemConfigReq) bool {
 		modified = true
 
 	}
-	if req.Hostname != "" && req.Hostname != envMap["BILLIONMAIL_HOSTNAME"] {
-		envMap["BILLIONMAIL_HOSTNAME"] = req.Hostname
+	if req.Hostname != "" && req.Hostname != envMap["JESUSMAIL_HOSTNAME"] {
+		envMap["JESUSMAIL_HOSTNAME"] = req.Hostname
 		modified = true
 
 	}

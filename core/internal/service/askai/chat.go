@@ -1,7 +1,7 @@
 package askai
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"encoding/json"
 	"errors"

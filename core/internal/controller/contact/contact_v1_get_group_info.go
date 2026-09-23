@@ -1,15 +1,15 @@
 package contact
 
 import (
-	"billionmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/domains"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/contact/v1"
-	"billionmail-core/internal/controller/subscribe_list"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/contact/v1"
+	"jesusmail-core/internal/controller/subscribe_list"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"github.com/gogf/gf/v2/frame/g"
 )
 

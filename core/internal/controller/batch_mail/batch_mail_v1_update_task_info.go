@@ -1,15 +1,15 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/batch_mail"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/batch_mail"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/batch_mail/v1"
+	"jesusmail-core/api/batch_mail/v1"
 )
 
 func (c *ControllerV1) UpdateTaskInfo(ctx context.Context, req *v1.UpdateTaskInfoReq) (res *v1.UpdateTaskInfoRes, err error) {

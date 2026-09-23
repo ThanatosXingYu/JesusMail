@@ -1,13 +1,13 @@
 package abnormal_recipient
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"strconv"
 
-	"billionmail-core/api/abnormal_recipient/v1"
+	"jesusmail-core/api/abnormal_recipient/v1"
 )
 
 func (c *ControllerV1) SetAbnormalSwitch(ctx context.Context, req *v1.SetAbnormalSwitchReq) (res *v1.SetAbnormalSwitchRes, err error) {

@@ -1,7 +1,7 @@
 package video_outreach
 
 import (
-	"billionmail-core/internal/service/lead_scoring"
+	"jesusmail-core/internal/service/lead_scoring"
 	"os"
 	"strconv"
 	"strings"

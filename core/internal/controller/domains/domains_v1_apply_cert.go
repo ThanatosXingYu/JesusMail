@@ -1,13 +1,13 @@
 package domains
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
-	"billionmail-core/internal/service/rbac"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/internal/service/rbac"
 	"context"
 
-	"billionmail-core/api/domains/v1"
+	"jesusmail-core/api/domains/v1"
 )
 
 func (c *ControllerV1) ApplyCert(ctx context.Context, req *v1.ApplyCertReq) (res *v1.ApplyCertRes, err error) {

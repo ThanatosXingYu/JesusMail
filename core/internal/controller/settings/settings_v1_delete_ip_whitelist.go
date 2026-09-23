@@ -1,8 +1,8 @@
 package settings
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/os/gtimer"
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/settings/v1"
+	"jesusmail-core/api/settings/v1"
 )
 
 func (c *ControllerV1) DeleteIPWhitelist(ctx context.Context, req *v1.DeleteIPWhitelistReq) (res *v1.DeleteIPWhitelistRes, err error) {

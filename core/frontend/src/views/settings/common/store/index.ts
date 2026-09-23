@@ -96,7 +96,7 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 		if (isObject<SystemInfo>(res)) {
 			currentUsername.value = res.admin_username
 			currentPath.value = res.safe_path
-			currentDomain.value = res.billionmail_hostname
+			currentDomain.value = res.hostname
 			serverIp.value = res.server_ip
 			ipWhitelistEnable.value = res.ip_whitelist_enable
 			ipWhitelistList.value = res.ip_whitelist

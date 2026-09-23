@@ -1,9 +1,9 @@
 package batch_mail
 
 import (
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"net"
 	"strings"

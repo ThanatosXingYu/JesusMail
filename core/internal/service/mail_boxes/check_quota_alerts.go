@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"billionmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/mail_service"
 	"github.com/gogf/gf/v2/frame/g"
 )
 

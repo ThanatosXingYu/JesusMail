@@ -7,7 +7,7 @@ package email_template
 import (
 	"context"
 
-	"billionmail-core/api/email_template/v1"
+	"jesusmail-core/api/email_template/v1"
 )
 
 type IEmailTemplateV1 interface {

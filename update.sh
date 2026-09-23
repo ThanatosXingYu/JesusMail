@@ -2,11 +2,11 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-CONTAINER_PROJECT_NAME=billionmail
-PGSQL_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-pgsql-billionmail-1"
-DOVECOT_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-dovecot-billionmail-1"
-POSTFIX_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-postfix-billionmail-1"
-RSPAMD_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-rspamd-billionmail-1"
+CONTAINER_PROJECT_NAME=jesusmail
+PGSQL_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-pgsql-jesusmail-1"
+DOVECOT_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-dovecot-jesusmail-1"
+POSTFIX_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-postfix-jesusmail-1"
+RSPAMD_CONTAINER_NAME="${CONTAINER_PROJECT_NAME}-rspamd-jesusmail-1"
 TIME=$(date +%Y_%m_%d_%H_%M_%S)
 
 PWD_d=`pwd`
@@ -186,7 +186,7 @@ Docker_Status_Check(){
     fi
 }
 
-Update_BillionMail(){
+Update_JesusMail(){
 
     if ! Command_Exists git ; then
         Red_Error "ERROR: git Command does not exist"
@@ -210,10 +210,10 @@ Update_BillionMail(){
     echo -e "\033[34m🚀 Committing current changes...\033[0m"
     # Set user.name and user.email if they are not set
     if [[ -z "$(git config user.name)" ]]; then
-        git config user.name BillionMail
+        git config user.name JesusMail
     fi
     if [[ -z "$(git config user.email)" ]]; then
-        git config user.email BillionMail@BillionMail.com
+        git config user.email JesusMail@JesusMail.com
     fi
     # Commit current changes
     git add -u
@@ -259,15 +259,8 @@ Update_BillionMail(){
         Red_Error "docker-compose.yml not found."
     fi
 
-    echo -e "Stop JesusMail, please wait..."
-    sleep 3
-    ${DOCKER_COMPOSE} down
-
-    echo -e "Getting the latest image, please wait..."
-    ${DOCKER_COMPOSE} pull
-
-    echo -e "Starting JesusMail, please wait..."
-    ${DOCKER_COMPOSE} up -d
+    echo -e "Building and starting JesusMail, please wait..."
+    ${DOCKER_COMPOSE} up -d --build
     if [ $? -eq 0 ]; then
         echo -e "\033[32m✅ Started successfully, update completed.\033[0m"
     else
@@ -275,7 +268,7 @@ Update_BillionMail(){
     fi
 
     [ ! -d "/opt" ] && mkdir /opt
-    echo "${PWD_d}" > /opt/PWD-Billion-Mail.txt
+    echo "${PWD_d}" > /opt/PWD-JesusMail.txt
     ln -sf ${PWD_d}/bm.sh /usr/bin/bm
     chmod +x ${PWD_d}/bm.sh
 
@@ -314,6 +307,6 @@ Docker_Compose_Check
     
 Docker_Status_Check
 
-Update_BillionMail
+Update_JesusMail
 
 Update_config

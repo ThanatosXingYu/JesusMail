@@ -1,7 +1,7 @@
 package public
 
 import (
-	"billionmail-core/internal/consts"
+	"jesusmail-core/internal/consts"
 	"strings"
 )
 

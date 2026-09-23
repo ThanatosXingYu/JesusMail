@@ -1,10 +1,10 @@
 package mail_boxes
 
 import (
-	"billionmail-core/api/mail_boxes/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/mail_boxes"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/mail_boxes"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"strings"
 

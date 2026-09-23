@@ -1,7 +1,7 @@
 package operation_log
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"bufio"
 	"context"
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"billionmail-core/api/operation_log/v1"
+	"jesusmail-core/api/operation_log/v1"
 )
 
 func (c *ControllerV1) GetOutputLog(ctx context.Context, req *v1.GetOutputLogReq) (res *v1.GetOutputLogRes, err error) {

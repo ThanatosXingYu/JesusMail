@@ -1,8 +1,8 @@
 package public_activation
 
 import (
-	"billionmail-core/api/public_activation/v1"
-	"billionmail-core/internal/service/activation"
+	"jesusmail-core/api/public_activation/v1"
+	"jesusmail-core/internal/service/activation"
 	"context"
 	"errors"
 	"net"

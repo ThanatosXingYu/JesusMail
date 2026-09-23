@@ -7,7 +7,7 @@ package batch_mail
 import (
 	"context"
 
-	"billionmail-core/api/batch_mail/v1"
+	"jesusmail-core/api/batch_mail/v1"
 )
 
 type IBatchMailV1 interface {

@@ -1,7 +1,7 @@
 package domains
 
 import (
-	v1 "billionmail-core/api/domains/v1"
+	v1 "jesusmail-core/api/domains/v1"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

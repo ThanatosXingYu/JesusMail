@@ -1,13 +1,13 @@
 package database_initialization
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"time"
 )
 
@@ -27,9 +27,9 @@ func InitDatabase() (err error) {
 			gdb.ConfigNode{
 				// Debug: true,
 				Host:             public.AbsPath(consts.POSTGRESQL_SOCK),
-				User:             "billionmail",
+				User:             public.MustGetDockerEnv("DBUSER", ""),
 				Pass:             dbPass,
-				Name:             "billionmail",
+				Name:             public.MustGetDockerEnv("DBNAME", ""),
 				Type:             "pgsql",
 				Role:             "master",
 				MaxOpenConnCount: 100,

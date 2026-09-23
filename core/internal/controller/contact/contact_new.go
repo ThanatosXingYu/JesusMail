@@ -5,7 +5,7 @@
 package contact
 
 import (
-	"billionmail-core/api/contact"
+	"jesusmail-core/api/contact"
 )
 
 type ControllerV1 struct{}

@@ -1,8 +1,8 @@
 package abnormal_recipient
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/maillog_stat"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/maillog_stat"
 	"context"
 	"fmt"
 	"time"

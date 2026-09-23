@@ -98,7 +98,7 @@ func getOrGenerateSecret(ctx context.Context) string {
 func generateSecret(ctx context.Context) string {
 	// use application fixed features as secret components
 	components := []string{
-		"BILLION_MAIL_UNSUBSCRIBE",                            // application identifier
+		"JESUSMAIL_UNSUBSCRIBE",                            // application identifier
 		g.Cfg().MustGet(ctx, "server.address").String(),       // server address
 		g.Cfg().MustGet(ctx, "server.sessionIdName").String(), // session name
 	}

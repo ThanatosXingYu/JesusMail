@@ -7,7 +7,7 @@ package overview
 import (
 	"context"
 
-	"billionmail-core/api/overview/v1"
+	"jesusmail-core/api/overview/v1"
 )
 
 type IOverviewV1 interface {

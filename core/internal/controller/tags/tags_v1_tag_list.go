@@ -1,10 +1,10 @@
 package tags
 
 import (
-	"billionmail-core/api/tags/v1"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/tags/v1"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 )

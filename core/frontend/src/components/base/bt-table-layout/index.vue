@@ -12,7 +12,7 @@
 			</n-flex>
 		</n-flex>
 		<slot name="table"></slot>
-		<n-flex v-if="slotPage" class="items-center mt-12px" justify="space-between">
+		<n-flex v-if="slotPage" class="table-layout-pager items-center mt-12px" justify="space-between">
 			<div>
 				<slot name="pageLeft"></slot>
 			</div>

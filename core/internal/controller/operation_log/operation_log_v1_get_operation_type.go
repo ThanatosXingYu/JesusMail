@@ -1,8 +1,8 @@
 package operation_log
 
 import (
-	"billionmail-core/api/operation_log/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/operation_log/v1"
+	"jesusmail-core/internal/service/public"
 	"context"
 )
 

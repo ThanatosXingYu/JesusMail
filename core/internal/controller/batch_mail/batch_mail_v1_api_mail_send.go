@@ -1,11 +1,11 @@
 package batch_mail
 
 import (
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"database/sql"
 	"errors"

@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"billionmail-core/internal/service/lead_scoring"
-	vo "billionmail-core/internal/service/video_outreach"
+	"jesusmail-core/internal/service/lead_scoring"
+	vo "jesusmail-core/internal/service/video_outreach"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// Integration tests for Phase 5 (R2 Upload + Thumbnail) and Phase 6 (BillionMail Integration).
+// Integration tests for Phase 5 (R2 Upload + Thumbnail) and Phase 6 (mail service integration).
 // Tests the full pipeline without external deps (no R2, no ImageMagick, no DB).
 
 // --- Scoring → Template Selection → Upload URL Pipeline ---

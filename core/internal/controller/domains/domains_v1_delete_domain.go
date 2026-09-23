@@ -1,14 +1,14 @@
 package domains
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/domains"
+	"jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/domains"
 )
 
 func (c *ControllerV1) DeleteDomain(ctx context.Context, req *v1.DeleteDomainReq) (res *v1.DeleteDomainRes, err error) {

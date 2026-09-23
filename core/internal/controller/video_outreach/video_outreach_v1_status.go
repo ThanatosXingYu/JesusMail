@@ -1,9 +1,9 @@
 package video_outreach
 
 import (
-	v1 "billionmail-core/api/video_outreach/v1"
-	"billionmail-core/internal/model/entity"
-	vo "billionmail-core/internal/service/video_outreach"
+	v1 "jesusmail-core/api/video_outreach/v1"
+	"jesusmail-core/internal/model/entity"
+	vo "jesusmail-core/internal/service/video_outreach"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"

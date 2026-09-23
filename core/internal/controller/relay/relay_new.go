@@ -5,7 +5,7 @@
 package relay
 
 import (
-	"billionmail-core/api/relay"
+	"jesusmail-core/api/relay"
 )
 
 type ControllerV1 struct{}

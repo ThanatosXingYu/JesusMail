@@ -1,11 +1,11 @@
 package campaign
 
 import (
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
@@ -13,7 +13,7 @@ import (
 	"net/url"
 	"time"
 
-	"billionmail-core/api/campaign/v1"
+	"jesusmail-core/api/campaign/v1"
 )
 
 func (c *ControllerV1) Form(ctx context.Context, req *v1.FormReq) (res *v1.FormRes, err error) {
@@ -105,7 +105,7 @@ func sendConfirmationEmail(ctx context.Context, email, name string) error {
 		domain = u.Hostname()
 	} else {
 		// Fallback: try to get from environment
-		if hostname, err := public.DockerEnv("BILLIONMAIL_HOSTNAME"); err == nil && hostname != "" {
+		if hostname, err := public.DockerEnv("JESUSMAIL_HOSTNAME"); err == nil && hostname != "" {
 			domain = hostname
 		} else {
 			return fmt.Errorf("unable to determine domain for noreply email")

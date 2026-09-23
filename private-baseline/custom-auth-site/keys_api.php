@@ -1,7 +1,7 @@
 <?php
 /**
- * QLU Mail 激活码管理 API（供 BillionMail 后台内嵌管理页 /custom/keys.html 调用）
- * 鉴权：请求头 X-Auth-Token 携带 BillionMail 后台 JWT，服务端回源校验
+ * QLU Mail 激活码管理 API（供 JesusMail 后台内嵌管理页 /custom/keys.html 调用）
+ * 鉴权：请求头 X-Auth-Token 携带 JesusMail 后台 JWT，服务端回源校验
  * 存储：MySQL mail 库 activation_keys / activation_logs
  */
 
@@ -41,7 +41,7 @@ function db(): PDO {
     return $pdo;
 }
 
-/* ---------- 鉴权：回源校验 BillionMail JWT ---------- */
+/* ---------- 鉴权：回源校验 JesusMail JWT ---------- */
 function auth_admin(): void {
     $token = $_SERVER['HTTP_X_AUTH_TOKEN'] ?? '';
     if ($token === '' && preg_match('/^Bearer\s+(.+)$/i', $_SERVER['HTTP_AUTHORIZATION'] ?? '', $m)) {

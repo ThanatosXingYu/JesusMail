@@ -7,7 +7,7 @@ package dockerapi
 import (
 	"context"
 
-	"billionmail-core/api/dockerapi/v1"
+	"jesusmail-core/api/dockerapi/v1"
 )
 
 type IDockerapiV1 interface {

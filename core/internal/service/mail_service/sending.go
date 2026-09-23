@@ -1,7 +1,6 @@
 package mail_service
 
 import (
-	"billionmail-core/internal/service/public"
 	"bytes"
 	"context"
 	"crypto/tls"
@@ -12,6 +11,7 @@ import (
 	"github.com/gogf/gf/util/grand"
 	"github.com/gogf/gf/v2/frame/g"
 	"io"
+	"jesusmail-core/internal/service/public"
 	"mime"
 	"mime/quotedprintable"
 	"net"
@@ -125,7 +125,7 @@ func NewEmailSender() *EmailSender {
 	if public.IsRunningInContainer() {
 		e.Host = "postfix"
 		// e.Port = "587"
-		// e.SNI, _ = public.DockerEnv("BILLIONMAIL_HOSTNAME")
+		// e.SNI is populated from the configured SMTP hostname when required.
 	}
 
 	return e
@@ -295,7 +295,7 @@ func (e *EmailSender) GenerateMessageID() string {
 	timestampMillis := time.Now().UnixMilli()
 
 	domain := strings.SplitN(e.Email, "@", 2)
-	domainPart := "billionmail"
+	domainPart := "localhost"
 	if len(domain) > 1 {
 		domainPart = domain[1]
 	}

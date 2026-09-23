@@ -15,7 +15,7 @@
 				><n-card size="small"><n-statistic :label="item.label" :value="item.value" /></n-card
 			></n-gi>
 		</n-grid>
-		<n-card>
+		<n-card class="activation-list-card">
 			<div class="toolbar">
 				<n-space class="filters" :wrap="true">
 					<n-select
@@ -62,6 +62,8 @@
 				:row-key="row => row.id"
 				:checked-row-keys="checked"
 				:scroll-x="1790"
+				class="activation-table"
+				flex-height
 				@update:checked-row-keys="keys => checked = keys as number[]" />
 			<div class="pager">
 				<n-pagination
@@ -172,9 +174,14 @@ const groupOptions = computed(() => [
 	...groups.value.map(value => ({ label: value, value })),
 ])
 const statusText = ['未使用', '已使用', '已禁用'],
-	statusType = ['success', 'info', 'warning'] as const
+	statusType = ['success', 'error', 'warning'] as const
 const getStatusText = (status: number) => statusText[status] || '未知'
 const getStatusType = (status: number) => statusType[status] || 'default'
+const getStatusColor = (status: number) => {
+	if (status === 0) return { color: '#dcfce7', textColor: '#166534', borderColor: '#86efac' }
+	if (status === 1) return { color: '#fee2e2', textColor: '#991b1b', borderColor: '#fca5a5' }
+	return undefined
+}
 const fmt = (value?: string | null) => (value ? new Date(value).toLocaleString() : '-')
 
 const removeRows = (ids: number[], row?: ActivationKey) => {
@@ -255,7 +262,11 @@ const columns: DataTableColumns<ActivationKey> = [
 		title: '状态',
 		key: 'status',
 		width: 90,
-		render: row => <NTag type={getStatusType(row.status)}>{getStatusText(row.status)}</NTag>,
+		render: row => (
+			<NTag type={getStatusType(row.status)} color={getStatusColor(row.status)} strong>
+				{getStatusText(row.status)}
+			</NTag>
+		),
 	},
 	{ title: '分组', key: 'group_name', width: 130, render: row => row.group_name || '未分组' },
 	{ title: '关联邮箱', key: 'email', width: 210, render: row => row.email || '-' },
@@ -441,6 +452,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.activation-admin {
+	box-sizing: border-box;
+	height: calc(100dvh - 48px);
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.activation-list-card {
+	flex: 1;
+	min-height: 0;
+}
+.activation-list-card :deep(.n-card__content) {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.activation-table {
+	flex: 1;
+	min-height: 0;
+}
+
 .page-head,
 .toolbar {
 	display: flex;
@@ -449,6 +482,7 @@ onMounted(() => {
 	gap: 16px;
 }
 .page-head {
+	flex: none;
 	margin-bottom: 18px;
 }
 .description,
@@ -459,13 +493,16 @@ onMounted(() => {
 	margin-top: 4px;
 }
 .stats {
+	flex: none;
 	margin-bottom: 16px;
 }
 .toolbar {
+	flex: none;
 	flex-wrap: wrap;
 	margin-bottom: 16px;
 }
 .pager {
+	flex: none;
 	display: flex;
 	justify-content: flex-end;
 	margin-top: 16px;

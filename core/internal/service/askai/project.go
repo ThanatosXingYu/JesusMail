@@ -1,9 +1,9 @@
 package askai
 
 import (
-	"billionmail-core/internal/service/public"
 	"encoding/json"
 	"fmt"
+	"jesusmail-core/internal/service/public"
 	"net/url"
 	"os"
 	"strings"
@@ -13,8 +13,12 @@ import (
 
 const (
 	PRODUCT_CONFIG_PATH = "../conf/askai"
-	FILE_CDN_API        = "https://cdn.billionmail.com" // CDN API for file access
 )
+
+// fileAPIBase is operator-controlled; no external image service is contacted by default.
+func fileAPIBase() string {
+	return strings.TrimRight(strings.TrimSpace(os.Getenv("JESUSMAIL_FILE_API")), "/")
+}
 
 type KnowledgeInfo struct {
 	Kid        string `json:"kid"`         // 知识库ID
@@ -938,7 +942,11 @@ func UploadImage(Domain string, Image string, Filename string, AltText string, I
 		ImageTag:   ImageTag,
 		UpdateTime: public.GetNowTime(),
 	}
-	apiUrl := fmt.Sprintf("%s/upload-image", FILE_CDN_API)
+	base := fileAPIBase()
+	if base == "" {
+		return "", fmt.Errorf("JESUSMAIL_FILE_API is not configured")
+	}
+	apiUrl := base + "/upload-image"
 	params := url.Values{}
 	params.Set("imageId", imageInfo.ImageId)
 	params.Set("imageBase64", Image)
@@ -1022,10 +1030,12 @@ func RemoveImage(Domain string, ImageId string) error {
 		return fmt.Errorf("error saving images configuration: %v", err)
 	}
 	// Optionally, you can also delete the image file from the CDN if needed
-	apiUrl := fmt.Sprintf("%s/remove-image", FILE_CDN_API)
+	apiUrl := fileAPIBase() + "/remove-image"
 	params := url.Values{}
 	params.Set("imageId", ImageId)
-	go public.HttpPostSrc(apiUrl, params, 60)
+	if fileAPIBase() != "" {
+		go public.HttpPostSrc(apiUrl, params, 60)
+	}
 	return nil
 }
 
@@ -1167,7 +1177,11 @@ func RequestUrl(domain, toUrl string) (BotResponse, error) {
 		toUrl = "http://" + toUrl
 	}
 	var result BotResponse
-	url := FILE_CDN_API + "/bot?url=" + toUrl
+	base := fileAPIBase()
+	if base == "" {
+		return result, fmt.Errorf("JESUSMAIL_FILE_API is not configured")
+	}
+	url := base + "/bot?url=" + url.QueryEscape(toUrl)
 	resultBody, err := public.HttpGetSrc(url, 360)
 	if err != nil {
 		fmt.Printf("Error fetching project data for %s: %v\n", domain, err)

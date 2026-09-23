@@ -80,7 +80,7 @@ JesusMail/
 ├── Dockerfiles/                   # 各服务容器定义
 ├── docs/                          # 文档（反向代理、数据迁移等）
 │   └── migrations/                # 数据库迁移脚本（含回滚）
-├── private-baseline/              # 已文档化的生产基线快照（可维护）
+├── private-baseline/              # 脱敏参考模板（非现网配置）
 ├── bm.sh                          # 管理命令入口
 ├── install.sh / update.sh         # 安装 / 更新脚本
 ├── docker-compose.yml             # 服务编排
@@ -162,7 +162,7 @@ JesusMail/
 |---|---|
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | 后台管理员初始账号密码 |
 | `SafePath` | 后台安全路径（控制台登录入口的路径段） |
-| 邮件主机名环境变量（见 `env_init`） | 邮件服务主机名；沿用现有部署的环境变量键名 |
+| `JESUSMAIL_HOSTNAME` | 邮件服务主机名；升级既有部署时先备份并迁移环境变量 |
 | `DBNAME` / `DBUSER` / `DBPASS` | PostgreSQL 数据库名、用户、密码 |
 | `REDISPASS` | Redis 密码 |
 | `HTTP_PORT` / `HTTPS_PORT` | 对外 HTTP / HTTPS 端口 |
@@ -173,8 +173,11 @@ JesusMail/
 | `JESUSMAIL_ACTIVATION_QUOTA` | 激活邮箱默认配额（字节，默认 32 MB） |
 | `JESUSMAIL_ROUNDCUBE_SSO_SECRET` | 一键登录票据签名密钥（旧名 `JESSUSMAIL_ROUNDCUBE_SSO_SECRET` 仍兼容） |
 | `JESUSMAIL_ROUNDCUBE_SSO_CORE_URL` | 票据消费接口地址 |
+| `JESUSMAIL_FILE_API` | 可选的图片上传／网页解析服务地址；未设置时不调用外部服务 |
+| `JESUSMAIL_SERVICE_*` / `JESUSMAIL_DEFAULT_NETWORK` | 既有容器部署临时兼容服务名／网络名；全新部署不设置 |
+| `JESUSMAIL_POSTFIX_HOSTNAME_ENV` | 既有 Postfix 脚本使用的邮件主机名变量键；全新部署不设置 |
 
-> 新名与旧名（`JESUSMAIL_*` / `JESSUSMAIL_*`）同时支持，兼容历史部署。
+> 激活／单点登录的 `JESSUSMAIL_*` 旧变量仍可读取。容器名与邮件主机名更名属于部署迁移：既有部署可以临时通过 `JESUSMAIL_SERVICE_*` 和 `JESUSMAIL_POSTFIX_HOSTNAME_ENV` 在 `.env` 中指定当前服务名；完成容器迁移后删除这些覆盖项。
 
 ---
 
@@ -187,7 +190,7 @@ cd /path/to/JesusMail
 cp env_init .env
 # 逐项检查并填写 .env（尤其是域名、密码、端口）
 docker compose config --no-interpolate --quiet   # 校验编排文件
-docker compose up -d
+docker compose up -d --build
 ```
 
 ### 方式二：安装脚本
@@ -197,7 +200,7 @@ cd /path/to/JesusMail
 bash install.sh
 ```
 
-> 升级或更新生产环境前，务必先完成可验证的数据库、配置和邮件数据备份，且不要直接在生产环境滚动未验证过的版本。
+> 构建需要联网下载 Go 模块与容器基础镜像。升级或更新生产环境前，务必先完成可验证的数据库、配置和邮件数据备份；旧部署的服务名、容器目录与环境变量同时更名，不能仅替换单个配置文件或直接在生产环境滚动未验证过的版本。
 
 ### 前端产物同步
 
@@ -228,7 +231,7 @@ node build-for-git.js    # 同步 dist 到 core/public/dist
 - 激活页需要nginx 透出 `/activate`、`/static/`、`/public/activation/*`（以及 `/api/public/activation/*`）；生产构建的激活页会请求不带 `/api` 前缀的 `/public/activation/...`，**两个前缀都要反代**，否则激活会 404。
 - 域名下打开后台后「不跳转、功能异常」通常是访问了不透出的路径导致的，属预期行为，请改用 IP 端口访问后台。
 
-宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。仓库的 `private-baseline/server-config/nginx/mail.qlu.edu.kg.conf` 是主站历史参考快照（现已移除与扩展文件重复的激活路由），**不可直接覆盖线上主站配置**；先检查现网配置、备份，再逐项合并和执行 `nginx -t`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
+宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。仓库的 `private-baseline/server-config/nginx/mail.qlu.edu.kg.conf` 是主站脱敏参考模板（现已移除与扩展文件重复的激活路由），**不可直接覆盖线上主站配置**；先检查现网配置、备份，再逐项合并和执行 `nginx -t`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
 
 ---
 

@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"billionmail-core/api/settings/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"github.com/gogf/gf/v2/errors/gerror"
 )
 

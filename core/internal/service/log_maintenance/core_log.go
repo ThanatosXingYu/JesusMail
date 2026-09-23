@@ -2,7 +2,7 @@ package log_maintenance
 
 import (
 	"archive/tar"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"compress/gzip"
 	"context"
 	"io"

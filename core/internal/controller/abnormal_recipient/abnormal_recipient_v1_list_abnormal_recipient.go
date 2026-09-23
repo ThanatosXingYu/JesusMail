@@ -1,9 +1,9 @@
 package abnormal_recipient
 
 import (
-	"billionmail-core/api/abnormal_recipient/v1"
-	"billionmail-core/internal/service/abnormal_recipient"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/abnormal_recipient/v1"
+	"jesusmail-core/internal/service/abnormal_recipient"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 )

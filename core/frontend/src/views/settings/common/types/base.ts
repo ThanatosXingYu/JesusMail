@@ -18,7 +18,7 @@ export interface PasswordStrength {
 
 export interface SystemInfo {
 	admin_username: string
-	billionmail_hostname: string
+	hostname: string
 	safe_path: string
 	db_name: string
 	db_user: string

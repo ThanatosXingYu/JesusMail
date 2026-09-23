@@ -1,7 +1,31 @@
 package consts
 
+import (
+	"os"
+	"strings"
+)
+
+// deploymentValue reads container naming overrides from the mounted .env file.
+// New installations use the defaults; an existing stack can migrate services separately.
+func deploymentValue(key, fallback string) string {
+	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+		return value
+	}
+	content, err := os.ReadFile(DEFAULT_DOCKER_ENV_FILE)
+	if err != nil {
+		return fallback
+	}
+	for _, line := range strings.Split(string(content), "\n") {
+		name, value, ok := strings.Cut(strings.TrimSpace(line), "=")
+		if ok && name == key && strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return fallback
+}
+
 const (
-	DEFAULT_SERVER_NAME              = "billion-mail"
+	DEFAULT_SERVER_NAME              = "jesus-mail"
 	DEFAULT_DOCKER_ENV_FILE          = "../.env"
 	PHP_FPM_SOCK_PATH                = "../php-sock/php-fpm.sock"
 	ROUNDCUBE_ROOT_PATH              = "../webmail-data"
@@ -20,7 +44,9 @@ const (
 )
 
 var (
-	SERVICES = struct {
+	DEFAULT_NETWORK_NAME     = deploymentValue("JESUSMAIL_DEFAULT_NETWORK", "jesusmail-network")
+	POSTFIX_HOSTNAME_ENV_KEY = deploymentValue("JESUSMAIL_POSTFIX_HOSTNAME_ENV", "JESUSMAIL_HOSTNAME")
+	SERVICES                 = struct {
 		Pgsql   string
 		Redis   string
 		Rspamd  string
@@ -29,12 +55,12 @@ var (
 		Webmail string
 		Core    string
 	}{
-		Pgsql:   "pgsql-billionmail",
-		Redis:   "redis-billionmail",
-		Rspamd:  "rspamd-billionmail",
-		Dovecot: "dovecot-billionmail",
-		Postfix: "postfix-billionmail",
-		Webmail: "webmail-billionmail",
-		Core:    "core-billionmail",
+		Pgsql:   deploymentValue("JESUSMAIL_SERVICE_PGSQL", "pgsql-jesusmail"),
+		Redis:   deploymentValue("JESUSMAIL_SERVICE_REDIS", "redis-jesusmail"),
+		Rspamd:  deploymentValue("JESUSMAIL_SERVICE_RSPAMD", "rspamd-jesusmail"),
+		Dovecot: deploymentValue("JESUSMAIL_SERVICE_DOVECOT", "dovecot-jesusmail"),
+		Postfix: deploymentValue("JESUSMAIL_SERVICE_POSTFIX", "postfix-jesusmail"),
+		Webmail: deploymentValue("JESUSMAIL_SERVICE_WEBMAIL", "webmail-jesusmail"),
+		Core:    deploymentValue("JESUSMAIL_SERVICE_CORE", "core-jesusmail"),
 	}
 )

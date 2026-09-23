@@ -1,10 +1,10 @@
 package mail_boxes
 
 import (
-	v1 "billionmail-core/api/mail_boxes/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"encoding/base64"
 	"encoding/hex"

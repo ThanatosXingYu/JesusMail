@@ -1,7 +1,7 @@
 package mail_services
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"bufio"
 	"context"
 	"os"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/mail_services/v1"
+	"jesusmail-core/api/mail_services/v1"
 )
 
 func (c *ControllerV1) GetPostfixConfig(ctx context.Context, req *v1.GetPostfixConfigReq) (res *v1.GetPostfixConfigRes, err error) {

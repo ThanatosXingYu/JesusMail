@@ -5,7 +5,7 @@
 package mail_services
 
 import (
-	"billionmail-core/api/mail_services"
+	"jesusmail-core/api/mail_services"
 )
 
 type ControllerV1 struct{}

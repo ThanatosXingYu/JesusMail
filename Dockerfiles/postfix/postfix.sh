@@ -89,8 +89,8 @@ EOF
 
 
 # Append myhostname and User configuration
-if [ -z "${BILLIONMAIL_HOSTNAME}" ]; then
-  BILLIONMAIL_HOSTNAME=mail.example.com
+if [ -z "${JESUSMAIL_HOSTNAME}" ]; then
+  JESUSMAIL_HOSTNAME=mail.example.com
 fi
 
 
@@ -105,7 +105,7 @@ if [ -f "/etc/postfix/conf/extra.cf" ]; then
       echo -e "\n# User Overrides-configuration" >> /etc/postfix/main.cf
       # Append User configuration
       sed -i '/\$myhostname/! { /myhostname/d }' /etc/postfix/conf/extra.cf
-      echo -e "myhostname = ${BILLIONMAIL_HOSTNAME}\n$(cat /etc/postfix/conf/extra.cf)" > /etc/postfix/conf/extra.cf
+      echo -e "myhostname = ${JESUSMAIL_HOSTNAME}\n$(cat /etc/postfix/conf/extra.cf)" > /etc/postfix/conf/extra.cf
       cat /etc/postfix/conf/extra.cf >> /etc/postfix/main.cf
       rm -f /etc/postfix/conf/extra.cf
   else
@@ -117,7 +117,7 @@ CHECK_MYHOSTNAME=$(grep "myhostname" /etc/postfix/main.cf | grep -v '$myhostname
 if [ -z "${CHECK_MYHOSTNAME}" ]; then
   echo >> /etc/postfix/main.cf
   echo -e "\n# User Overrides-configuration" >> /etc/postfix/main.cf
-  echo "myhostname = ${BILLIONMAIL_HOSTNAME}" >> /etc/postfix/main.cf
+  echo "myhostname = ${JESUSMAIL_HOSTNAME}" >> /etc/postfix/main.cf
 fi
 
 if [ ! -f "/etc/postfix/conf/vmail_ssl.map" ]; then

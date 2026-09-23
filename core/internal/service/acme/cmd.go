@@ -1,7 +1,7 @@
 package acme
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"encoding/json"
 	"flag"
 	"fmt"

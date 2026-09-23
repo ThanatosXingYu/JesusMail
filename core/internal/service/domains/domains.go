@@ -1,19 +1,19 @@
 package domains
 
 import (
-	v2 "billionmail-core/api/dockerapi/v1"
-	v1 "billionmail-core/api/domains/v1"
-	mail_v1 "billionmail-core/api/mail_boxes/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model"
-	docker "billionmail-core/internal/service/dockerapi"
-	"billionmail-core/internal/service/mail_boxes"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/multi_ip_domain"
-	"billionmail-core/internal/service/public"
 	"context"
 	"database/sql"
 	"fmt"
+	v2 "jesusmail-core/api/dockerapi/v1"
+	v1 "jesusmail-core/api/domains/v1"
+	mail_v1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model"
+	docker "jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/mail_boxes"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/multi_ip_domain"
+	"jesusmail-core/internal/service/public"
 	"os"
 	"path/filepath"
 	"strings"
@@ -111,20 +111,20 @@ func Add(ctx context.Context, domain *v1.Domain) error {
 		}
 
 		// attempt update hostname in .env file
-		hostname := public.MustGetDockerEnv("BILLIONMAIL_HOSTNAME", "")
+		hostname := public.MustGetDockerEnv("JESUSMAIL_HOSTNAME", "")
 
 		if hostname == "" || hostname == "mail.example.com" {
-			err = public.SetDockerEnv("BILLIONMAIL_HOSTNAME", public.FormatMX(domain.Domain))
+			err = public.SetDockerEnv("JESUSMAIL_HOSTNAME", public.FormatMX(domain.Domain))
 
 			if err != nil {
-				return fmt.Errorf("failed to update BILLIONMAIL_HOSTNAME in .env file: %v", err)
+				return fmt.Errorf("failed to update JESUSMAIL_HOSTNAME in .env file: %v", err)
 			}
 
 			// update postfix environment parameter
-			_, err = public.DockerApiFromCtx(ctx).ExecCommandByName(ctx, consts.SERVICES.Postfix, []string{"bash", "-c", fmt.Sprintf("sed -i '/^BILLIONMAIL_HOSTNAME=/d' /postfix.sh && sed -i '/^#!\\/bin\\/bash/a BILLIONMAIL_HOSTNAME=%s' /postfix.sh", public.FormatMX(domain.Domain))}, "root")
+			_, err = public.DockerApiFromCtx(ctx).ExecCommandByName(ctx, consts.SERVICES.Postfix, []string{"bash", "-c", fmt.Sprintf("sed -i '/^%s=/d' /postfix.sh && sed -i '/^#!\\/bin\\/bash/a %s=%s' /postfix.sh", consts.POSTFIX_HOSTNAME_ENV_KEY, consts.POSTFIX_HOSTNAME_ENV_KEY, public.FormatMX(domain.Domain))}, "root")
 
 			if err != nil {
-				return fmt.Errorf("failed to update BILLIONMAIL_HOSTNAME in postfix container: %v", err)
+				return fmt.Errorf("failed to update JESUSMAIL_HOSTNAME in postfix container: %v", err)
 			}
 
 			// restart postfix service

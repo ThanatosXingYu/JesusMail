@@ -1,14 +1,14 @@
 package email_template
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/email_template"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/email_template"
+	"jesusmail-core/internal/service/public"
 	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/email_template/v1"
+	"jesusmail-core/api/email_template/v1"
 )
 
 func (c *ControllerV1) DeleteTemplate(ctx context.Context, req *v1.DeleteTemplateReq) (res *v1.DeleteTemplateRes, err error) {

@@ -1,15 +1,15 @@
 package warmup
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"math"
 	"strings"
 	"time"
 
-	"billionmail-core/internal/model/entity"
+	"jesusmail-core/internal/model/entity"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 )

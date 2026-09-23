@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"billionmail-core/internal/service/public"
-	"billionmail-core/utility/types/api_v1"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/util/gvalid"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"strings"

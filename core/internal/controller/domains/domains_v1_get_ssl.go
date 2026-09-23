@@ -1,9 +1,9 @@
 package domains
 
 import (
-	"billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
 	"context"
 )
 

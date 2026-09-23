@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>激活码管理 · BillionMail</title>
+<title>激活码管理 · JesusMail</title>
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 <style>
     :root {
@@ -95,7 +95,7 @@
 <body>
 <div id="gate" style="display:none">
     <img src="/custom/logo.svg" alt="QLU Mail">
-    <p id="gateMsg">请先登录 BillionMail 管理后台</p>
+    <p id="gateMsg">请先登录 JesusMail 管理后台</p>
     <a id="gateBtn" href="/">前往登录后台</a>
 </div>
 
@@ -183,7 +183,7 @@ function getToken() {
 }
 
 function showGate(msg) {
-    document.getElementById('gateMsg').textContent = msg || '请先登录 BillionMail 管理后台';
+    document.getElementById('gateMsg').textContent = msg || '请先登录 JesusMail 管理后台';
     document.getElementById('gate').style.display = 'flex';
 }
 

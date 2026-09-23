@@ -1,7 +1,7 @@
 package warmup
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"time"

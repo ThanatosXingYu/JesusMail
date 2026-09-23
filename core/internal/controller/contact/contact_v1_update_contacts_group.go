@@ -1,14 +1,14 @@
 package contact
 
 import (
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/contact/v1"
+	"jesusmail-core/api/contact/v1"
 )
 
 func (c *ControllerV1) UpdateContactsGroup(ctx context.Context, req *v1.UpdateContactsGroupReq) (res *v1.UpdateContactsGroupRes, err error) {

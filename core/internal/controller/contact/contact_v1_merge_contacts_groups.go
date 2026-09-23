@@ -1,17 +1,17 @@
 package contact
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/model/entity"
-	"billionmail-core/internal/service/contact"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/model/entity"
+	"jesusmail-core/internal/service/contact"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"time"
 
-	"billionmail-core/api/contact/v1"
+	"jesusmail-core/api/contact/v1"
 )
 
 func (c *ControllerV1) MergeContactsGroups(ctx context.Context, req *v1.MergeContactsGroupsReq) (res *v1.MergeContactsGroupsRes, err error) {

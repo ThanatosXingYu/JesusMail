@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"billionmail-core/api/mail_services/v1"
+	"jesusmail-core/api/mail_services/v1"
 )
 
 func (c *ControllerV1) GetConfigFile(ctx context.Context, req *v1.GetConfigFileReq) (res *v1.GetConfigFileRes, err error) {

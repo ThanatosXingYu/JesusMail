@@ -1,15 +1,15 @@
 package batch_mail
 
 import (
-	"billionmail-core/internal/service/batch_mail"
+	"jesusmail-core/internal/service/batch_mail"
 	"context"
 	"time"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/batch_mail/v1"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/api/batch_mail/v1"
+	"jesusmail-core/internal/service/public"
 )
 
 // GetTaskSendCount

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"billionmail-core/api/mail_boxes/v1"
-	mailboxservice "billionmail-core/internal/service/mail_boxes"
+	"jesusmail-core/api/mail_boxes/v1"
+	mailboxservice "jesusmail-core/internal/service/mail_boxes"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

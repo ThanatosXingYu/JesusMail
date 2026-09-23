@@ -1,17 +1,17 @@
 package settings
 
 import (
-	v1 "billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	v1 "jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"os"
 	"strings"
 )
 
-// Check whether the A record of BILLIONMAIL_HOSTNAME is consistent with the local public network IP and write or delete the tag file
+// Check whether the A record of JESUSMAIL_HOSTNAME is consistent with the local public network IP and write or delete the tag file
 func CheckHostname() {
-	hostname := public.MustGetDockerEnv("BILLIONMAIL_HOSTNAME", "")
-	flagFile := public.AbsPath("../core/data/billionmail_hostname.txt")
+	hostname := public.MustGetDockerEnv("JESUSMAIL_HOSTNAME", "")
+	flagFile := public.AbsPath("../core/data/jesusmail_hostname.txt")
 	if hostname == "" || hostname == "mail.example.com" {
 		_ = os.Remove(flagFile)
 		return

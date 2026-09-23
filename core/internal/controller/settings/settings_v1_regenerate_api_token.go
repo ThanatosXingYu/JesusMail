@@ -1,14 +1,14 @@
 package settings
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
-	"billionmail-core/internal/service/rbac"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/internal/service/rbac"
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/settings/v1"
+	"jesusmail-core/api/settings/v1"
 )
 
 func (c *ControllerV1) RegenerateAPIToken(ctx context.Context, req *v1.RegenerateAPITokenReq) (res *v1.RegenerateAPITokenRes, err error) {

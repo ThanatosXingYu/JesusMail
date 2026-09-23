@@ -1,10 +1,10 @@
 package rbac
 
 import (
-	"billionmail-core/api/rbac/v1"
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/public"
-	service "billionmail-core/internal/service/rbac"
+	"jesusmail-core/api/rbac/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/public"
+	service "jesusmail-core/internal/service/rbac"
 	"context"
 	"fmt"
 	"github.com/gogf/gf/util/gconv"

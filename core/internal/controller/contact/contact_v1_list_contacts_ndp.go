@@ -1,7 +1,7 @@
 package contact
 
 import (
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"database/sql"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"billionmail-core/api/contact/v1"
+	"jesusmail-core/api/contact/v1"
 )
 
 func (c *ControllerV1) ListContactsNDP(ctx context.Context, req *v1.ListContactsNDPReq) (res *v1.ListContactsNDPRes, err error) {

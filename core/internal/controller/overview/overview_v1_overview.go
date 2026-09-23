@@ -1,15 +1,15 @@
 package overview
 
 import (
-	"billionmail-core/internal/service/maillog_stat"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/maillog_stat"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"billionmail-core/api/overview/v1"
+	"jesusmail-core/api/overview/v1"
 )
 
 func (c *ControllerV1) Overview(ctx context.Context, req *v1.OverviewReq) (res *v1.OverviewRes, err error) {

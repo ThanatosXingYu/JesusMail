@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"billionmail-core/utility/types/api_v1"
+	"jesusmail-core/utility/types/api_v1"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/panjf2000/ants/v2"

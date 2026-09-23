@@ -7,7 +7,7 @@ package languages
 import (
 	"context"
 
-	"billionmail-core/api/languages/v1"
+	"jesusmail-core/api/languages/v1"
 )
 
 type ILanguagesV1 interface {

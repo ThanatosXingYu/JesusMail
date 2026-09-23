@@ -1,10 +1,10 @@
 package settings
 
 import (
-	"billionmail-core/api/settings/v1"
-	"billionmail-core/internal/service/mail_service"
-	"billionmail-core/internal/service/public"
-	"billionmail-core/internal/service/relay"
+	"jesusmail-core/api/settings/v1"
+	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/public"
+	"jesusmail-core/internal/service/relay"
 	"context"
 	"encoding/json"
 	"fmt"

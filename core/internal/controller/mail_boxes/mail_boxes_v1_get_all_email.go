@@ -1,12 +1,12 @@
 package mail_boxes
 
 import (
-	"billionmail-core/internal/service/mail_boxes"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/mail_boxes"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 
-	"billionmail-core/api/mail_boxes/v1"
+	"jesusmail-core/api/mail_boxes/v1"
 )
 
 func (c *ControllerV1) GetAllEmail(ctx context.Context, req *v1.GetAllEmailReq) (res *v1.GetAllEmailRes, err error) {

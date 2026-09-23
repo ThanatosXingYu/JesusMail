@@ -1,9 +1,9 @@
 package subscribe_list
 
 import (
-	"billionmail-core/internal/service/contact_activity"
-	"billionmail-core/internal/service/domains"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/service/contact_activity"
+	"jesusmail-core/internal/service/domains"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
 	"time"
@@ -12,7 +12,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	"billionmail-core/api/subscribe_list/v1"
+	"jesusmail-core/api/subscribe_list/v1"
 )
 
 func (c *ControllerV1) SubscribeConfirm(ctx context.Context, req *v1.SubscribeConfirmReq) (res *v1.SubscribeConfirmRes, err error) {

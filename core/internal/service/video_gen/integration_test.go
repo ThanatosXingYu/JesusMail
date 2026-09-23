@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"billionmail-core/internal/service/lead_scoring"
+	"jesusmail-core/internal/service/lead_scoring"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

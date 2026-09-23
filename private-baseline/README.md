@@ -1,10 +1,10 @@
 # Production customization baseline
 
-This directory is a **sanitized, version-controlled snapshot** of the QLU Mail customizations discovered on the production server on 2026-09-14.
+This directory is a **sanitized, rebranded reference template** of the QLU Mail customizations discovered on the production server on 2026-09-14.
 
 - `custom-auth-site/`: activation page and activation-code management API.
-- `billionmail-overrides/`: BillionMail admin UI and Roundcube skin overrides.
-- `server-config/`: Nginx/rewrite/Compose configuration snapshots with server identifiers redacted.
+- `jesusmail-overrides/`: JesusMail admin UI and Roundcube skin overrides.
+- `server-config/`: Nginx/rewrite/Compose configuration references with server identifiers redacted. These templates do not represent the current running service names or mount points and must be reviewed before use.
 
 Runtime data, database dumps, API tokens, passwords, TLS keys, activation-code archives, and `.env` are intentionally excluded. The original read-only copies are kept under the local Git-ignored `server-private/` directory.
 

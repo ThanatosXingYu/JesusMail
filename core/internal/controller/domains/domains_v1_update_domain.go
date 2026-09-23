@@ -1,17 +1,17 @@
 package domains
 
 import (
-	"billionmail-core/internal/consts"
-	"billionmail-core/internal/service/multi_ip_domain"
-	"billionmail-core/internal/service/public"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/multi_ip_domain"
+	"jesusmail-core/internal/service/public"
 	"context"
 	"database/sql"
 	"github.com/gogf/gf/v2/frame/g"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"billionmail-core/api/domains/v1"
-	"billionmail-core/internal/service/domains"
+	"jesusmail-core/api/domains/v1"
+	"jesusmail-core/internal/service/domains"
 )
 
 func (c *ControllerV1) UpdateDomain(ctx context.Context, req *v1.UpdateDomainReq) (res *v1.UpdateDomainRes, err error) {

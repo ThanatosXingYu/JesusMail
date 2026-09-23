@@ -17,7 +17,7 @@ JesusMail combines a mail server, webmail, mailbox administration, activation-co
 - Activation-code creation, grouping, export, binding reset, and redemption
 - Public mailbox activation with permanent (non-expiring) mailboxes
 - One-click sign-in to the corresponding webmail account
-- Mailbox recycle bin with a default 30-day retention period
+- Mailbox recycle bin with a 30-day retention period
 - Campaigns, contacts, templates, delivery analytics, and warm-up tools
 - Integrated Roundcube webmail
 - Docker Compose deployment with PostgreSQL, Redis, Postfix, Dovecot, and Rspamd
@@ -75,15 +75,14 @@ Some internal service names, paths, database names, and environment variables re
 ## Data migration
 
 Activated mailboxes are permanent (`expires_at` is empty). To convert existing
-activation-sourced mailboxes that were previously given a finite expiry into
+mailboxes of every source that were previously given a finite expiry into
 permanent ones, run the reversible migration:
 
 ```text
 docs/migrations/20260923-permanent-activation-mailboxes.sql
 ```
 
-It backs up affected rows before updating, only touches `source_type = 'activation'`
-by default, is idempotent, and ships with a rollback script. See
+It backs up affected rows before updating, covers all existing `mailbox` rows with non-null `expires_at`, is idempotent, and ships with a rollback script. See
 [docs/REVERSE_PROXY.md](docs/REVERSE_PROXY.md) for proxy setup.
 
 ## Webmail

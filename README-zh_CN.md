@@ -41,7 +41,7 @@ JesusMail 是一套自托管的邮件运营与邮箱分发平台，把邮件服�
 - **公开激活页面**：客户无需登录后台，打开 `/activate` 即可用激活码开通邮箱
 - **永久邮箱**：通过激活码开通的邮箱默认为永久有效，不设置到期时间
 - **一键登录**：管理员可签发短时一次性票据，安全进入指定用户的网页邮箱
-- **回收站**：删除的邮箱进入回收站，默认保留 30 天（`RETENTION_DAYS`），可还原或彻底删除
+- **回收站**：删除的邮箱进入回收站，固定保留 30 天（`RecycleRetention`），可还原或彻底删除
 - **邮件营销**：邮件营销活动、联系人管理、模板、投递统计与预热工具
 - **网页邮箱**：集成 Roundcube，通常通过 `/roundcube/` 访问
 - **容器化部署**：Docker Compose 一键编排 PostgreSQL、Redis、Postfix、Dovecot、Rspamd
@@ -125,7 +125,7 @@ JesusMail/
 ## 邮箱回收站机制
 
 - **进入回收站**：在后台删除邮箱（包括清除激活码绑定）时，邮箱不会被直接抹掉，而是进入回收站流程。
-- **自动清理**：系统每分钟由定时任务 `archiveExpiredMailboxes` 检查，按保留期（默认 `RETENTION_DAYS`，可在 `.env` 配置）把到期邮箱归档进回收站。
+- **自动清理**：系统每分钟由定时任务 `archiveExpiredMailboxes` 检查，将已到期且仍处于启用状态的邮箱归档进回收站；回收站保留期由代码中的 `RecycleRetention` 规定为 30 天。
 - **保留期内**：可在后台「回收站」页面还原邮箱，或手动彻底删除。
 - **过期后**：回收站数据按保留策略清理，邮件数据随之移除。
 - **注意**：一旦邮箱已被归档/清出回收站，仅修改 `mailbox` 表的到期时间无法让它复活，需要从回收站还原。
@@ -156,7 +156,7 @@ JesusMail/
 | `DBNAME` / `DBUSER` / `DBPASS` | PostgreSQL 数据库名、用户、密码 |
 | `REDISPASS` | Redis 密码 |
 | `HTTP_PORT` / `HTTPS_PORT` | 对外 HTTP / HTTPS 端口 |
-| `RETENTION_DAYS` | 回收站保留天数（默认 7） |
+| `RETENTION_DAYS` | 其他数据的保留天数（模板默认 7）；邮箱回收站使用代码中的 `RecycleRetention`（30 天） |
 | `IPV4_NETWORK` | 内网网段 |
 | `IP_WHITELIST_ENABLE` | 是否启用 IP 白名单 |
 | `JESUSMAIL_ACTIVATION_DOMAIN` | 激活域名（旧名 `JESSUSMAIL_ACTIVATION_DOMAIN` 仍兼容） |
@@ -218,7 +218,7 @@ node build-for-git.js    # 同步 dist 到 core/public/dist
 - 激活页需要nginx 透出 `/activate`、`/static/`、`/public/activation/*`（以及 `/api/public/activation/*`）；生产构建的激活页会请求不带 `/api` 前缀的 `/public/activation/...`，**两个前缀都要反代**，否则激活会 404。
 - 域名下打开后台后「不跳转、功能异常」通常是访问了不透出的路径导致的，属预期行为，请改用 IP 端口访问后台。
 
-完整的反向代理配置见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
+宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
 
 ---
 
@@ -240,7 +240,7 @@ bm restart       # 重启 JesusMail 相关服务
 
 ### 激活邮箱永久化迁移（2026-09-23）
 
-自本版本起，通过激活码开通的邮箱一律**永久有效**。为了把历史数据中「已通过激活码开通、但被设置了有限到期时间」的邮箱一并修正为永久，提供了迁移脚本：
+自本版本起，通过激活码开通的邮箱一律**永久有效**。为了把历史数据中所有来源的有限期邮箱一并修正为永久，提供了迁移脚本：
 
 ```text
 docs/migrations/20260923-permanent-activation-mailboxes.sql
@@ -249,7 +249,7 @@ docs/migrations/20260923-permanent-activation-mailboxes.sql
 脚本特性：
 
 - **安全备份**：先把受影响行备份到 `mailbox_expires_at_migration_20260923` 表，任何时候可回滚；
-- **只动激活来源**：默认只处理 `source_type = 'activation'` 的邮箱，不碰管理员手动创建的邮箱；
+- **覆盖所有有限期邮箱**：按本次要求处理 `mailbox.expires_at IS NOT NULL` 的所有来源，不区分 activation、manual、batch、import、legacy；执行前应先完成数据库备份；
 - **幂等**：可重复执行，不会重复备份或重复更新；
 - **带回滚**：文件末尾附带回滚 SQL（注释形式）。
 
@@ -261,7 +261,7 @@ docs/migrations/20260923-permanent-activation-mailboxes.sql
 psql -U billionmail -d billionmail -f docs/migrations/20260923-permanent-activation-mailboxes.sql
 ```
 
-如需把**所有来源**的有限期邮箱都改为永久，请修改脚本中两处 `WHERE source_type = 'activation'` 条件，并先在测试库验证后再上生产。
+脚本默认已经覆盖所有来源的有限期邮箱；如需只迁移激活来源，请先在测试库增加 `source_type = 'activation'` 条件并验证。
 
 ---
 
@@ -295,7 +295,7 @@ A：不会。激活开通的邮箱为永久有效，`expires_at` 为空。如需
 A：不能。票据 60 秒过期且只能消费一次，且与签名密钥绑定，请勿外传。
 
 **Q：删除的邮箱怎么找回？**
-A：在回收站保留期内（默认 `RETENTION_DAYS`）可从后台还原；一旦已被彻底清理则无法恢复。
+A：在回收站保留期内（默认 30 天）可从后台还原；一旦已被彻底清理则无法恢复。
 
 **Q：页面图标不显示 / 按钮挤在一起？**
 A：请确认部署的是最新构建的 `core/public/dist`（图标规则与布局样式依赖该产物）。

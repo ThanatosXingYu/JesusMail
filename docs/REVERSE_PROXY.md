@@ -55,6 +55,12 @@ server {
 
 ## Public activation page paths
 
+For the Baota-based deployment, the actual activation routing lives in
+`/www/server/panel/vhost/nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`;
+the versioned snapshot is `private-baseline/server-config/nginx/extension/jesusmail-native-activation.conf`.
+The main vhost includes this extension: avoid adding duplicate `location` blocks to the live main vhost.
+
+
 The public activation page (`/activate`) is a separate single-page entry point. A reverse proxy that only exposes selected paths must forward every path it uses:
 
 | Path | Purpose |

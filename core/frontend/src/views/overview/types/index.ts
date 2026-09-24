@@ -1,3 +1,10 @@
+export type MailboxOverviewStats = {
+	mailboxes: number
+	active_mailboxes: number
+	sent: number
+	received: number
+}
+
 export type MailOverview = {
 	dashboard: MailDashboard
 	mail_providers: MailProvider[]

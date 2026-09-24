@@ -5,11 +5,38 @@
 		<filter-bar
 			v-model:domain="domain"
 			v-model:date-range="dateRange"
-			@update:domain="handleDataUpdate"
+			@update:domain="handleDomainUpdate"
 			@update:date-range="handleDataUpdate">
 		</filter-bar>
 
-		<!-- Main Metric Cards -->
+		<!-- All-time totals are independent of the date filter above. -->
+		<n-card class="mailbox-summary" :title="t('overview.mailboxSummary.title')">
+			<div v-if="mailboxStats" class="metrics-cards">
+				<metric-card
+					:title="t('overview.mailboxSummary.mailboxes')"
+					:value="mailboxStats.mailboxes" />
+				<metric-card
+					:title="t('overview.mailboxSummary.activeMailboxes')"
+					:value="mailboxStats.active_mailboxes" />
+				<metric-card
+					:title="t('overview.mailboxSummary.received')"
+					:value="mailboxStats.received" />
+				<metric-card :title="t('overview.mailboxSummary.sent')" :value="mailboxStats.sent" />
+			</div>
+			<div v-else-if="mailboxStatsLoading" class="summary-error">
+				{{ t('overview.mailboxSummary.loading') }}
+			</div>
+			<div v-else class="summary-error">
+				{{ t('overview.mailboxSummary.loadFailed') }}
+				<n-button size="small" @click="fetchMailboxStats">{{
+					t('overview.mailboxSummary.retry')
+				}}</n-button>
+			</div>
+			<p class="summary-note">{{ t('overview.mailboxSummary.note') }}</p>
+		</n-card>
+
+		<h3 class="period-heading">{{ t('overview.mailboxSummary.periodHeading') }}</h3>
+		<!-- Date-filtered delivery analytics -->
 		<div class="metrics-cards">
 			<metric-card
 				v-for="(item, key) in rateData"
@@ -54,8 +81,8 @@ import { useDebounceFn } from '@vueuse/core'
 import { useThemeVars } from 'naive-ui'
 import { getDayTimeRange, isArray, isObject } from '@/utils'
 import { useModal } from '@/hooks/modal/useModal'
-import { getOverviewInfo } from '@/api/modules/overview'
-import type { MailOverview, MailProvider, RateData } from './types'
+import { getOverviewInfo, getMailboxOverviewStats } from '@/api/modules/overview'
+import type { MailOverview, MailProvider, RateData, MailboxOverviewStats } from './types'
 
 import FilterBar from './components/FilterBar.vue'
 import MetricCard from './components/MetricCard.vue'
@@ -73,6 +100,9 @@ const domain = ref('')
 const dateRange = ref(getDayTimeRange())
 
 const providers = ref<MailProvider[]>([])
+const mailboxStats = ref<MailboxOverviewStats | null>(null)
+const mailboxStatsLoading = ref(true)
+let mailboxStatsRequest = 0
 
 const rateData = reactive<RateData>({
 	delivery_rate: { label: t('overview.delivered'), value: 0, unit: '%' },
@@ -131,6 +161,25 @@ const handleShowFail = () => {
 
 // Function to handle data update
 const handleDataUpdate = useDebounceFn(fetchOverviewData, 300)
+const handleDomainUpdate = () => {
+	handleDataUpdate()
+	fetchMailboxStats()
+}
+
+async function fetchMailboxStats() {
+	const request = ++mailboxStatsRequest
+	mailboxStats.value = null
+	mailboxStatsLoading.value = true
+	try {
+		const res = await getMailboxOverviewStats(domain.value)
+		if (request === mailboxStatsRequest && isObject<MailboxOverviewStats>(res))
+			mailboxStats.value = res
+	} catch {
+		// The error card keeps a database/API failure distinct from a true zero.
+	} finally {
+		if (request === mailboxStatsRequest) mailboxStatsLoading.value = false
+	}
+}
 
 // Function to update rate data
 const updateRateData = (dashboard: MailOverview['dashboard']) => {
@@ -162,6 +211,7 @@ async function fetchOverviewData() {
 }
 
 onMounted(() => {
+	fetchMailboxStats()
 	fetchOverviewData()
 })
 </script>
@@ -169,6 +219,34 @@ onMounted(() => {
 <style lang="scss" scoped>
 .email-analytics-container {
 	padding: 20px;
+}
+
+.period-heading {
+	margin: 0 0 14px;
+}
+
+.mailbox-summary {
+	margin-bottom: 20px;
+
+	.metrics-cards {
+		flex-wrap: wrap;
+	}
+
+	.metric-card {
+		flex: 1;
+	}
+}
+
+.summary-note {
+	margin: 0;
+	color: var(--color-text-4);
+}
+
+.summary-error {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
 }
 
 .metrics-cards {

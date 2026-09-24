@@ -150,6 +150,18 @@
 		}
 	},
 	"overview": {
+		"mailboxSummary": {
+			"loading": "正在加载邮箱统计…",
+			"title": "邮箱整体概况",
+			"mailboxes": "邮箱总数",
+			"activeMailboxes": "启用邮箱",
+			"received": "成功收信记录",
+			"sent": "成功发信记录",
+			"note": "统计现存邮箱在保留的邮件日志中的成功收发记录；不受日期筛选影响。删除邮箱或清理日志后数量可能变化。",
+			"loadFailed": "邮箱统计加载失败，请重试。",
+			"retry": "重试",
+			"periodHeading": "所选时段的发信分析"
+		},
 		"delivered": "已送达",
 		"opened": "已打开",
 		"clicked": "已点击",

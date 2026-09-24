@@ -148,6 +148,18 @@
 		}
 	},
 	"overview": {
+		"mailboxSummary": {
+			"loading": "Loading mailbox totals…",
+			"title": "Mailbox totals",
+			"mailboxes": "Mailboxes",
+			"activeMailboxes": "Active mailboxes",
+			"received": "Received records",
+			"sent": "Sent records",
+			"note": "Successful log records for existing mailboxes; independent of the date filter. Deleting mailboxes or pruning logs can change totals.",
+			"loadFailed": "Failed to load mailbox totals.",
+			"retry": "Retry",
+			"periodHeading": "Sending analytics for the selected period"
+		},
 		"delivered": "Delivered",
 		"opened": "Opened",
 		"clicked": "Clicked",

@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"jesusmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/v2/frame/g"
+	"jesusmail-core/utility/types/api_v1"
 )
 
 type OverviewReq struct {
@@ -49,4 +49,20 @@ type FailedListRes struct {
 		Delays           string `json:"delays" dc:"Delays"`
 		LogTime          string `json:"log_time" dc:"Log Time"`
 	} `json:"data" dc:"Data"`
+}
+
+// MailboxStatsReq is independent of campaign and date filters.
+type MailboxStatsReq struct {
+	g.Meta `path:"/overview/mailbox_stats" tags:"Overview" method:"get" summary:"Get existing mailbox totals" in:"query"`
+	Domain string `json:"domain" v:"domain" dc:"Optional mailbox domain"`
+}
+
+type MailboxStatsRes struct {
+	api_v1.StandardRes
+	Data struct {
+		Mailboxes       int64 `json:"mailboxes"`
+		ActiveMailboxes int64 `json:"active_mailboxes"`
+		Sent            int64 `json:"sent"`
+		Received        int64 `json:"received"`
+	} `json:"data"`
 }

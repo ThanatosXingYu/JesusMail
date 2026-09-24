@@ -2,7 +2,7 @@
   <a name="readme-top"></a>
   <h1>JesusMail 📧</h1>
   <p><strong>Posta kutusu dağıtımı ve işletimi için kendi sunucunuzda çalışan e-posta platformu</strong></p>
-  <p>Sürüm 5.0.0</p>
+  <p>Sürüm 1.0.0</p>
 
 [简体中文](README.md) | [English](README-en.md) | [日本語](README-ja.md) | Türkçe
 </div>

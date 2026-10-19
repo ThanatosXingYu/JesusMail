@@ -2,6 +2,7 @@
     # Product name
     $config['product_name'] = 'JesusMail';
     $config['language'] = 'zh_CN'; // Default webmail locale; users can change it in preferences.
+    $config['login_username_filter'] = 'email';
     $config['display_product_info'] = false;
 
     $config['mime_types'] = '/var/roundcube/config/mime.types';
@@ -11,6 +12,15 @@
 
     # JesusMail Roundcube SSO (the shared secret is read directly from the container environment)
     $config['jesusmail_sso_core_url'] = getenv('JESUSMAIL_ROUNDCUBE_SSO_CORE_URL') ?: 'http://core/api/public/mailbox/login_ticket/consume';
+    $diagnose_url = getenv('JESUSMAIL_ROUNDCUBE_LOGIN_DIAGNOSE_URL');
+    if ($diagnose_url === false || trim($diagnose_url) === '') {
+        $diagnose_url = preg_replace(
+            '~/mailbox/login_ticket/consume$~',
+            '/mailbox/login_diagnose',
+            $config['jesusmail_sso_core_url']
+        );
+    }
+    $config['jesusmail_login_diagnose_url'] = $diagnose_url ?: 'http://core/api/public/mailbox/login_diagnose';
 
     # Password
     $config['password_query'] = 'update mailbox set password = %P where username = %u';

@@ -222,6 +222,7 @@ node build-for-git.js    # 同步 dist 到 core/public/dist
 
 | 入口 | 用途 | 说明 |
 |---|---|---|
+| `https://域名/admin/` | **管理员后台** | 域名下的管理后台登录入口，使用 `/admin/api/*` 访问后台接口 |
 | `https://IP:41443/` | **管理员后台** | 完整管理控制台，含 SafePath 登录；建议仅管理员使用 |
 | `https://域名/activate` | **客户激活页** | 公开激活入口，无需登录后台 |
 | `https://域名/roundcube/` | **用户网页邮箱** | 客户登录自己的邮箱 |
@@ -229,9 +230,9 @@ node build-for-git.js    # 同步 dist 到 core/public/dist
 
 **重要说明**：
 
-- **域名下不开放管理后台登录入口**（nginx 不透出 `/login`）。需要使用后台时，请直接通过 `https://IP:41443/` 访问，并输入 `.env` 中的 `SafePath`。
+- 推荐通过 `https://域名/admin/` 进入管理后台；`https://IP:41443/` 保留为直连和故障排查入口。
 - 激活页需要nginx 透出 `/activate`、`/static/`、`/public/activation/*`（以及 `/api/public/activation/*`）；生产构建的激活页会请求不带 `/api` 前缀的 `/public/activation/...`，**两个前缀都要反代**，否则激活会 404。
-- 域名下打开后台后「不跳转、功能异常」通常是访问了不透出的路径导致的，属预期行为，请改用 IP 端口访问后台。
+- `https://域名/login` 仍不开放。域名后台必须从 `/admin/` 进入，由 nginx 转换页面和 API 路径。
 
 宝塔 nginx 部署中的实际激活路由在 `nginx/extension/mail.qlu.edu.kg/jesusmail-native-activation.conf`；更新该扩展文件，不要在主站重复定义 `location`。仓库的 `private-baseline/server-config/nginx/mail.qlu.edu.kg.conf` 是主站脱敏参考模板（现已移除与扩展文件重复的激活路由），**不可直接覆盖线上主站配置**；先检查现网配置、备份，再逐项合并和执行 `nginx -t`。完整反向代理说明见 [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md)。
 

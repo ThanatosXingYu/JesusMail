@@ -13,7 +13,9 @@ class jesusmail_sso extends rcube_plugin
 
     private const TICKET_PARAMETER = 'jesusmail_ticket';
     private const SECRET_HEADER = 'X-JesusMail-Roundcube-SSO-Secret';
+    private const CLIENT_IP_HEADER = 'X-JesusMail-Client-IP';
     private const DEFAULT_CORE_URL = 'http://core/api/public/mailbox/login_ticket/consume';
+    private const DEFAULT_DIAGNOSE_URL = 'http://core/api/public/mailbox/login_diagnose';
     private const MAX_RESPONSE_BYTES = 8192;
 
     public function init()
@@ -21,6 +23,7 @@ class jesusmail_sso extends rcube_plugin
         $this->add_hook('startup', array($this, 'startup'));
         $this->add_hook('authenticate', array($this, 'authenticate'));
         $this->add_hook('login_after', array($this, 'login_after'));
+        $this->add_hook('loginform_content', array($this, 'login_form_content'));
     }
 
     public function startup($args)
@@ -37,7 +40,7 @@ class jesusmail_sso extends rcube_plugin
     {
         $ticket = $this->ticket();
         if ($ticket === null) {
-            return $args;
+            return $this->diagnose_login_credentials($args);
         }
 
         $this->set_private_response_headers();
@@ -50,6 +53,27 @@ class jesusmail_sso extends rcube_plugin
         $args['pass'] = $credential['password'];
         $args['cookiecheck'] = false;
         $args['valid'] = true;
+
+        return $args;
+    }
+
+    public function login_form_content($args)
+    {
+        if (isset($args['inputs']['user'])) {
+            $args['inputs']['user']['title'] = '<label for="rcmloginuser">邮箱</label>';
+            $content = isset($args['inputs']['user']['content']) ? $args['inputs']['user']['content'] : '';
+            if (is_string($content) && strpos($content, 'placeholder=') === false) {
+                $updated = preg_replace(
+                    '/id="rcmloginuser"/',
+                    'id="rcmloginuser" placeholder="请输入邮箱地址"',
+                    $content,
+                    1
+                );
+                if (is_string($updated)) {
+                    $args['inputs']['user']['content'] = $updated;
+                }
+            }
+        }
 
         return $args;
     }
@@ -89,21 +113,108 @@ class jesusmail_sso extends rcube_plugin
             return null;
         }
 
-        $payload = json_encode(array('ticket' => $ticket));
-        if (!is_string($payload)) {
+        $decoded = $this->post_core_json($core_url, array('ticket' => $ticket), $secret);
+        if (!is_array($decoded) || !isset($decoded['username'], $decoded['password'])) {
             return null;
         }
+
+        if (!is_string($decoded['username'])
+            || !is_string($decoded['password'])
+            || $decoded['password'] === ''
+            || filter_var($decoded['username'], FILTER_VALIDATE_EMAIL) === false
+        ) {
+            return null;
+        }
+
+        return array(
+            'username' => strtolower($decoded['username']),
+            'password' => $decoded['password'],
+        );
+    }
+
+    private function diagnose_login_credentials($args)
+    {
+        $user = isset($args['user']) && is_string($args['user']) ? trim($args['user']) : '';
+        $password = isset($args['pass']) && is_string($args['pass']) ? $args['pass'] : '';
+
+        if ($user === '') {
+            $args['valid'] = false;
+            $args['error'] = '请输入邮箱地址。';
+            return $args;
+        }
+        if ($password === '') {
+            $args['valid'] = false;
+            $args['error'] = '请输入密码。';
+            return $args;
+        }
+
+        $secret = $this->shared_secret();
+        if ($secret === '') {
+            return $args;
+        }
+
+        $core_url = trim((string) rcmail::get_instance()->config->get(
+            'jesusmail_login_diagnose_url',
+            self::DEFAULT_DIAGNOSE_URL
+        ));
+        if (!$this->valid_core_url($core_url)) {
+            return $args;
+        }
+
+        $decoded = $this->post_core_json(
+            $core_url,
+            array('username' => $user, 'password' => $password),
+            $secret,
+            array(self::CLIENT_IP_HEADER . ': ' . $this->client_ip())
+        );
+        if (!is_array($decoded) || !isset($decoded['status']) || !is_string($decoded['status'])) {
+            // Keep normal IMAP authentication working if diagnostics are temporarily unavailable.
+            return $args;
+        }
+
+        $status = $decoded['status'];
+        if ($status === 'ok') {
+            return $args;
+        }
+
+        $messages = array(
+            'invalid_email' => '请输入完整的邮箱地址，例如 name@example.com。',
+            'not_found' => '该邮箱不存在，请检查邮箱地址或先完成激活。',
+            'unavailable' => '该邮箱已停用或已过期，请联系管理员。',
+            'wrong_password' => '密码错误，请重新输入。',
+            'rate_limited' => '登录尝试次数过多，请 10 分钟后再试。',
+        );
+        if (!isset($messages[$status])) {
+            return $args;
+        }
+
+        // Slow down account enumeration while the shared-secret endpoint applies per-IP limits.
+        usleep(250000);
+        $args['valid'] = false;
+        $args['error'] = $messages[$status];
+
+        return $args;
+    }
+
+    private function post_core_json($url, $payload, $secret, $extra_headers = array())
+    {
+        $encoded = json_encode($payload);
+        if (!is_string($encoded)) {
+            return null;
+        }
+
+        $headers = array_merge(array(
+            'Content-Type: application/json',
+            'Accept: application/json',
+            self::SECRET_HEADER . ': ' . $secret,
+            'Connection: close',
+        ), $extra_headers);
 
         $context = stream_context_create(array(
             'http' => array(
                 'method' => 'POST',
-                'header' => implode("\r\n", array(
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                    self::SECRET_HEADER . ': ' . $secret,
-                    'Connection: close',
-                )),
-                'content' => $payload,
+                'header' => implode("\r\n", $headers),
+                'content' => $encoded,
                 'timeout' => 3,
                 'ignore_errors' => true,
                 'follow_location' => 0,
@@ -116,7 +227,7 @@ class jesusmail_sso extends rcube_plugin
         ));
 
         // Suppress transport warnings to avoid accidental ticket/secret disclosure in logs.
-        $handle = @fopen($core_url, 'rb', false, $context);
+        $handle = @fopen($url, 'rb', false, $context);
         if ($handle === false) {
             return null;
         }
@@ -136,20 +247,24 @@ class jesusmail_sso extends rcube_plugin
         }
 
         $decoded = json_decode($response, true);
-        if (!is_array($decoded)
-            || !isset($decoded['username'], $decoded['password'])
-            || !is_string($decoded['username'])
-            || !is_string($decoded['password'])
-            || $decoded['password'] === ''
-            || filter_var($decoded['username'], FILTER_VALIDATE_EMAIL) === false
-        ) {
-            return null;
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function client_ip()
+    {
+        $candidates = array(
+            isset($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP'] : '',
+            isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '',
+        );
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim((string) $candidate);
+            if (filter_var($candidate, FILTER_VALIDATE_IP) !== false) {
+                return $candidate;
+            }
         }
 
-        return array(
-            'username' => strtolower($decoded['username']),
-            'password' => $decoded['password'],
-        );
+        return 'unknown';
     }
 
     private function shared_secret()

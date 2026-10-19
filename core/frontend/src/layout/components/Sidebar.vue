@@ -12,10 +12,10 @@
 		}">
 		<!-- 应用标志和名称 -->
 		<div class="app-logo" :class="{ collapse: isCollapse }">
-			<a href="/">
+			<router-link to="/">
 				<img class="icon" src="@/assets/images/logo.png" alt="JesusMail" />
 				<span v-show="!isCollapse" class="app-name">JesusMail</span>
-			</a>
+			</router-link>
 		</div>
 
 		<!-- 导航菜单 -->

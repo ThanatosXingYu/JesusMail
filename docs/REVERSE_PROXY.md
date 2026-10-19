@@ -68,11 +68,18 @@ The public activation page (`/activate`) is a separate single-page entry point. 
 | `/static/*` | Frontend assets |
 | `/favicon.ico` | Site icon |
 | `/api/languages/get` | Language discovery |
+| `/admin` and `/admin/*` | Administrator console under the mail domain |
+| `/admin/api/*` | Administrator API proxied to the Core `/api/*` endpoints |
 | `/public/activation/activate` | Redeem an activation key |
 | `/public/activation/config` | Public activation settings |
 | `/api/public/activation/activate`, `/api/public/activation/config` | The same endpoints with the `/api` prefix |
 
 JesusMail accepts both the `/public/...` and the `/api/public/...` prefix for the public activation API, because the production bundle is built without an API prefix. If a proxy forwards only one of them, activation fails with a 404.
+
+The administrator console can also be exposed under `/admin/`. The proxy must strip
+`/admin` from page requests and `/admin/api` from API requests. Keep the direct
+`IP:41443` management entry available until `/admin/` has been verified, because
+the domain route depends on both the frontend router base and the API prefix.
 
 ## Caddy
 

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"context"
+	"crypto/tls"
+	"fmt"
 	"jesusmail-core/internal/consts"
 	"jesusmail-core/internal/controller/abnormal_recipient"
 	"jesusmail-core/internal/controller/activation"
@@ -35,9 +38,6 @@ import (
 	"jesusmail-core/internal/service/redis_initialization"
 	"jesusmail-core/internal/service/rspamd"
 	"jesusmail-core/internal/service/timers"
-	"context"
-	"crypto/tls"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -116,27 +116,29 @@ func stripWebBasePathMiddleware(basePath string) ghttp.HandlerFunc {
 // activation page keeps working when the safe path is enabled.
 func excludedSafePathURIs() map[string]struct{} {
 	excludes := map[string]struct{}{
-		"/favicon.ico":                   {},
-		"/robots.txt":                    {},
-		"/activate":                      {},
-		"/activate/":                     {},
-		"/unsubscribe.html":              {},
-		"/unsubscribe_new.html":          {},
-		"/api/aapanel/sso":               {},
-		"/api/unsubscribe/user_group":    {},
-		"/api/unsubscribe":               {},
-		"/api/unsubscribe_new":           {},
-		"/api/batch_mail/api/send":       {},
-		"/api/batch_mail/api/batch_send": {},
-		"/api/subscribe/confirm":         {},
-		"/api/subscribe/submit":          {},
-		"/api/languages/get":             {},
-		"/already_subscribed.html":       {},
-		"/subscribe_confirm.html":        {},
-		"/subscribe_form.html":           {},
-		"/subscribe_success.html":        {},
-		"/unsubscribe_success.html":      {},
-		"/subscribe_form_code.html":      {},
+		"/favicon.ico":                             {},
+		"/robots.txt":                              {},
+		"/activate":                                {},
+		"/activate/":                               {},
+		"/unsubscribe.html":                        {},
+		"/unsubscribe_new.html":                    {},
+		"/api/aapanel/sso":                         {},
+		"/api/public/mailbox/login_diagnose":       {},
+		"/api/public/mailbox/login_ticket/consume": {},
+		"/api/unsubscribe/user_group":              {},
+		"/api/unsubscribe":                         {},
+		"/api/unsubscribe_new":                     {},
+		"/api/batch_mail/api/send":                 {},
+		"/api/batch_mail/api/batch_send":           {},
+		"/api/subscribe/confirm":                   {},
+		"/api/subscribe/submit":                    {},
+		"/api/languages/get":                       {},
+		"/already_subscribed.html":                 {},
+		"/subscribe_confirm.html":                  {},
+		"/subscribe_form.html":                     {},
+		"/subscribe_success.html":                  {},
+		"/unsubscribe_success.html":                {},
+		"/subscribe_form_code.html":                {},
 	}
 
 	for _, path := range publicActivationAPIPaths {
@@ -167,6 +169,7 @@ func isPublicActivationPath(path string) bool {
 	}
 
 	return path == "/api/public/mailbox/login_ticket/consume" ||
+		path == "/api/public/mailbox/login_diagnose" ||
 		strings.HasPrefix(path, "/static/")
 }
 

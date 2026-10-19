@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios'
 import router from '@/router'
 import { useUserStore } from '@/store'
 import { apiUrlPrefix, isObject, Message } from '@/utils'
+import { toAdminApiUrl } from '@/config/admin'
 
 interface FetchOptions {
 	prefix: string
@@ -80,6 +81,7 @@ instance.interceptors.request.use(config => {
 	if (isObject<FetchOptions>(fetchOptions)) {
 		config.url = `${fetchOptions.prefix}` + config.url
 	}
+	config.url = toAdminApiUrl(config.url || '')
 	return config
 })
 

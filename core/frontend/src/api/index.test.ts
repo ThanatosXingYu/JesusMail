@@ -22,6 +22,10 @@ vi.mock('@/utils', () => ({
   },
 }))
 
+vi.mock('@/config/admin', () => ({
+  toAdminApiUrl: (url: string) => url,
+}))
+
 import { instance, clearPendingRequests } from './index'
 
 describe('API instance', () => {

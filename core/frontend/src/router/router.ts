@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { isDev } from '@/utils'
+import { adminPath } from '@/config/admin'
 import activationRoute from './modules/activation'
 import apiRoute from './modules/api'
 import automationRoute from './modules/automation'
@@ -89,7 +90,7 @@ export const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-	history: createWebHistory('/'),
+	history: createWebHistory(adminPath || '/'),
 	routes,
 	strict: false,
 	scrollBehavior: () => ({ left: 0, top: 0 }),

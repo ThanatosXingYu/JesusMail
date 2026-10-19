@@ -292,6 +292,28 @@ describe('原生激活码管理', () => {
 		expect(mocks.copyText).toHaveBeenCalledWith('UNUSED-CODE')
 	})
 
+	it('可以按激活码关键字搜索，并回到第一页', async () => {
+		const wrapper = await mountPage()
+		mocks.getActivationList.mockClear()
+
+		const search = wrapper
+			.findAllComponents(NInputStub)
+			.find(item => item.attributes('placeholder') === '搜索激活码')
+		expect(search).toBeTruthy()
+		search!.vm.$emit('update:value', ' ABCD ')
+		await nextTick()
+		await findButton(wrapper, '搜索').trigger('click')
+		await flushPromises()
+
+		expect(mocks.getActivationList).toHaveBeenCalledWith({
+			page: 1,
+			page_size: 50,
+			status: -1,
+			group: '',
+			keyword: ' ABCD ',
+		})
+	})
+
 	it('未使用激活码经二次确认后调用统一删除', async () => {
 		const wrapper = await mountPage()
 		const actionColumn = getColumn(wrapper, 'actions')
@@ -369,7 +391,11 @@ describe('原生激活码管理', () => {
 		const wrapper = await mountPage()
 		const countInput = wrapper.getComponent(NInputNumberStub)
 		countInput.vm.$emit('update:value', 500)
-		const inputs = wrapper.findAllComponents(NInputStub)
+		const generateModal = wrapper
+			.findAllComponents(NModalStub)
+			.find(item => item.props('title') === '生成激活码')
+		expect(generateModal).toBeTruthy()
+		const inputs = generateModal!.findAllComponents(NInputStub)
 		inputs[0].vm.$emit('update:value', '  教师  ')
 		inputs[1].vm.$emit('update:value', '  秋季批次  ')
 		await nextTick()
@@ -445,12 +471,14 @@ describe('原生激活码管理', () => {
 		expect(mocks.getActivationList).toHaveBeenNthCalledWith(1, {
 			status: 1,
 			group: '新生',
+			keyword: '',
 			page: 1,
 			page_size: 500,
 		})
 		expect(mocks.getActivationList).toHaveBeenNthCalledWith(2, {
 			status: 1,
 			group: '新生',
+			keyword: '',
 			page: 2,
 			page_size: 500,
 		})

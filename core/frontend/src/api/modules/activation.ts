@@ -38,6 +38,7 @@ export const getActivationList = (params: {
 	page_size: number
 	status: number
 	group: string
+	keyword: string
 }) => instance.get('/activation/list', { params })
 export const generateActivationKeys = (params: { count: number; note: string; group: string }) =>
 	instance.post('/activation/generate', params, { fetchOptions: { successMessage: true } })

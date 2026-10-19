@@ -18,6 +18,19 @@
 		<n-card class="activation-list-card">
 			<div class="toolbar">
 				<n-space class="filters" :wrap="true">
+					<n-input
+						v-model:value="params.keyword"
+						clearable
+						maxlength="32"
+						class="w-260px"
+						placeholder="搜索激活码"
+						@keyup.enter="reset"
+						@clear="reset">
+						<template #prefix>
+							<i class="i-mdi-magnify"></i>
+						</template>
+					</n-input>
+					<n-button @click="reset">搜索</n-button>
 					<n-select
 						v-model:value="params.status"
 						:options="statusOptions"
@@ -154,7 +167,7 @@ const statCards = computed(() => [
 	{ label: '已使用', value: stats.used },
 	{ label: '已禁用', value: stats.disabled },
 ])
-const params = reactive({ page: 1, page_size: 50, status: -1, group: '' })
+const params = reactive({ page: 1, page_size: 50, status: -1, group: '', keyword: '' })
 const rows = ref<ActivationKey[]>([]),
 	total = ref(0),
 	groups = ref<string[]>([]),
@@ -391,7 +404,7 @@ const exportCsv = async () => {
 	if (exporting.value) return
 	exporting.value = true
 	try {
-		const filter = { status: params.status, group: params.group }
+		const filter = { status: params.status, group: params.group, keyword: params.keyword }
 		const first = (await getActivationList({
 			...filter,
 			page: 1,

@@ -1,12 +1,12 @@
 package activation
 
 import (
-	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
-	"jesusmail-core/internal/service/mail_boxes"
 	"context"
 	"crypto/rand"
 	"errors"
 	"fmt"
+	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/service/mail_boxes"
 	"os"
 	"regexp"
 	"strconv"
@@ -249,7 +249,7 @@ func GetStats(ctx context.Context) (Stats, error) {
 	return out, err
 }
 
-func List(ctx context.Context, page, pageSize, status int, group string) (ListResult, error) {
+func List(ctx context.Context, page, pageSize, status int, group, keyword string) (ListResult, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -267,6 +267,9 @@ func List(ctx context.Context, page, pageSize, status int, group string) (ListRe
 		m = m.Where("group_name", "")
 	} else if group != "" {
 		m = m.Where("group_name", group)
+	}
+	if keyword = strings.ToUpper(strings.TrimSpace(keyword)); keyword != "" {
+		m = m.WhereLike("keycode", "%"+keyword+"%")
 	}
 	total, err := m.Count()
 	if err != nil {

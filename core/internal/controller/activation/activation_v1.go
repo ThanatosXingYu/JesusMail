@@ -1,10 +1,10 @@
 package activation
 
 import (
-	"jesusmail-core/api/activation/v1"
-	service "jesusmail-core/internal/service/activation"
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
+	"jesusmail-core/api/activation/v1"
+	service "jesusmail-core/internal/service/activation"
 )
 
 func (c *ControllerV1) Stats(ctx context.Context, req *v1.StatsReq) (*v1.StatsRes, error) {
@@ -18,7 +18,7 @@ func (c *ControllerV1) Stats(ctx context.Context, req *v1.StatsReq) (*v1.StatsRe
 	return res, nil
 }
 func (c *ControllerV1) List(ctx context.Context, req *v1.ListReq) (*v1.ListRes, error) {
-	data, err := service.List(ctx, req.Page, req.PageSize, req.Status, req.Group)
+	data, err := service.List(ctx, req.Page, req.PageSize, req.Status, req.Group, req.Keyword)
 	if err != nil {
 		return nil, err
 	}

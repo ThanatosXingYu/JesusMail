@@ -95,6 +95,14 @@ describe('公共激活页', () => {
 		expect(wrapper.find('.domain-suffix').text()).toBe('@mail.example.com')
 	})
 
+	it('激活页允许移动端宽度，离开页面后恢复全局布局', async () => {
+		const wrapper = await mountPage()
+		expect(document.body.classList.contains('activation-page-body')).toBe(true)
+
+		wrapper.unmount()
+		expect(document.body.classList.contains('activation-page-body')).toBe(false)
+	})
+
 	it('提交激活时不发送有效期字段', async () => {
 		const wrapper = await mountPage()
 
@@ -116,9 +124,30 @@ describe('公共激活页', () => {
 			password: 'Passw0rd',
 		})
 		expect(payload).not.toHaveProperty('duration_days')
+		expect(payload).not.toHaveProperty('recovery_email')
 	})
 
-	it('激活成功页提示永久有效并展示开通的邮箱', async () => {
+	it('填写备用邮箱时随激活请求提交，并去除首尾空格', async () => {
+		const wrapper = await mountPage()
+
+		const inputs = wrapper.findAll('input')
+		await inputs[0].setValue('JESUSMAIL-ABCD-2345-EFGH')
+		await inputs[1].setValue('student')
+		await inputs[2].setValue('Passw0rd')
+		await inputs[3].setValue('Passw0rd')
+		await inputs[4].setValue('  backup@example.com  ')
+		await wrapper.find('form').trigger('submit.prevent')
+		await flushPromises()
+
+		expect(mocks.activateMailbox).toHaveBeenCalledWith({
+			key: 'JESUSMAIL-ABCD-2345-EFGH',
+			prefix: 'student',
+			password: 'Passw0rd',
+			recovery_email: 'backup@example.com',
+		})
+	})
+
+	it('激活成功页展示 7 天转永久规则和开通邮箱', async () => {
 		const wrapper = await mountPage()
 
 		const inputs = wrapper.findAll('input')
@@ -130,8 +159,13 @@ describe('公共激活页', () => {
 		await flushPromises()
 
 		expect(wrapper.text()).toContain('student@mail.example.com')
-		expect(wrapper.text()).toContain('永久有效')
+		expect(wrapper.text()).toContain('默认有效期为 7 天，好评后将自动转为永久')
 		expect(wrapper.find('a').attributes('href')).toBe('/roundcube/')
+	})
+
+	it('表单展示 7 天转永久规则', async () => {
+		const wrapper = await mountPage()
+		expect(wrapper.find('.expiry-tip').text()).toBe('默认有效期为 7 天，好评后将自动转为永久。')
 	})
 
 	it('底部入口跳转用户登录（Roundcube），而非管理后台登录', async () => {

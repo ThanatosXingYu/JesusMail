@@ -1,8 +1,8 @@
 package v1
 
 import (
-	api_v1 "jesusmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/v2/frame/g"
+	api_v1 "jesusmail-core/utility/types/api_v1"
 )
 
 type ActivateReq struct {
@@ -10,6 +10,8 @@ type ActivateReq struct {
 	Key      string `json:"key" v:"required|max-length:32"`
 	Prefix   string `json:"prefix" v:"required|max-length:30"`
 	Password string `json:"password" v:"required|max-length:64"`
+	// RecoveryEmail is optional. When set, a copy of the login details is sent there.
+	RecoveryEmail string `json:"recovery_email" v:"max-length:320"`
 	// DurationDays is accepted for backward compatibility with older clients and ignored:
 	// mailboxes activated from an activation key are permanent.
 	DurationDays int `json:"duration_days,omitempty"`

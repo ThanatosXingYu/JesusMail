@@ -54,6 +54,7 @@ const rows: ActivationKey[] = [
 		keycode: 'USED-CODE',
 		status: 1,
 		email: 'student@example.com',
+		recovery_email: 'backup@example.com',
 		used_ip: '192.0.2.1',
 		used_at: '2026-09-15T02:00:00Z',
 		note: '已使用备注',
@@ -273,12 +274,14 @@ describe('原生激活码管理', () => {
 		expect(countInput.props()).toMatchObject({ min: 1, max: 500, precision: 0 })
 
 		const table = wrapper.getComponent(NDataTableStub)
-		expect(table.props('scrollX')).toBe(1790)
+		expect(table.props('scrollX')).toBe(2020)
 		const titles = (table.props('columns') as Array<{ title?: string }>).map(column => column.title)
 		expect(titles).toContain('操作')
 		expect(titles).toContain('激活码')
 		expect(titles).toContain('状态')
 		expect(titles).toContain('分组')
+		expect(titles).toContain('开通邮箱')
+		expect(titles).toContain('备用邮箱')
 		expect(titles).toContain('备注')
 	})
 
@@ -292,13 +295,13 @@ describe('原生激活码管理', () => {
 		expect(mocks.copyText).toHaveBeenCalledWith('UNUSED-CODE')
 	})
 
-	it('可以按激活码关键字搜索，并回到第一页', async () => {
+	it('可以按激活码、开通邮箱或备用邮箱搜索，并回到第一页', async () => {
 		const wrapper = await mountPage()
 		mocks.getActivationList.mockClear()
 
 		const search = wrapper
 			.findAllComponents(NInputStub)
-			.find(item => item.attributes('placeholder') === '搜索激活码')
+			.find(item => item.attributes('placeholder') === '搜索激活码/开通邮箱/备用邮箱')
 		expect(search).toBeTruthy()
 		search!.vm.$emit('update:value', ' ABCD ')
 		await nextTick()

@@ -10,7 +10,7 @@
 				<div class="success-icon">✓</div>
 				<h2>你的邮箱已就绪</h2>
 				<div class="email">{{ email }}</div>
-				<p>登录密码为你刚才设置的密码，请妥善保管。邮箱永久有效，不会过期。本次激活密钥已作废，请勿重复使用。</p>
+				<p>登录密码为你刚才设置的密码，请妥善保管。邮箱默认有效期为 7 天，好评后将自动转为永久。本次激活密钥已作废，请勿重复使用。</p>
 				<n-button type="primary" size="large" block tag="a" href="/roundcube/">前往登录邮箱</n-button>
 			</div>
 			<n-form
@@ -54,8 +54,16 @@
 						placeholder="再次输入密码"
 						@keyup.enter="submit" />
 				</n-form-item>
+				<n-form-item label="备用邮箱（选填）" path="recovery_email">
+					<n-input
+						v-model:value="form.recovery_email"
+						type="email"
+						maxlength="320"
+						placeholder="填写后将向此邮箱发送邮箱账号和登录密码"
+						@keyup.enter="submit" />
+				</n-form-item>
 				<n-form-item label="邮箱有效期">
-					<div class="expiry-tip">永久有效：激活成功后邮箱不会过期，可长期使用。</div>
+					<div class="expiry-tip">默认有效期为 7 天，好评后将自动转为永久。</div>
 				</n-form-item>
 				<n-button type="primary" size="large" block :loading="loading" attr-type="submit"
 					>立即开通邮箱</n-button
@@ -76,7 +84,7 @@ const formRef = ref<FormInst | null>(null)
 const loading = ref(false)
 const email = ref('')
 const domain = ref('')
-const form = reactive({ key: '', prefix: '', password: '', password2: '' })
+const form = reactive({ key: '', prefix: '', password: '', password2: '', recovery_email: '' })
 
 const domainSuffix = computed(() => (domain.value ? `@${domain.value}` : '@...'))
 
@@ -91,7 +99,14 @@ const fetchConfig = async () => {
 	}
 }
 
-onMounted(fetchConfig)
+onMounted(() => {
+	document.body.classList.add('activation-page-body')
+	fetchConfig()
+})
+
+onBeforeUnmount(() => {
+	document.body.classList.remove('activation-page-body')
+})
 
 const rules: FormRules = {
 	key: [
@@ -128,17 +143,30 @@ const rules: FormRules = {
 			trigger: ['blur', 'input'],
 		},
 	],
+	recovery_email: [
+		{
+			validator: (_rule, value: string) =>
+				!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
+			message: '请输入正确的备用邮箱地址，或留空',
+			trigger: ['blur', 'input'],
+		},
+	],
 }
 
 const submit = async () => {
 	await formRef.value?.validate()
 	loading.value = true
 	try {
-		const data = (await activateMailbox({
+		const params: { key: string; prefix: string; password: string; recovery_email?: string } = {
 			key: form.key,
 			prefix: form.prefix,
 			password: form.password,
-		})) as { email: string }
+		}
+		const recoveryEmail = form.recovery_email.trim()
+		if (recoveryEmail) {
+			params.recovery_email = recoveryEmail
+		}
+		const data = (await activateMailbox(params)) as { email: string }
 		email.value = data.email
 		if (data.email.includes('@')) {
 			domain.value = data.email.slice(data.email.indexOf('@') + 1)
@@ -157,6 +185,9 @@ const submit = async () => {
 	justify-content: center;
 	padding: 24px;
 	background: linear-gradient(135deg, #263b48, #40545d 55%, #31586a);
+}
+:global(body.activation-page-body) {
+	min-width: 0;
 }
 .activate-card {
 	width: 100%;

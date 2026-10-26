@@ -7,6 +7,7 @@ export interface ActivationKey {
 	used_at?: string | null
 	used_ip?: string
 	email?: string
+	recovery_email?: string
 	note: string
 	group_name: string
 	created_at: string
@@ -29,7 +30,12 @@ export interface ActivationConfig {
 export const getActivationConfig = () => instance.get<ActivationConfig>('/public/activation/config')
 
 // 激活成功后邮箱为永久有效，无需提交有效期
-export const activateMailbox = (params: { key: string; prefix: string; password: string }) =>
+export const activateMailbox = (params: {
+	key: string
+	prefix: string
+	password: string
+	recovery_email?: string
+}) =>
 	instance.post('/public/activation/activate', params)
 
 export const getActivationStats = () => instance.get('/activation/stats')

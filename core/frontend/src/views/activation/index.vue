@@ -21,9 +21,9 @@
 					<n-input
 						v-model:value="params.keyword"
 						clearable
-						maxlength="32"
+						maxlength="320"
 						class="w-260px"
-						placeholder="搜索激活码"
+						placeholder="搜索激活码/开通邮箱/备用邮箱"
 						@keyup.enter="reset"
 						@clear="reset">
 						<template #prefix>
@@ -74,7 +74,7 @@
 				:data="rows"
 				:row-key="row => row.id"
 				:checked-row-keys="checked"
-				:scroll-x="1790"
+				:scroll-x="2020"
 				class="activation-table"
 				flex-height
 				@update:checked-row-keys="keys => checked = keys as number[]" />
@@ -282,7 +282,8 @@ const columns: DataTableColumns<ActivationKey> = [
 		),
 	},
 	{ title: '分组', key: 'group_name', width: 130, render: row => row.group_name || '未分组' },
-	{ title: '关联邮箱', key: 'email', width: 210, render: row => row.email || '-' },
+	{ title: '开通邮箱', key: 'email', width: 210, render: row => row.email || '-' },
+	{ title: '备用邮箱', key: 'recovery_email', width: 210, render: row => row.recovery_email || '-' },
 	{ title: '使用 IP', key: 'used_ip', width: 140, render: row => row.used_ip || '-' },
 	{ title: '使用时间', key: 'used_at', width: 175, render: row => fmt(row.used_at) },
 	{ title: '备注', key: 'note', minWidth: 150, render: row => row.note || '-' },
@@ -422,6 +423,7 @@ const exportCsv = async () => {
 			'状态',
 			'分组',
 			'关联邮箱',
+			'备用邮箱',
 			'使用IP',
 			'使用时间',
 			'备注',
@@ -434,6 +436,7 @@ const exportCsv = async () => {
 				getStatusText(row.status),
 				row.group_name,
 				row.email,
+				row.recovery_email,
 				row.used_ip,
 				fmt(row.used_at),
 				row.note,

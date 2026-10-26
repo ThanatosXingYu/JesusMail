@@ -143,3 +143,43 @@ func TestWebmailURL(t *testing.T) {
 		t.Fatalf("webmailURL() = %q", got)
 	}
 }
+
+func TestRenderActivationRecoveryTemplateContainsCredentials(t *testing.T) {
+	originalResolver := resolveWebmailHost
+	resolveWebmailHost = func(string) string { return "mail.example.com" }
+	t.Cleanup(func() {
+		resolveWebmailHost = originalResolver
+	})
+
+	_, testFile, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("resolve test file path")
+	}
+	templateDir := filepath.Join(filepath.Dir(testFile), "..", "..", "..", "template", "activation_recovery_email")
+	htmlBody, txtBody, err := renderRecoveryTemplates(
+		"student@mail.example.com",
+		"Pass<word&9",
+		filepath.Join(templateDir, "recovery_email.html"),
+		filepath.Join(templateDir, "recovery_email.txt"),
+	)
+	if err != nil {
+		t.Fatalf("renderRecoveryTemplateFiles() error = %v", err)
+	}
+	for _, body := range []string{htmlBody, txtBody} {
+		if !strings.Contains(body, "student@mail.example.com") ||
+			!strings.Contains(body, "https://mail.example.com/roundcube/") {
+			t.Fatalf("recovery template is missing login details: %s", body)
+		}
+	}
+	if !strings.Contains(htmlBody, "Pass&lt;word&amp;9") {
+		t.Fatal("recovery HTML template did not escape the password")
+	}
+	if !strings.Contains(txtBody, "Pass<word&9") {
+		t.Fatal("recovery TXT template is missing the password")
+	}
+	for _, body := range []string{htmlBody, txtBody} {
+		if strings.Contains(body, "SMTP") || strings.Contains(body, ":41443") {
+			t.Fatal("recovery template contains infrastructure details")
+		}
+	}
+}

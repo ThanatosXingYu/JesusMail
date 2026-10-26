@@ -1,10 +1,9 @@
 package public_activation
 
 import (
+	"context"
 	"jesusmail-core/api/public_activation/v1"
 	"jesusmail-core/internal/service/activation"
-	"context"
-	"errors"
 	"net"
 	"strings"
 
@@ -27,13 +26,12 @@ func (c *ControllerV1) Activate(ctx context.Context, req *v1.ActivateReq) (res *
 		res.Msg = "尝试次数过多，请 10 分钟后再试"
 		return res, nil
 	}
-	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, ip)
+	email, err := activation.Activate(ctx, req.Key, req.Prefix, req.Password, req.RecoveryEmail, ip)
 	if err != nil {
 		res.Code = 422
-		switch {
-		case errors.Is(err, activation.ErrInvalidKey), errors.Is(err, activation.ErrMailboxExists):
-			res.Msg = err.Error()
-		default:
+		if message, known := activation.PublicErrorMessage(err); known {
+			res.Msg = message
+		} else {
 			g.Log().Error(ctx, "public mailbox activation failed:", err)
 			res.Msg = "激活失败，请检查输入或稍后重试"
 		}

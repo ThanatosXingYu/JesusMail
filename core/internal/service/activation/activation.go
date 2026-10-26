@@ -3,11 +3,13 @@ package activation
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"errors"
 	"fmt"
 	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
 	"jesusmail-core/internal/service/mail_boxes"
 	"jesusmail-core/internal/service/welcome"
+	"net/mail"
 	"os"
 	"regexp"
 	"strconv"
@@ -69,20 +71,30 @@ var (
 )
 
 var (
-	ErrInvalidKey    = errors.New("该激活密钥无效或已被使用")
-	ErrMailboxExists = errors.New("该邮箱前缀已被占用，请换一个")
+	ErrInvalidKeyFormat         = errors.New("激活密钥格式不正确，请检查是否完整输入")
+	ErrInvalidKey               = errors.New("激活密钥不存在，请检查后重试")
+	ErrKeyUsed                  = errors.New("该激活密钥已被使用，请更换一个")
+	ErrKeyDisabled              = errors.New("该激活密钥已被禁用，请联系管理员")
+	ErrInvalidPrefix            = errors.New("邮箱前缀需为 3-30 位小写字母、数字或 . _ -，并以字母或数字开头结尾")
+	ErrReservedPrefix           = errors.New("该邮箱前缀为系统保留，请换一个")
+	ErrInvalidPassword          = errors.New("密码需为 8-64 位，且同时包含字母和数字")
+	ErrMailboxExists            = errors.New("该邮箱已被注册，请更换邮箱前缀")
+	ErrActivationDomainDisabled = errors.New("激活域名当前不可用，请联系管理员")
+	ErrInvalidRecoveryEmail     = errors.New("备用邮箱格式不正确，请检查后重试")
 )
 
 type Key struct {
-	Id        int64      `json:"id"`
-	Keycode   string     `json:"keycode"`
-	Status    int        `json:"status"`
-	UsedAt    *time.Time `json:"used_at"`
-	UsedIp    string     `json:"used_ip"`
-	Email     string     `json:"email"`
-	Note      string     `json:"note"`
-	GroupName string     `json:"group_name"`
-	CreatedAt time.Time  `json:"created_at"`
+	Id      int64      `json:"id"`
+	Keycode string     `json:"keycode"`
+	Status  int        `json:"status"`
+	UsedAt  *time.Time `json:"used_at"`
+	UsedIp  string     `json:"used_ip"`
+	Email   string     `json:"email"`
+	// RecoveryEmail is the optional alternate recipient for login details.
+	RecoveryEmail string    `json:"recovery_email"`
+	Note          string    `json:"note"`
+	GroupName     string    `json:"group_name"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Stats struct {
@@ -125,18 +137,47 @@ func Validate(key, prefix, password string) (string, string, error) {
 	key = strings.ToUpper(strings.TrimSpace(key))
 	prefix = strings.ToLower(strings.TrimSpace(prefix))
 	if !keyPattern.MatchString(key) {
-		return "", "", errors.New("激活密钥格式不正确")
+		return "", "", ErrInvalidKeyFormat
 	}
 	if !prefixPattern.MatchString(prefix) || strings.Contains(prefix, "..") {
-		return "", "", errors.New("前缀需为 3-30 位小写字母、数字或 . _ -，且以字母/数字开头结尾")
+		return "", "", ErrInvalidPrefix
 	}
 	if _, ok := reservedPrefixes[prefix]; ok {
-		return "", "", errors.New("该前缀为系统保留，请换一个")
+		return "", "", ErrReservedPrefix
 	}
 	if len(password) < 8 || len(password) > 64 || !passwordLetter.MatchString(password) || !passwordDigit.MatchString(password) {
-		return "", "", errors.New("密码需 8-64 位，且同时包含字母和数字")
+		return "", "", ErrInvalidPassword
 	}
 	return key, prefix, nil
+}
+
+func normalizeRecoveryEmail(value string) (string, error) {
+	value = strings.ToLower(strings.TrimSpace(value))
+	if value == "" {
+		return "", nil
+	}
+	if len(value) > 320 || strings.ContainsAny(value, "\r\n") {
+		return "", ErrInvalidRecoveryEmail
+	}
+	address, err := mail.ParseAddress(value)
+	if err != nil || address.Name != "" || strings.ToLower(address.Address) != value {
+		return "", ErrInvalidRecoveryEmail
+	}
+	return value, nil
+}
+
+// PublicErrorMessage returns a safe, specific message for known activation failures.
+func PublicErrorMessage(err error) (string, bool) {
+	for _, known := range []error{
+		ErrInvalidKeyFormat, ErrInvalidKey, ErrKeyUsed, ErrKeyDisabled,
+		ErrInvalidPrefix, ErrReservedPrefix, ErrInvalidPassword,
+		ErrMailboxExists, ErrActivationDomainDisabled, ErrInvalidRecoveryEmail,
+	} {
+		if errors.Is(err, known) {
+			return known.Error(), true
+		}
+	}
+	return "", false
 }
 
 func AllowAttempt(ctx context.Context, ip string) (bool, error) {
@@ -171,8 +212,12 @@ func PublicConfigInfo() PublicConfig {
 // Activate redeems an activation key and creates a permanent mailbox.
 // Mailboxes activated through an activation key never expire: ExpiresAt stays nil,
 // which the mailbox service treats as "permanent".
-func Activate(ctx context.Context, keycode, prefix, password, ip string) (string, error) {
+func Activate(ctx context.Context, keycode, prefix, password, recoveryEmail, ip string) (string, error) {
 	keycode, prefix, err := Validate(keycode, prefix, password)
+	if err != nil {
+		return "", err
+	}
+	recoveryEmail, err = normalizeRecoveryEmail(recoveryEmail)
 	if err != nil {
 		return "", err
 	}
@@ -191,15 +236,24 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 			return fmt.Errorf("检查邮箱域名失败: %w", err)
 		}
 		if domainCount == 0 {
-			return errors.New("激活域名尚未启用")
+			return ErrActivationDomainDisabled
 		}
 
 		var key Key
 		if err := tx.Model("activation_keys").Ctx(ctx).
-			Where("keycode", keycode).Where("status", 0).LockUpdate().Scan(&key); err != nil {
+			Where("keycode", keycode).LockUpdate().Scan(&key); err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("锁定激活码失败: %w", err)
 		}
 		if key.Id == 0 {
+			return ErrInvalidKey
+		}
+		switch key.Status {
+		case 0:
+		case 1:
+			return ErrKeyUsed
+		case 2:
+			return ErrKeyDisabled
+		default:
 			return ErrInvalidKey
 		}
 		mailbox.ActivationKeyID = &key.Id
@@ -217,7 +271,10 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 
 		result, err := tx.Model("activation_keys").Ctx(ctx).
 			Where("id", key.Id).Where("status", 0).
-			Data(g.Map{"status": 1, "used_at": now, "used_ip": ip, "email": email}).Update()
+			Data(g.Map{
+				"status": 1, "used_at": now, "used_ip": ip,
+				"email": email, "recovery_email": recoveryEmail,
+			}).Update()
 		if err != nil {
 			return fmt.Errorf("核销激活码失败: %w", err)
 		}
@@ -242,6 +299,14 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 		g.Log().Warning(ctx, "activation mailbox storage initialization failed:", err)
 	}
 	enqueueActivationWelcome(ctx, email, welcome.Queue)
+	if recoveryEmail != "" {
+		sendCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
+		defer cancel()
+		if err := welcome.SendActivationRecoveryEmail(sendCtx, email, password, recoveryEmail); err != nil {
+			// Never include the password or SMTP body details in this best-effort warning.
+			g.Log().Warning(sendCtx, "activation recovery email delivery failed; mailbox activation remains successful")
+		}
+	}
 	return email, nil
 }
 
@@ -279,15 +344,19 @@ func List(ctx context.Context, page, pageSize, status int, group, keyword string
 	} else if group != "" {
 		m = m.Where("group_name", group)
 	}
-	if keyword = strings.ToUpper(strings.TrimSpace(keyword)); keyword != "" {
-		m = m.WhereLike("keycode", "%"+keyword+"%")
+	if keyword = strings.ToLower(strings.TrimSpace(keyword)); keyword != "" {
+		pattern := "%" + keyword + "%"
+		m = m.Where(
+			"(LOWER(keycode) LIKE ? OR LOWER(COALESCE(email, '')) LIKE ? OR LOWER(recovery_email) LIKE ? OR LOWER(note) LIKE ? OR LOWER(group_name) LIKE ?)",
+			pattern, pattern, pattern, pattern, pattern,
+		)
 	}
 	total, err := m.Count()
 	if err != nil {
 		return ListResult{}, err
 	}
 	var rows []Key
-	if err = m.Fields("id,keycode,status,used_at,used_ip,email,note,group_name,created_at").OrderAsc("id").Page(page, pageSize).Scan(&rows); err != nil {
+	if err = m.Fields("id,keycode,status,used_at,used_ip,email,recovery_email,note,group_name,created_at").OrderAsc("id").Page(page, pageSize).Scan(&rows); err != nil {
 		return ListResult{}, err
 	}
 	groupsVar, err := g.DB().Model("activation_keys").Ctx(ctx).WhereNot("group_name", "").OrderAsc("group_name").Distinct().Array("group_name")
@@ -447,7 +516,7 @@ func bindingStillMatches(current, original *Key) bool {
 }
 
 func clearBindingResetData() g.Map {
-	return g.Map{"status": 0, "used_at": nil, "used_ip": nil, "email": nil}
+	return g.Map{"status": 0, "used_at": nil, "used_ip": nil, "email": nil, "recovery_email": ""}
 }
 
 func activationRelationProven(ctx context.Context, tx gdb.TX, key *Key) (bool, error) {

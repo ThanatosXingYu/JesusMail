@@ -15,7 +15,7 @@ type ListReq struct {
 	PageSize int    `json:"page_size" d:"50" v:"min:5|max:500"`
 	Status   int    `json:"status" d:"-1" v:"min:-1|max:2"`
 	Group    string `json:"group" v:"max-length:100"`
-	Keyword  string `json:"keyword" v:"max-length:32"`
+	Keyword  string `json:"keyword" v:"max-length:320"`
 }
 type ListRes struct{ api_v1.StandardRes }
 type GenerateReq struct {

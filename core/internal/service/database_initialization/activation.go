@@ -44,6 +44,7 @@ func activationSchemaStatements() []string {
             used_at TIMESTAMPTZ,
             used_ip VARCHAR(45),
             email VARCHAR(320),
+            recovery_email VARCHAR(320) NOT NULL DEFAULT '',
             note VARCHAR(255) NOT NULL DEFAULT '',
             group_name VARCHAR(100) NOT NULL DEFAULT '',
             created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -55,6 +56,7 @@ func activationSchemaStatements() []string {
             ADD COLUMN IF NOT EXISTS used_at TIMESTAMPTZ,
             ADD COLUMN IF NOT EXISTS used_ip VARCHAR(45),
             ADD COLUMN IF NOT EXISTS email VARCHAR(320),
+            ADD COLUMN IF NOT EXISTS recovery_email VARCHAR(320) NOT NULL DEFAULT '',
             ADD COLUMN IF NOT EXISTS note VARCHAR(255) DEFAULT '',
             ADD COLUMN IF NOT EXISTS group_name VARCHAR(100) DEFAULT '',
             ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP`,
@@ -116,6 +118,7 @@ func activationSchemaStatements() []string {
 		`CREATE UNIQUE INDEX IF NOT EXISTS activation_keys_keycode_key ON activation_keys(keycode)`,
 		`CREATE INDEX IF NOT EXISTS idx_activation_keys_status ON activation_keys(status)`,
 		`CREATE INDEX IF NOT EXISTS idx_activation_keys_group ON activation_keys(group_name)`,
+		`CREATE INDEX IF NOT EXISTS idx_activation_keys_recovery_email ON activation_keys(recovery_email) WHERE recovery_email <> ''`,
 		`CREATE TABLE IF NOT EXISTS activation_logs (
             id BIGSERIAL PRIMARY KEY,
             keycode VARCHAR(32) NOT NULL,

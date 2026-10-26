@@ -18,7 +18,7 @@ func TestValidate(t *testing.T) {
 		password   string
 		wantKey    string
 		wantPrefix string
-		wantErr    bool
+		wantErr    error
 	}{
 		{
 			name:       "normalizes current key",
@@ -36,22 +36,22 @@ func TestValidate(t *testing.T) {
 			wantKey:    "QLU-ABCD-2345-WXYZ",
 			wantPrefix: "user1",
 		},
-		{name: "rejects invalid key alphabet", key: "JESUSMAIL-A0II-2345-WXYZ", prefix: "user1", password: "password8", wantErr: true},
-		{name: "rejects short prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "ab", password: "password8", wantErr: true},
-		{name: "rejects long prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "abcdefghijklmnopqrstuvwxyz12345", password: "password8", wantErr: true},
-		{name: "rejects double dot", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user..name", password: "password8", wantErr: true},
-		{name: "rejects reserved prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "Admin", password: "password8", wantErr: true},
-		{name: "rejects password without digit", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "password", wantErr: true},
-		{name: "rejects password without letter", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "12345678", wantErr: true},
-		{name: "rejects short password", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "pass123", wantErr: true},
+		{name: "rejects invalid key alphabet", key: "JESUSMAIL-A0II-2345-WXYZ", prefix: "user1", password: "password8", wantErr: ErrInvalidKeyFormat},
+		{name: "rejects short prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "ab", password: "password8", wantErr: ErrInvalidPrefix},
+		{name: "rejects long prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "abcdefghijklmnopqrstuvwxyz12345", password: "password8", wantErr: ErrInvalidPrefix},
+		{name: "rejects double dot", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user..name", password: "password8", wantErr: ErrInvalidPrefix},
+		{name: "rejects reserved prefix", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "Admin", password: "password8", wantErr: ErrReservedPrefix},
+		{name: "rejects password without digit", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "password", wantErr: ErrInvalidPassword},
+		{name: "rejects password without letter", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "12345678", wantErr: ErrInvalidPassword},
+		{name: "rejects short password", key: "JESUSMAIL-ABCD-2345-WXYZ", prefix: "user1", password: "pass123", wantErr: ErrInvalidPassword},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotKey, gotPrefix, err := Validate(tt.key, tt.prefix, tt.password)
-			if tt.wantErr {
-				if err == nil {
-					t.Fatal("Validate() error = nil, want error")
+			if tt.wantErr != nil {
+				if !errors.Is(err, tt.wantErr) {
+					t.Fatalf("Validate() error = %v, want %v", err, tt.wantErr)
 				}
 				return
 			}
@@ -65,6 +65,37 @@ func TestValidate(t *testing.T) {
 				t.Errorf("Validate() prefix = %q, want %q", gotPrefix, tt.wantPrefix)
 			}
 		})
+	}
+}
+
+func TestNormalizeRecoveryEmail(t *testing.T) {
+	got, err := normalizeRecoveryEmail(" Backup@Example.COM ")
+	if err != nil || got != "backup@example.com" {
+		t.Fatalf("normalizeRecoveryEmail() = %q, %v", got, err)
+	}
+	got, err = normalizeRecoveryEmail("")
+	if err != nil || got != "" {
+		t.Fatalf("empty recovery email = %q, %v", got, err)
+	}
+	for _, invalid := range []string{"not-an-email", "Name <backup@example.com>", "a@example.com\r\nBcc:x@example.com"} {
+		if _, err := normalizeRecoveryEmail(invalid); !errors.Is(err, ErrInvalidRecoveryEmail) {
+			t.Errorf("normalizeRecoveryEmail(%q) error = %v, want ErrInvalidRecoveryEmail", invalid, err)
+		}
+	}
+}
+
+func TestPublicErrorMessageMapsKnownActivationFailures(t *testing.T) {
+	for _, known := range []error{
+		ErrInvalidKeyFormat, ErrInvalidKey, ErrKeyUsed, ErrKeyDisabled,
+		ErrInvalidPrefix, ErrReservedPrefix, ErrInvalidPassword,
+		ErrMailboxExists, ErrActivationDomainDisabled, ErrInvalidRecoveryEmail,
+	} {
+		if got, ok := PublicErrorMessage(known); !ok || got != known.Error() {
+			t.Errorf("PublicErrorMessage(%v) = %q, %v", known, got, ok)
+		}
+	}
+	if _, ok := PublicErrorMessage(errors.New("database unavailable")); ok {
+		t.Fatal("unknown error was exposed as a known activation failure")
 	}
 }
 
@@ -317,6 +348,9 @@ func TestClearBindingResetDataClearsUsageFields(t *testing.T) {
 		if !ok || value != nil {
 			t.Fatalf("reset field %s = %#v (present=%v), want explicit nil", field, value, ok)
 		}
+	}
+	if value, ok := data["recovery_email"]; !ok || value != "" {
+		t.Fatalf("reset recovery_email = %#v (present=%v), want empty string", value, ok)
 	}
 }
 

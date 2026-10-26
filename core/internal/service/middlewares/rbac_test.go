@@ -40,6 +40,7 @@ func TestPathToRouteInfo(t *testing.T) {
 		{"settings", "/api/settings/list", "settings", "read", "settings"},
 		{"subscribe_list", "/api/subscribe_list/list", "subscribe_list", "read", "subscribe_list"},
 		{"operation_log", "/api/operation_log/list", "operation_log", "read", "operation_log"},
+		{"operation log users", "/api/operation_log/users", "operation_log", "read", "operation_log"},
 		{"askai", "/api/askai/list", "askai", "read", "askai"},
 		{"tags", "/api/tags/list", "tags", "read", "tags"},
 		{"video_outreach", "/api/video_outreach/list", "video_outreach", "read", "video_outreach"},

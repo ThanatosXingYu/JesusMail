@@ -1443,6 +1443,16 @@
 					}
 				}
 			},
+			"activationWelcome": {
+				"title": "アクティベーション完了メール",
+				"enabled": "自動送信",
+				"on": "有効",
+				"off": "無効",
+				"sender": "送信者メールアドレス",
+				"senderPlaceholder": "空欄の場合は noreply システムメールボックスを使用",
+				"subject": "件名",
+				"save": "設定を保存"
+			},
 			"retention": {
 				"title": "メール保持期間",
 				"currentDays": "{days}日",
@@ -1608,6 +1618,27 @@
 	},
 	"logs": {
 		"title": "ログ",
+		"user": {
+			"title": "ユーザーログ",
+			"columns": {
+				"username": "メールボックスユーザー",
+				"event": "イベント",
+				"status": "ステータス",
+				"detail": "詳細",
+				"time": "時刻"
+			},
+			"events": {
+				"all": "すべてのイベント",
+				"login": "ログイン",
+				"logout": "ログアウト",
+				"send": "送信",
+				"receive": "受信"
+			},
+			"search": {
+				"username": "メールボックスユーザーを検索",
+				"keyword": "IP/詳細を検索"
+			}
+		},
 		"table": {
 			"columns": {
 				"username": "ユーザー名",

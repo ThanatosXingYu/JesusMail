@@ -1,11 +1,12 @@
 package settings
 
 import (
+	"context"
+	"encoding/json"
 	"jesusmail-core/api/settings/v1"
 	"jesusmail-core/internal/service/domains"
 	"jesusmail-core/internal/service/public"
-	"context"
-	"encoding/json"
+	"jesusmail-core/internal/service/welcome"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -66,6 +67,7 @@ func (c *ControllerV1) GetSystemConfig(ctx context.Context, req *v1.GetSystemCon
 	config.APIDocSwagger.APIToken = apiToken
 	config.APIDocSwagger.APIDocURL = BaseURL + "/api.json"
 	config.APIDocSwagger.SwaggerURL = BaseURL + "/swagger"
+	config.WelcomeEmail = v1.ActivationWelcomeEmailConfig(welcome.LoadConfig(ctx))
 
 	// Load blacklist configuration
 	blacklistConfig, err := loadBlacklistConfig(ctx)

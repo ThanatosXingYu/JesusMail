@@ -45,7 +45,7 @@ AAPANEL_SSO_SECRET=
 # See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of timezones"
 # echo -e "Use a column named "TZ identifier" + note the column named "Notes""
 
-TZ=Etc/UTC
+TZ=Asia/Shanghai
 
 # Default containers IPV4 intranet segment
 IPV4_NETWORK=172.66.1

@@ -69,6 +69,12 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 		},
 	})
 
+	const welcomeEmail = reactive({
+		enabled: true,
+		sender: '',
+		subject: '您的 JesusMail 邮箱已成功激活',
+	})
+
 	const checkPasswordStrength = () => {
 		const password = securityForm.newPassword
 		let score = 0
@@ -135,6 +141,11 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 			if (res.blacklist_config) {
 				blacklistConfig.value = res.blacklist_config
 			}
+			if (res.welcome_email) {
+				welcomeEmail.enabled = res.welcome_email.enabled
+				welcomeEmail.sender = res.welcome_email.sender
+				welcomeEmail.subject = res.welcome_email.subject
+			}
 		}
 	}
 
@@ -162,6 +173,9 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 		apiInfo.api_token = ''
 		apiInfo.swagger_url = ''
 		retentionDays.value = 0
+		welcomeEmail.enabled = true
+		welcomeEmail.sender = ''
+		welcomeEmail.subject = '您的 JesusMail 邮箱已成功激活'
 	}
 
 	return {
@@ -184,6 +198,7 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 		currentProxy,
 		apiInfo,
 		blacklistConfig,
+		welcomeEmail,
 		retentionDays,
 
 		// 方法

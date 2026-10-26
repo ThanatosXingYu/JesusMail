@@ -72,7 +72,12 @@ func InitDatabase() (err error) {
 	// Empty the registered handlers before reporting migration failures.
 	registeredHandlers = registeredHandlers[:0]
 
-	if migrationErr := errors.Join(activationSchemaInitializationErr, mailboxLifecycleSchemaInitializationErr); migrationErr != nil {
+	if migrationErr := errors.Join(
+		activationSchemaInitializationErr,
+		activationWelcomeSchemaInitializationErr,
+		mailboxUserEventsSchemaInitializationErr,
+		mailboxLifecycleSchemaInitializationErr,
+	); migrationErr != nil {
 		return fmt.Errorf("database schema initialization failed: %w", migrationErr)
 	}
 

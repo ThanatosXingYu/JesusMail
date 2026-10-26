@@ -26,6 +26,7 @@ REDISPASS=$(LC_ALL=C </dev/urandom tr -dc A-Za-z0-9 2> /dev/null | head -c 32)
 ADMIN_USERNAME=$(LC_ALL=C </dev/urandom tr -dc A-Za-z0-9 2> /dev/null | head -c 8)
 ADMIN_PASSWORD=$(LC_ALL=C </dev/urandom tr -dc A-Za-z0-9 2> /dev/null | head -c 8)
 time=$(date +%Y_%m_%d_%H_%M_%S)
+JESUSMAIL_TIME_ZONE=${JESUSMAIL_TIME_ZONE:-Asia/Shanghai}
 
 PWD_d=`pwd`
 download_Url=https://node.aapanel.com
@@ -72,6 +73,10 @@ while [ ${#} -gt 0 ]; do
             shift 1
             ;;
         -t|--TZ)
+            if [ -z "${2:-}" ]; then
+                echo "Error: --TZ requires a time zone identifier, for example Asia/Shanghai."
+                exit 1
+            fi
             JESUSMAIL_TIME_ZONE=$2
             shift 1
             ;;
@@ -134,31 +139,6 @@ fi
 if [ -z "${ADD_MAIL_JESUSMAIL_HOSTNAME}" ]; then
     ADD_MAIL_JESUSMAIL_HOSTNAME="${JESUSMAIL_HOSTNAME}"
     echo "Postfix myhostname configuration use: ${ADD_MAIL_JESUSMAIL_HOSTNAME}"
-fi
-
-if [ -a /etc/timezone ]; then
-    SYSTEM_TIME_ZONE=$(cat /etc/timezone)
-elif [ -a /etc/localtime ]; then
-    SYSTEM_TIME_ZONE=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
-fi
-
-# while [ -z "${JESUSMAIL_TIME_ZONE}" ]; do
-#     echo -e ""
-#     echo -e "See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of timezones"
-#     echo -e "Use a column named "TZ identifier" + note the column named "Notes""
-#     echo -e "Please enter your time zone"
-#     echo -e ""
-#     if [ -z "${SYSTEM_TIME_ZONE}" ]; then
-#         read -p "Timezone: " -e JESUSMAIL_TIME_ZONE
-#     else
-#         read -p "Timezone [${SYSTEM_TIME_ZONE}]: " -e JESUSMAIL_TIME_ZONE
-#         [ -z "${JESUSMAIL_TIME_ZONE}" ] && JESUSMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
-#     fi
-# done
-
-JESUSMAIL_TIME_ZONE=${SYSTEM_TIME_ZONE}
-if [ -z "${JESUSMAIL_TIME_ZONE}" ]; then
-    JESUSMAIL_TIME_ZONE="America/New_York"
 fi
 
 DBPASS_file=DBPASS_file.pl

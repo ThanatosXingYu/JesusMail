@@ -29,6 +29,11 @@ export interface SystemInfo {
 	fail2ban: boolean
 	server_ip: string
 	retention_days: number
+	welcome_email: {
+		enabled: boolean
+		sender: string
+		subject: string
+	}
 	ip_whitelist_enable: boolean
 	ip_whitelist: Array<{
 		id: number

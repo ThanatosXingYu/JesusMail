@@ -7,6 +7,7 @@ import (
 	"fmt"
 	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
 	"jesusmail-core/internal/service/mail_boxes"
+	"jesusmail-core/internal/service/welcome"
 	"os"
 	"regexp"
 	"strconv"
@@ -240,7 +241,17 @@ func Activate(ctx context.Context, keycode, prefix, password, ip string) (string
 	if err := mail_boxes.EnsureStorage(ctx, mailbox); err != nil {
 		g.Log().Warning(ctx, "activation mailbox storage initialization failed:", err)
 	}
+	enqueueActivationWelcome(ctx, email, welcome.Queue)
 	return email, nil
+}
+
+func enqueueActivationWelcome(ctx context.Context, email string, enqueue func(context.Context, string) error) {
+	if enqueue == nil {
+		return
+	}
+	if err := enqueue(ctx, email); err != nil {
+		g.Log().Warning(ctx, "activation welcome email queueing failed:", err)
+	}
 }
 
 func GetStats(ctx context.Context) (Stats, error) {
@@ -456,7 +467,7 @@ func activationRelationProven(ctx context.Context, tx gdb.TX, key *Key) (bool, e
 		ActivationKeyID        *int64
 		RelatedActivationKeyID *int64
 	}
-	if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+	if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 		Fields("id,activation_key_id,related_activation_key_id").Where("username", key.Email).
 		OrderDesc("id").Limit(1).LockUpdate().Scan(&recycled); err != nil {
 		return false, err
@@ -500,7 +511,7 @@ func clearOneBinding(ctx context.Context, id int64) (bool, error) {
 		if err != nil {
 			return fmt.Errorf("归档绑定邮箱准备失败: %w", err)
 		}
-		_, err = tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).Data(g.Map{
+		_, err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).Data(g.Map{
 			"related_activation_key_id":   key.Id,
 			"activation_keycode_snapshot": key.Keycode,
 			"delete_reason":               "activation_clear_binding",

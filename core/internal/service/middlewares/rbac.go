@@ -1,10 +1,10 @@
 package middlewares
 
 import (
-	"jesusmail-core/internal/model"
-	"jesusmail-core/internal/service/public"
 	"context"
 	"fmt"
+	"jesusmail-core/internal/model"
+	"jesusmail-core/internal/service/public"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -52,6 +52,9 @@ func PathToRouteInfo(path string) (module, action, resource string) {
 			action = "delete"
 		default:
 			action = actionName
+		}
+		if module == "operation_log" && actionName == "users" {
+			action = "read"
 		}
 	}
 

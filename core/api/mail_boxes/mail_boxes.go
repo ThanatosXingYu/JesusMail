@@ -32,4 +32,5 @@ type IMailBoxesV1 interface {
 type IPublicMailBoxesV1 interface {
 	ConsumeLoginTicket(ctx context.Context, req *v1.ConsumeLoginTicketReq) (res *v1.ConsumeLoginTicketRes, err error)
 	DiagnoseLogin(ctx context.Context, req *v1.DiagnoseLoginReq) (res *v1.DiagnoseLoginRes, err error)
+	RecordUserEvent(ctx context.Context, req *v1.RecordUserEventReq) (res *v1.RecordUserEventRes, err error)
 }

@@ -261,6 +261,20 @@ func TestPublicConfigInfoReportsDomainAndQuota(t *testing.T) {
 	}
 }
 
+func TestEnqueueActivationWelcomeDoesNotPropagateFailure(t *testing.T) {
+	called := false
+	enqueueActivationWelcome(context.Background(), "student@example.com", func(_ context.Context, email string) error {
+		called = true
+		if email != "student@example.com" {
+			t.Fatalf("email = %q", email)
+		}
+		return errors.New("outbox unavailable")
+	})
+	if !called {
+		t.Fatal("welcome enqueue was not attempted")
+	}
+}
+
 func TestPublicConfigInfoFallsBackToDefaults(t *testing.T) {
 	config := PublicConfigInfo()
 	if config.Domain != defaultDomain {

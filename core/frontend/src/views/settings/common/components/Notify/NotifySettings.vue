@@ -9,6 +9,8 @@
 			</div>
 		</template>
 
+		<ActivationWelcomeEmail />
+		<n-divider />
 		<BlacklistSetting />
 		<n-divider />
 		<AutoCheckSettings />
@@ -16,6 +18,7 @@
 </template>
 
 <script lang="ts" setup>
+import ActivationWelcomeEmail from './ActivationWelcomeEmail.vue'
 import BlacklistSetting from './BlacklistSetting.vue'
 import AutoCheckSettings from './AutoCheckSettings.vue'
 </script>

@@ -1,10 +1,6 @@
 package mail_boxes
 
 import (
-	v1 "jesusmail-core/api/mail_boxes/v1"
-	"jesusmail-core/internal/consts"
-	"jesusmail-core/internal/service/dockerapi"
-	"jesusmail-core/internal/service/public"
 	"context"
 	"encoding/base64"
 	"encoding/hex"
@@ -12,6 +8,10 @@ import (
 	"github.com/GehirnInc/crypt/md5_crypt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+	v1 "jesusmail-core/api/mail_boxes/v1"
+	"jesusmail-core/internal/consts"
+	"jesusmail-core/internal/service/dockerapi"
+	"jesusmail-core/internal/service/public"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -103,7 +103,7 @@ func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided bool) (e
 			ID            int64  `json:"id"`
 			ArchiveStatus string `json:"archive_status"`
 		}
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Fields("id,archive_status").
 			Where("username", mailbox.Username).
 			Where("create_time", previous.CreateTime).

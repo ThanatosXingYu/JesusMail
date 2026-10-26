@@ -1516,6 +1516,16 @@
 					}
 				}
 			},
+			"activationWelcome": {
+				"title": "激活欢迎邮件",
+				"enabled": "自动发送",
+				"on": "已启用",
+				"off": "已关闭",
+				"sender": "发件邮箱",
+				"senderPlaceholder": "留空则自动使用 noreply 系统邮箱",
+				"subject": "邮件主题",
+				"save": "保存设置"
+			},
 			"retention": {
 				"title": "邮件保留时间",
 				"currentDays": "{days}天",
@@ -1557,6 +1567,27 @@
 	},
 	"logs": {
 		"title": "日志",
+		"user": {
+			"title": "用户日志",
+			"columns": {
+				"username": "邮箱用户",
+				"event": "事件",
+				"status": "状态",
+				"detail": "详情",
+				"time": "时间"
+			},
+			"events": {
+				"all": "全部事件",
+				"login": "登录",
+				"logout": "退出",
+				"send": "发信",
+				"receive": "收信"
+			},
+			"search": {
+				"username": "搜索邮箱用户",
+				"keyword": "搜索 IP/详情"
+			}
+		},
 		"table": {
 			"columns": {
 				"username": "用户名",

@@ -700,22 +700,18 @@ MODIFY_HTTPS_PORT() {
 
 # Modify time zone
 MODIFY_TZ() { 
-    if [ -a /etc/timezone ]; then
-        SYSTEM_TIME_ZONE=$(cat /etc/timezone)
-    elif [ -a /etc/localtime ]; then
-        SYSTEM_TIME_ZONE=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
-    fi
+    DEFAULT_TIME_ZONE=${TZ:-Asia/Shanghai}
     NEW_TZ="$2"
     echo -e ""
     echo -e "See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of timezones"
     echo -e "Use a column named "TZ identifier" + note the column named "Notes""
     echo -e "Please enter your time zone"
     echo -e ""
-    if [ -z "${SYSTEM_TIME_ZONE}" ]; then
+    if [ -z "${DEFAULT_TIME_ZONE}" ]; then
         read -p "Timezone: " -e NEW_TZ
     else
-        read -p "Timezone [${SYSTEM_TIME_ZONE}]: " -e NEW_TZ
-        [ -z "${NEW_TZ}" ] && NEW_TZ=${SYSTEM_TIME_ZONE}
+        read -p "Timezone [${DEFAULT_TIME_ZONE}]: " -e NEW_TZ
+        [ -z "${NEW_TZ}" ] && NEW_TZ=${DEFAULT_TIME_ZONE}
     fi
 
     if [ -z "${NEW_TZ}" ]; then

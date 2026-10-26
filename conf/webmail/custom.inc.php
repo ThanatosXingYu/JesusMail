@@ -21,6 +21,15 @@
         );
     }
     $config['jesusmail_login_diagnose_url'] = $diagnose_url ?: 'http://core/api/public/mailbox/login_diagnose';
+    $user_event_url = getenv('JESUSMAIL_ROUNDCUBE_USER_EVENT_URL');
+    if ($user_event_url === false || trim($user_event_url) === '') {
+        $user_event_url = preg_replace(
+            '~/mailbox/login_ticket/consume$~',
+            '/mailbox/user_event',
+            $config['jesusmail_sso_core_url']
+        );
+    }
+    $config['jesusmail_sso_user_event_url'] = $user_event_url ?: 'http://core/api/public/mailbox/user_event';
 
     # Password
     $config['password_query'] = 'update mailbox set password = %P where username = %u';

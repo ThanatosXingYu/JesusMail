@@ -99,6 +99,14 @@ type SystemConfig struct {
 	BlacklistConfig BlacklistConfig `json:"blacklist_config" dc:"blacklist configuration"`
 	// Data retention days
 	RetentionDays int `json:"retention_days" dc:"Number of days to keep log backup"`
+	// Activation welcome email configuration
+	WelcomeEmail ActivationWelcomeEmailConfig `json:"welcome_email" dc:"activation welcome email configuration"`
+}
+
+type ActivationWelcomeEmailConfig struct {
+	Enabled bool   `json:"enabled" dc:"send a welcome email after activation"`
+	Sender  string `json:"sender" dc:"custom sender email; empty uses noreply@activation-domain"`
+	Subject string `json:"subject" dc:"welcome email subject"`
 }
 
 type BlacklistConfig struct {

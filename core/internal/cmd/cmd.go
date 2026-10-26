@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/tls"
 	"fmt"
 	"jesusmail-core/internal/consts"
@@ -30,6 +31,7 @@ import (
 	video_outreach_ctrl "jesusmail-core/internal/controller/video_outreach"
 	"jesusmail-core/internal/service/database_initialization"
 	docker "jesusmail-core/internal/service/dockerapi"
+	mailboxservice "jesusmail-core/internal/service/mail_boxes"
 	"jesusmail-core/internal/service/maillog_stat"
 	"jesusmail-core/internal/service/middlewares"
 	"jesusmail-core/internal/service/phpfpm"
@@ -125,6 +127,7 @@ func excludedSafePathURIs() map[string]struct{} {
 		"/api/aapanel/sso":                         {},
 		"/api/public/mailbox/login_diagnose":       {},
 		"/api/public/mailbox/login_ticket/consume": {},
+		"/api/public/mailbox/user_event":           {},
 		"/api/unsubscribe/user_group":              {},
 		"/api/unsubscribe":                         {},
 		"/api/unsubscribe_new":                     {},
@@ -170,15 +173,41 @@ func isPublicActivationPath(path string) bool {
 
 	return path == "/api/public/mailbox/login_ticket/consume" ||
 		path == "/api/public/mailbox/login_diagnose" ||
+		path == "/api/public/mailbox/user_event" ||
 		strings.HasPrefix(path, "/static/")
 }
 
 func bindPublicAPI(group *ghttp.RouterGroup) {
-	group.Middleware(middlewares.HandleApiResponse)
+	group.Middleware(middlewares.HandleApiResponse, requireRoundcubeSSOSecretForUserEvent)
 	group.Bind(
 		public_activation.NewV1(),
 		mail_boxes.NewPublicV1(),
 	)
+}
+
+func requireRoundcubeSSOSecretForUserEvent(r *ghttp.Request) {
+	if r.URL.Path != "/api/public/mailbox/user_event" {
+		r.Middleware.Next()
+		return
+	}
+
+	r.Response.Header().Set("Cache-Control", "no-store")
+	r.Response.Header().Set("Pragma", "no-cache")
+
+	expectedSecret := mailboxservice.RoundcubeSSOSecret()
+	if expectedSecret == "" {
+		r.Response.WriteStatus(http.StatusServiceUnavailable)
+		r.Response.WriteJson(g.Map{"error": "Mailbox user event logging is unavailable"})
+		return
+	}
+	providedSecret := r.Header.Get("X-JesusMail-Roundcube-SSO-Secret")
+	if !hmac.Equal([]byte(providedSecret), []byte(expectedSecret)) {
+		r.Response.WriteStatus(http.StatusForbidden)
+		r.Response.WriteJson(g.Map{"error": "Forbidden"})
+		return
+	}
+
+	r.Middleware.Next()
 }
 
 // bindPublicActivationAPI registers only the public activation endpoints. It is mounted a second

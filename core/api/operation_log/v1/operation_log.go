@@ -1,9 +1,9 @@
 package v1
 
 import (
+	"github.com/gogf/gf/v2/frame/g"
 	"jesusmail-core/internal/model/entity"
 	"jesusmail-core/utility/types/api_v1"
-	"github.com/gogf/gf/v2/frame/g"
 )
 
 type GetOperationLogReq struct {
@@ -22,6 +22,26 @@ type GetOperationLogRes struct {
 	Data struct {
 		Total int                   `json:"total" dc:"Total Count"`
 		List  []entity.OperationLog `json:"list" dc:"Operation Log List"`
+	} `json:"data"`
+}
+
+type GetUserLogReq struct {
+	g.Meta        `path:"/operation_log/users" method:"get" tags:"User Log" summary:"List mailbox user logs"`
+	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
+	Page          int    `json:"page" v:"required|min:1" dc:"Page Number"`
+	PageSize      int    `json:"page_size" v:"required|min:1|max:100" dc:"Page Size"`
+	Username      string `json:"username" v:"max-length:320" dc:"Mailbox username"`
+	EventType     string `json:"event_type" v:"in:login,logout,send,receive" dc:"login, logout, send, or receive"`
+	Keyword       string `json:"keyword" v:"max-length:200" dc:"Search keyword"`
+	StartTime     int64  `json:"start_time" v:"min:0" dc:"Start timestamp"`
+	EndTime       int64  `json:"end_time" v:"min:0" dc:"End timestamp"`
+}
+
+type GetUserLogRes struct {
+	api_v1.StandardRes
+	Data struct {
+		Total int                     `json:"total" dc:"Total Count"`
+		List  []entity.MailboxUserLog `json:"list" dc:"Mailbox User Log List"`
 	} `json:"data"`
 }
 

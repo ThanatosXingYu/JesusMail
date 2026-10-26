@@ -53,6 +53,15 @@ describe('settings/common API', () => {
     expect(mockPost).toHaveBeenCalledWith('/settings/set_system_config_key', { key: 'timezone', value: 'UTC' }, expect.any(Object))
   })
 
+  it('setSystemConfigKey can suppress duplicate success messages', () => {
+    setSystemConfigKey({ key: 'welcome_email_enabled', value: 'true' }, { successMessage: false })
+    expect(mockPost).toHaveBeenCalledWith(
+      '/settings/set_system_config_key',
+      { key: 'welcome_email_enabled', value: 'true' },
+      { fetchOptions: { loading: 'settings.api.loading.setting', successMessage: false } }
+    )
+  })
+
   it('setSslConfig calls POST /settings/set_ssl_config', () => {
     setSslConfig({ certPem: 'cert', privateKey: 'key' })
     expect(mockPost).toHaveBeenCalledWith('/settings/set_ssl_config', { certPem: 'cert', privateKey: 'key' }, expect.any(Object))

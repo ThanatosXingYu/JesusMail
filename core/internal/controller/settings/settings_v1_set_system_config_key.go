@@ -1,14 +1,15 @@
 package settings
 
 import (
-	"jesusmail-core/internal/consts"
 	"context"
+	"jesusmail-core/internal/consts"
 	"time"
 
 	"github.com/gogf/gf/os/gtimer"
 
 	"jesusmail-core/api/settings/v1"
 	"jesusmail-core/internal/service/public"
+	"jesusmail-core/internal/service/welcome"
 	"strings"
 
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -17,6 +18,16 @@ import (
 
 func (c *ControllerV1) SetSystemConfigKey(ctx context.Context, req *v1.SetSystemConfigKeyReq) (res *v1.SetSystemConfigKeyRes, err error) {
 	res = &v1.SetSystemConfigKeyRes{}
+
+	// Welcome-email settings live in bm_options and take effect without restarting the container.
+	if isWelcomeEmailConfigKey(req.Key) {
+		if err := welcome.SetConfigValue(ctx, req.Key, req.Value); err != nil {
+			res.SetError(gerror.New(public.LangCtx(ctx, "Parameter validation failed: {}", err)))
+			return res, nil
+		}
+		res.SetSuccess(public.LangCtx(ctx, "Configuration updated successfully"))
+		return res, nil
+	}
 
 	// Parameter validation
 	if err := validateConfigValue(req.Key, req.Value); err != nil {
@@ -77,33 +88,42 @@ func (c *ControllerV1) SetSystemConfigKey(ctx context.Context, req *v1.SetSystem
 	return res, nil
 }
 
+func isWelcomeEmailConfigKey(key string) bool {
+	switch strings.ToLower(strings.TrimSpace(key)) {
+	case welcome.APIKeyEnabled, welcome.APIKeySender, welcome.APIKeySubject:
+		return true
+	default:
+		return false
+	}
+}
+
 // convertJsonKeyToEnvKey Convert JSON configuration key to environment variable key and update value
 func convertJsonKeyToEnvKey(jsonKey string, value string, envMap map[string]string) (string, bool) {
 	// JSON key to environment variable key mapping
 	keyMapping := map[string]string{
-		"admin_username":       "ADMIN_USERNAME",
-		"admin_password":       "ADMIN_PASSWORD",
-		"safe_path":            "SafePath",
-		"hostname": "JESUSMAIL_HOSTNAME",
-		"db_name":              "DBNAME",
-		"db_user":              "DBUSER",
-		"db_pass":              "DBPASS",
-		"redis_pass":           "REDISPASS",
-		"redis_port":           "REDIS_PORT",
-		"smtp":                 "SMTP_PORT",
-		"smtps":                "SMTPS_PORT",
-		"submission":           "SUBMISSION_PORT",
-		"imap":                 "IMAP_PORT",
-		"imaps":                "IMAPS_PORT",
-		"pop":                  "POP_PORT",
-		"pops":                 "POPS_PORT",
-		"http":                 "HTTP_PORT",
-		"https":                "HTTPS_PORT",
-		"timezone":             "TZ",
-		"ipv4_network":         "IPV4_NETWORK",
-		"fail2ban":             "FAIL2BAN_INIT",
-		"ip_whitelist_enable":  "IP_WHITELIST_ENABLE",
-		"retention_days":       "RETENTION_DAYS",
+		"admin_username":      "ADMIN_USERNAME",
+		"admin_password":      "ADMIN_PASSWORD",
+		"safe_path":           "SafePath",
+		"hostname":            "JESUSMAIL_HOSTNAME",
+		"db_name":             "DBNAME",
+		"db_user":             "DBUSER",
+		"db_pass":             "DBPASS",
+		"redis_pass":          "REDISPASS",
+		"redis_port":          "REDIS_PORT",
+		"smtp":                "SMTP_PORT",
+		"smtps":               "SMTPS_PORT",
+		"submission":          "SUBMISSION_PORT",
+		"imap":                "IMAP_PORT",
+		"imaps":               "IMAPS_PORT",
+		"pop":                 "POP_PORT",
+		"pops":                "POPS_PORT",
+		"http":                "HTTP_PORT",
+		"https":               "HTTPS_PORT",
+		"timezone":            "TZ",
+		"ipv4_network":        "IPV4_NETWORK",
+		"fail2ban":            "FAIL2BAN_INIT",
+		"ip_whitelist_enable": "IP_WHITELIST_ENABLE",
+		"retention_days":      "RETENTION_DAYS",
 	}
 
 	// Get the environment variable key name

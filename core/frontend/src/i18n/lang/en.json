@@ -1513,6 +1513,16 @@
 					}
 				}
 			},
+			"activationWelcome": {
+				"title": "Activation Welcome Email",
+				"enabled": "Automatic delivery",
+				"on": "Enabled",
+				"off": "Disabled",
+				"sender": "Sender Email",
+				"senderPlaceholder": "Leave empty to use the noreply system mailbox",
+				"subject": "Subject",
+				"save": "Save Settings"
+			},
 			"retention": {
 				"title": "Mail retention time",
 				"currentDays": "{days} day(s)",
@@ -1554,6 +1564,27 @@
 	},
 	"logs": {
 		"title": "Logs",
+		"user": {
+			"title": "User Logs",
+			"columns": {
+				"username": "Mailbox User",
+				"event": "Event",
+				"status": "Status",
+				"detail": "Details",
+				"time": "Time"
+			},
+			"events": {
+				"all": "All events",
+				"login": "Login",
+				"logout": "Logout",
+				"send": "Send",
+				"receive": "Receive"
+			},
+			"search": {
+				"username": "Search mailbox user",
+				"keyword": "Search IP/details"
+			}
+		},
 		"table": {
 			"columns": {
 				"username": "Username",

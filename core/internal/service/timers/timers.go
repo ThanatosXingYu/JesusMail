@@ -1,6 +1,7 @@
 package timers
 
 import (
+	"context"
 	"jesusmail-core/internal/service/abnormal_recipient"
 	"jesusmail-core/internal/service/askai"
 	"jesusmail-core/internal/service/batch_mail"
@@ -15,7 +16,7 @@ import (
 	"jesusmail-core/internal/service/relay"
 	"jesusmail-core/internal/service/video_gen"
 	"jesusmail-core/internal/service/warmup"
-	"context"
+	"jesusmail-core/internal/service/welcome"
 	"time"
 
 	"github.com/gogf/gf/os/gtimer"
@@ -192,6 +193,13 @@ func Start(ctx context.Context) (err error) {
 	// Video generation pipeline orchestrator
 	gtimer.Add(30*time.Second, func() {
 		video_gen.ProcessVideoJobs(ctx)
+	})
+
+	// Deliver activation welcome emails from the outbox without blocking activation.
+	gtimer.Add(time.Minute, func() {
+		if err := welcome.Process(ctx); err != nil {
+			g.Log().Warning(ctx, "Activation welcome email processing failed:", err)
+		}
 	})
 
 	// Check the domain name blacklist

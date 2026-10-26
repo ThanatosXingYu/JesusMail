@@ -11,11 +11,14 @@ export const getTimezoneList = () => {
 	return instance.get('/settings/get_timezone_list')
 }
 
-export const setSystemConfigKey = (params: { key: string; value: string }) => {
+export const setSystemConfigKey = (
+	params: { key: string; value: string },
+	options: { successMessage?: boolean } = {}
+) => {
 	return instance.post('/settings/set_system_config_key', params, {
 		fetchOptions: {
 			loading: t('settings.api.loading.setting'),
-			successMessage: true,
+			successMessage: options.successMessage ?? true,
 		},
 	})
 }

@@ -1,0 +1,132 @@
+package welcome
+
+import (
+	"errors"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestConfigValidation(t *testing.T) {
+	tests := []struct {
+		name    string
+		key     string
+		value   string
+		wantErr bool
+	}{
+		{name: "enabled", key: OptionEnabled, value: "false"},
+		{name: "invalid enabled", key: OptionEnabled, value: "maybe", wantErr: true},
+		{name: "empty sender uses default", key: OptionSender, value: " "},
+		{name: "valid sender", key: OptionSender, value: " Welcome@Example.COM "},
+		{name: "invalid sender", key: OptionSender, value: "not-an-email", wantErr: true},
+		{name: "subject", key: OptionSubject, value: "  欢迎加入  "},
+		{name: "empty subject", key: OptionSubject, value: " ", wantErr: true},
+		{name: "header injection", key: OptionSubject, value: "hello\r\nBcc: victim@example.com", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var err error
+			switch tt.key {
+			case OptionEnabled:
+				_, err = normalizeEnabled(tt.value)
+			case OptionSender:
+				_, err = normalizeOptionalSender(tt.value)
+			case OptionSubject:
+				_, err = normalizeSubject(tt.value)
+			}
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("validation error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestFailureBackoffAndTerminalState(t *testing.T) {
+	now := time.Date(2026, 10, 26, 8, 0, 0, 0, time.UTC)
+	tests := []struct {
+		retryCount int
+		wantStatus string
+		wantDelay  time.Duration
+	}{
+		{retryCount: 0, wantStatus: StatusPending, wantDelay: time.Minute},
+		{retryCount: 1, wantStatus: StatusPending, wantDelay: 2 * time.Minute},
+		{retryCount: 2, wantStatus: StatusPending, wantDelay: 4 * time.Minute},
+		{retryCount: 3, wantStatus: StatusPending, wantDelay: 8 * time.Minute},
+		{retryCount: 4, wantStatus: StatusFailed, wantDelay: 0},
+	}
+
+	for _, tt := range tests {
+		state := evaluateFailure(Job{RetryCount: tt.retryCount}, errors.New("smtp unavailable"), now)
+		if state.RetryCount != tt.retryCount+1 {
+			t.Errorf("retry count = %d, want %d", state.RetryCount, tt.retryCount+1)
+		}
+		if state.Status != tt.wantStatus {
+			t.Errorf("retry %d status = %q, want %q", tt.retryCount+1, state.Status, tt.wantStatus)
+		}
+		if got := state.NextAttemptAt.Sub(now); got != tt.wantDelay {
+			t.Errorf("retry %d delay = %v, want %v", tt.retryCount+1, got, tt.wantDelay)
+		}
+	}
+}
+
+func TestResolveSender(t *testing.T) {
+	sender, isDefault, err := ResolveSender("student@Mail.Example.COM", "")
+	if err != nil {
+		t.Fatalf("ResolveSender() error = %v", err)
+	}
+	if !isDefault || sender != "noreply@mail.example.com" {
+		t.Fatalf("ResolveSender() = %q, default=%v; want noreply@mail.example.com, true", sender, isDefault)
+	}
+
+	sender, isDefault, err = ResolveSender("student@mail.example.com", "welcome@example.com")
+	if err != nil {
+		t.Fatalf("ResolveSender(custom) error = %v", err)
+	}
+	if isDefault || sender != "welcome@example.com" {
+		t.Fatalf("ResolveSender(custom) = %q, default=%v", sender, isDefault)
+	}
+}
+
+func TestRenderActivationWelcomeTemplates(t *testing.T) {
+	_, testFile, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("resolve test file path")
+	}
+	templateDir := filepath.Join(filepath.Dir(testFile), "..", "..", "..", "template", "activation_welcome_email")
+	htmlBody, txtBody, err := renderTemplateFiles(
+		"student@mail.example.com",
+		"https://mail.example.com/",
+		filepath.Join(templateDir, "welcome_email.html"),
+		filepath.Join(templateDir, "welcome_email.txt"),
+	)
+	if err != nil {
+		t.Fatalf("renderTemplateFiles() error = %v", err)
+	}
+
+	required := []string{
+		"student@mail.example.com",
+		"https://mail.example.com/roundcube/",
+		"mail.example.com",
+		"收发",
+	}
+	for _, fragment := range required {
+		if !strings.Contains(htmlBody, fragment) {
+			t.Errorf("HTML template missing %q", fragment)
+		}
+		if !strings.Contains(txtBody, fragment) {
+			t.Errorf("TXT template missing %q", fragment)
+		}
+	}
+}
+
+func TestWebmailURL(t *testing.T) {
+	if got := webmailURL("https://mail.example.com/"); got != "https://mail.example.com/roundcube/" {
+		t.Fatalf("webmailURL() = %q", got)
+	}
+	if got := webmailURL(""); got != "/roundcube/" {
+		t.Fatalf("webmailURL(empty) = %q", got)
+	}
+}

@@ -1,0 +1,25 @@
+# Rspamd checks the SMTP client hostname and its registered domain against this map.
+# Keep this list limited to established mail providers; unknown senders remain greylisted.
+qq.com
+foxmail.com
+gmail.com
+googlemail.com
+google.com
+outlook.com
+hotmail.com
+live.com
+msn.com
+yahoo.com
+ymail.com
+icloud.com
+me.com
+mac.com
+163.com
+126.com
+yeah.net
+sina.com
+sina.cn
+sohu.com
+139.com
+189.cn
+aliyun.com

@@ -2,6 +2,7 @@ package mail_boxes
 
 import (
 	context "context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -75,6 +76,24 @@ func recycleStateAllowed(status string, allowed []string) bool {
 
 func sameLifecycleLease(a, b time.Time) bool {
 	return !a.IsZero() && !b.IsZero() && a.UnixMicro() == b.UnixMicro()
+}
+
+func refreshLifecycleTimestamp(ctx context.Context, tx gdb.TX, item *RecycleItem) error {
+	if item == nil || item.ID <= 0 {
+		return errors.New("invalid recycle item")
+	}
+	var stored RecycleItem
+	if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
+		Fields("status_updated_at").
+		Where("id", item.ID).
+		Scan(&stored); err != nil {
+		return fmt.Errorf("read recycle item lease: %w", err)
+	}
+	if stored.StatusUpdatedAt.IsZero() {
+		return errors.New("recycle item lease is empty")
+	}
+	item.StatusUpdatedAt = stored.StatusUpdatedAt
+	return nil
 }
 
 func mailboxVersionMatchesRecycleItem(mailbox *mailboxv1.Mailbox, item *RecycleItem) bool {
@@ -528,15 +547,15 @@ func PrepareArchiveInTx(ctx context.Context, tx gdb.TX, email string, options Ar
 	}
 
 	var mailbox mailboxv1.Mailbox
-	if err := tx.Model("mailbox").Ctx(ctx).Where("username", email).LockUpdate().Scan(&mailbox); err != nil {
+	if err := tx.Model("mailbox").Ctx(ctx).Where("username", email).LockUpdate().Scan(&mailbox); err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("lock mailbox: %w", err)
 	}
 	if mailbox.Username == "" {
 		var existing RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("username", email).
 			WhereIn("archive_status", []string{ArchiveStatusPending, ArchiveStatusArchiving, ArchiveStatusArchiveFailed, ArchiveStatusArchived}).
-			OrderDesc("id").Limit(1).LockUpdate().Scan(&existing); err != nil {
+			OrderDesc("id").Limit(1).LockUpdate().Scan(&existing); err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("find existing recycle item: %w", err)
 		}
 		if existing.ID != 0 {
@@ -549,10 +568,10 @@ func PrepareArchiveInTx(ctx context.Context, tx gdb.TX, email string, options Ar
 	}
 
 	var existing RecycleItem
-	if err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+	if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 		Where("username", email).
 		WhereIn("archive_status", []string{ArchiveStatusPending, ArchiveStatusArchiving, ArchiveStatusArchiveFailed}).
-		OrderDesc("id").Limit(1).LockUpdate().Scan(&existing); err != nil {
+		OrderDesc("id").Limit(1).LockUpdate().Scan(&existing); err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("find retryable recycle item: %w", err)
 	}
 	if existing.ID != 0 {
@@ -590,7 +609,7 @@ func PrepareArchiveInTx(ctx context.Context, tx gdb.TX, email string, options Ar
 			update["activation_keycode_snapshot"] = opts.ActivationKeycodeSnapshot
 			existing.ActivationKeycodeSnapshot = opts.ActivationKeycodeSnapshot
 		}
-		result, err = tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", existing.ID).Where("archive_status", ArchiveStatusArchiveFailed).
 			Data(update).Update()
 		if err != nil {
@@ -605,7 +624,9 @@ func PrepareArchiveInTx(ctx context.Context, tx gdb.TX, email string, options Ar
 		}
 		existing.ArchiveStatus = ArchiveStatusArchiving
 		existing.LastError = ""
-		existing.StatusUpdatedAt = claimedAt
+		if err := refreshLifecycleTimestamp(ctx, tx, &existing); err != nil {
+			return nil, err
+		}
 		return &existing, nil
 	}
 
@@ -628,9 +649,22 @@ func PrepareArchiveInTx(ctx context.Context, tx gdb.TX, email string, options Ar
 	if affected != 1 {
 		return nil, errors.New("mailbox changed while preparing archive")
 	}
-	item.ID, err = tx.Model("mailbox_recycle_items").Ctx(ctx).Data(recycleInsertData(item)).InsertAndGetId()
-	if err != nil {
+	if _, err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Data(recycleInsertData(item)).Insert(); err != nil {
 		return nil, fmt.Errorf("create mailbox recycle item: %w", err)
+	}
+	var inserted RecycleItem
+	if err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
+		Fields("id").
+		Where("archive_uuid", item.ArchiveUUID).
+		Scan(&inserted); err != nil {
+		return nil, fmt.Errorf("read created mailbox recycle item: %w", err)
+	}
+	if inserted.ID <= 0 {
+		return nil, errors.New("created mailbox recycle item has no id")
+	}
+	item.ID = inserted.ID
+	if err := refreshLifecycleTimestamp(ctx, tx, item); err != nil {
+		return nil, err
 	}
 	return item, nil
 }
@@ -651,7 +685,7 @@ func markArchiveFailure(ctx context.Context, item *RecycleItem, keepDisabled boo
 		}
 
 		var locked RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
 			return fmt.Errorf("lock recycle item for archive failure: %w", err)
 		}
 		if locked.ID == 0 || locked.ArchiveStatus != ArchiveStatusArchiving || !sameLifecycleLease(locked.StatusUpdatedAt, item.StatusUpdatedAt) {
@@ -677,7 +711,7 @@ func markArchiveFailure(ctx context.Context, item *RecycleItem, keepDisabled boo
 			return errors.New("mailbox changed while recording archive failure")
 		}
 
-		result, err = tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", item.ID).Where("archive_status", ArchiveStatusArchiving).
 			Data(g.Map{
 				"archive_status": ArchiveStatusArchiveFailed, "last_error": message,
@@ -737,7 +771,7 @@ func CompleteArchive(ctx context.Context, item *RecycleItem, keepDisabledOnFailu
 		}
 
 		var locked RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
 			return fmt.Errorf("lock recycle item for finalization: %w", err)
 		}
 		if locked.ID == 0 {
@@ -766,7 +800,7 @@ func CompleteArchive(ctx context.Context, item *RecycleItem, keepDisabledOnFailu
 		if affected != 1 {
 			return fmt.Errorf("archived mailbox version changed or disappeared: affected %d rows", affected)
 		}
-		result, err = tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err = tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", item.ID).Where("archive_status", ArchiveStatusArchiving).
 			Data(g.Map{
 				"archive_status": ArchiveStatusArchived, "mail_size_bytes": size, "file_count": count,
@@ -874,7 +908,7 @@ func ListRecycleItems(ctx context.Context, page, pageSize int, keyword, status s
 			return RecycleListResult{}, errors.New("invalid recycle status")
 		}
 	}
-	query := g.DB().Model("mailbox_recycle_items").Ctx(ctx)
+	query := g.DB().Model("mailbox_recycle_items").Unscoped().Ctx(ctx)
 	if keyword != "" {
 		query = query.WhereLike("username", "%"+keyword+"%")
 	}
@@ -940,7 +974,7 @@ func GetRecycleStats(ctx context.Context) (RecycleStats, error) {
 
 func loadRecycleItemForState(ctx context.Context, tx gdb.TX, id int64, states []string, nextState string) (*RecycleItem, error) {
 	var item RecycleItem
-	if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", id).LockUpdate().Scan(&item); err != nil {
+	if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", id).LockUpdate().Scan(&item); err != nil {
 		return nil, err
 	}
 	if item.ID == 0 {
@@ -950,7 +984,7 @@ func loadRecycleItemForState(ctx context.Context, tx gdb.TX, id int64, states []
 		return nil, fmt.Errorf("recycle item %d is in state %s", id, item.ArchiveStatus)
 	}
 	claimedAt := time.Now().UTC()
-	result, err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+	result, err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 		Where("id", id).Where("archive_status", item.ArchiveStatus).
 		Data(g.Map{
 			"archive_status": nextState, "last_error": "", "status_updated_at": claimedAt,
@@ -967,7 +1001,9 @@ func loadRecycleItemForState(ctx context.Context, tx gdb.TX, id int64, states []
 	}
 	item.ArchiveStatus = nextState
 	item.LastError = ""
-	item.StatusUpdatedAt = claimedAt
+	if err := refreshLifecycleTimestamp(ctx, tx, &item); err != nil {
+		return nil, err
+	}
 	return &item, nil
 }
 
@@ -977,13 +1013,13 @@ func markRecycleOperationFailure(ctx context.Context, item *RecycleItem, operati
 	}
 	markErr := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var locked RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
 			return err
 		}
 		if locked.ID == 0 || locked.ArchiveStatus != operationState || !sameLifecycleLease(locked.StatusUpdatedAt, item.StatusUpdatedAt) {
 			return errLifecycleLeaseLost
 		}
-		result, err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", item.ID).Where("archive_status", operationState).
 			Data(g.Map{
 				"archive_status": failureState, "last_error": safeLifecycleError(operationErr),
@@ -1091,7 +1127,7 @@ func completeRecycleRestore(ctx context.Context, item *RecycleItem) error {
 	}
 	finalErr := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var locked RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
 			return err
 		}
 		if locked.ID == 0 || locked.ArchiveStatus != ArchiveStatusRestoring || !sameLifecycleLease(locked.StatusUpdatedAt, item.StatusUpdatedAt) {
@@ -1104,7 +1140,7 @@ func completeRecycleRestore(ctx context.Context, item *RecycleItem) error {
 		if _, err := tx.Model("mailbox").Ctx(ctx).Data(mailboxDataFromRecycle(&locked, now)).Insert(); err != nil {
 			return fmt.Errorf("restore mailbox row: %w", err)
 		}
-		result, err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", item.ID).Where("archive_status", ArchiveStatusRestoring).Delete()
 		if err != nil {
 			return fmt.Errorf("remove restored recycle item: %w", err)
@@ -1214,7 +1250,7 @@ func completeRecyclePurge(ctx context.Context, item *RecycleItem) error {
 	}
 	if err := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var locked RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", item.ID).LockUpdate().Scan(&locked); err != nil {
 			return err
 		}
 		if locked.ID == 0 {
@@ -1223,7 +1259,7 @@ func completeRecyclePurge(ctx context.Context, item *RecycleItem) error {
 		if locked.ArchiveStatus != ArchiveStatusPurging || !sameLifecycleLease(locked.StatusUpdatedAt, item.StatusUpdatedAt) {
 			return errLifecycleLeaseLost
 		}
-		result, err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", item.ID).Where("archive_status", ArchiveStatusPurging).Delete()
 		if err != nil {
 			return err
@@ -1280,14 +1316,14 @@ func claimStaleLifecycleItem(ctx context.Context, id int64, expectedState string
 	var claimed *RecycleItem
 	err := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var item RecycleItem
-		if err := tx.Model("mailbox_recycle_items").Ctx(ctx).Where("id", id).LockUpdate().Scan(&item); err != nil {
+		if err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).Where("id", id).LockUpdate().Scan(&item); err != nil {
 			return err
 		}
 		if item.ID == 0 || item.ArchiveStatus != expectedState || !lifecycleLeaseIsStale(item.StatusUpdatedAt, cutoff) {
 			return errLifecycleNotClaimed
 		}
 		claimedAt := time.Now().UTC()
-		result, err := tx.Model("mailbox_recycle_items").Ctx(ctx).
+		result, err := tx.Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 			Where("id", id).Where("archive_status", expectedState).
 			Data(g.Map{"status_updated_at": claimedAt}).Update()
 		if err != nil {
@@ -1300,7 +1336,9 @@ func claimStaleLifecycleItem(ctx context.Context, id int64, expectedState string
 		if affected != 1 {
 			return errLifecycleNotClaimed
 		}
-		item.StatusUpdatedAt = claimedAt
+		if err := refreshLifecycleTimestamp(ctx, tx, &item); err != nil {
+			return err
+		}
 		claimed = &item
 		return nil
 	})
@@ -1335,7 +1373,7 @@ func ReconcileStaleLifecycleItems(ctx context.Context, limit int) (RecycleMutati
 		ID            int64  `json:"id"`
 		ArchiveStatus string `json:"archive_status"`
 	}
-	if err := g.DB().Model("mailbox_recycle_items").Ctx(ctx).
+	if err := g.DB().Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 		Fields("id,archive_status").
 		WhereIn("archive_status", staleLifecycleStatuses()).
 		WhereLTE("status_updated_at", cutoff).
@@ -1369,7 +1407,7 @@ func CleanupExpiredRecycleItems(ctx context.Context, limit int) (RecycleMutation
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
-	rows, err := g.DB().Model("mailbox_recycle_items").Ctx(ctx).
+	rows, err := g.DB().Model("mailbox_recycle_items").Unscoped().Ctx(ctx).
 		Where("archive_status", ArchiveStatusArchived).WhereLTE("purge_at", time.Now().UTC()).
 		OrderAsc("purge_at").Limit(limit).Array("id")
 	if err != nil {

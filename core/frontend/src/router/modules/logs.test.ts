@@ -20,17 +20,24 @@ describe('logs route', () => {
     })
   })
 
-  it('first child has operation and error sub-routes', () => {
+  it('first child has operation, user, and error sub-routes', () => {
     const logs = route.children![0]
     expect(logs.name).toBe('Logs')
     expect(logs.redirect).toBe('/logs/operation')
     const subRoutes = logs.children!
-    expect(subRoutes).toHaveLength(2)
+    expect(subRoutes).toHaveLength(3)
 
     expect(subRoutes[0].path).toBe('operation')
     expect(subRoutes[0].name).toBe('Operation Logs')
 
-    expect(subRoutes[1].path).toBe('error')
-    expect(subRoutes[1].name).toBe('Error Logs')
+    expect(subRoutes[1].path).toBe('users')
+    expect(subRoutes[1].name).toBe('User Logs')
+    expect(subRoutes[1].meta).toMatchObject({
+      title: '用户日志',
+      titleKey: 'logs.user.title',
+    })
+
+    expect(subRoutes[2].path).toBe('error')
+    expect(subRoutes[2].name).toBe('Error Logs')
   })
 })

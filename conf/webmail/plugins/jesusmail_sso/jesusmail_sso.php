@@ -9,20 +9,28 @@
  */
 class jesusmail_sso extends rcube_plugin
 {
-    public $task = 'login';
+    // Roundcube loads task-scoped plugins only for that task. User activity spans
+    // both login and mail tasks so the hooks must be available throughout a session.
+    public $task = '';
 
     private const TICKET_PARAMETER = 'jesusmail_ticket';
     private const SECRET_HEADER = 'X-JesusMail-Roundcube-SSO-Secret';
     private const CLIENT_IP_HEADER = 'X-JesusMail-Client-IP';
     private const DEFAULT_CORE_URL = 'http://core/api/public/mailbox/login_ticket/consume';
     private const DEFAULT_DIAGNOSE_URL = 'http://core/api/public/mailbox/login_diagnose';
+    private const DEFAULT_USER_EVENT_URL = 'http://core/api/public/mailbox/user_event';
     private const MAX_RESPONSE_BYTES = 8192;
+    private const SESSION_USERNAME_KEY = 'jesusmail_sso_username';
+
+    private $pendingUserEvents = array();
+    private $userEventFlushRegistered = false;
 
     public function init()
     {
         $this->add_hook('startup', array($this, 'startup'));
         $this->add_hook('authenticate', array($this, 'authenticate'));
         $this->add_hook('login_after', array($this, 'login_after'));
+        $this->add_hook('logout_after', array($this, 'logout'));
         $this->add_hook('loginform_content', array($this, 'login_form_content'));
     }
 
@@ -82,7 +90,54 @@ class jesusmail_sso extends rcube_plugin
     {
         // Roundcube's normal successful-login redirect removes the ticket query string.
         $this->set_private_response_headers();
+        $username = $this->event_username(isset($args['user']) ? $args['user'] : '');
+        if ($username !== '') {
+            $_SESSION[self::SESSION_USERNAME_KEY] = $username;
+            $this->queue_user_event('login', $username);
+        }
         return $args;
+    }
+
+    public function logout($args)
+    {
+        $username = $this->event_username(isset($args['user']) ? $args['user'] : '');
+        if ($username !== '') {
+            $this->queue_user_event('logout', $username);
+        }
+        return $args;
+    }
+
+    public function flush_user_events()
+    {
+        if (count($this->pendingUserEvents) === 0) {
+            return;
+        }
+
+        // Finish the browser response before reporting activity. If this is not
+        // PHP-FPM, discard best-effort events rather than delaying login/logout.
+        if (!function_exists('fastcgi_finish_request')) {
+            return;
+        }
+        fastcgi_finish_request();
+
+        $secret = $this->shared_secret();
+        if ($secret === '') {
+            return;
+        }
+        $url = $this->user_event_url();
+        if ($url === '') {
+            return;
+        }
+
+        foreach ($this->pendingUserEvents as $event) {
+            $this->post_core_json(
+                $url,
+                $event,
+                $secret,
+                array(self::CLIENT_IP_HEADER . ': ' . $this->client_ip())
+            );
+        }
+        $this->pendingUserEvents = array();
     }
 
     private function ticket()
@@ -130,6 +185,65 @@ class jesusmail_sso extends rcube_plugin
             'username' => strtolower($decoded['username']),
             'password' => $decoded['password'],
         );
+    }
+
+    private function queue_user_event($eventType, $username)
+    {
+        if (($eventType !== 'login' && $eventType !== 'logout') || $username === '') {
+            return;
+        }
+
+        $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? trim((string) $_SERVER['HTTP_USER_AGENT']) : '';
+        if (strlen($userAgent) > 512) {
+            $userAgent = substr($userAgent, 0, 512);
+        }
+
+        $this->pendingUserEvents[] = array(
+            'username' => $username,
+            'event_type' => $eventType,
+            'user_agent' => $userAgent,
+            'detail' => 'Roundcube webmail',
+        );
+        if (!$this->userEventFlushRegistered) {
+            $this->userEventFlushRegistered = true;
+            register_shutdown_function(array($this, 'flush_user_events'));
+        }
+    }
+
+    private function event_username($candidate = '')
+    {
+        $candidates = array();
+        if (is_string($candidate) && trim($candidate) !== '') {
+            $candidates[] = $candidate;
+        }
+
+        $rcmail = rcmail::get_instance();
+        if (isset($rcmail->user) && method_exists($rcmail->user, 'get_username')) {
+            $candidates[] = $rcmail->user->get_username();
+        }
+        if (isset($_SESSION[self::SESSION_USERNAME_KEY])) {
+            $candidates[] = $_SESSION[self::SESSION_USERNAME_KEY];
+        }
+
+        foreach ($candidates as $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            $username = strtolower(trim($value));
+            if (filter_var($username, FILTER_VALIDATE_EMAIL) !== false && strlen($username) <= 320) {
+                return $username;
+            }
+        }
+        return '';
+    }
+
+    private function user_event_url()
+    {
+        $url = trim((string) rcmail::get_instance()->config->get(
+            'jesusmail_sso_user_event_url',
+            self::DEFAULT_USER_EVENT_URL
+        ));
+        return $this->valid_core_url($url) ? $url : '';
     }
 
     private function diagnose_login_credentials($args)

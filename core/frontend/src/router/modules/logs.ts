@@ -20,6 +20,12 @@ const route: RouteRecordRaw = {
 					component: () => import('@/views/logs/operate/index.vue'),
 				},
 				{
+					path: 'users',
+					name: 'User Logs',
+					meta: { title: '用户日志', titleKey: 'logs.user.title' },
+					component: () => import('@/views/logs/users/index.vue'),
+				},
+				{
 					path: 'error',
 					name: 'Error Logs',
 					meta: { title: 'Error logs', titleKey: '' },

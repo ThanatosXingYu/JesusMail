@@ -23,6 +23,7 @@ func TestIsPublicActivationPath(t *testing.T) {
 		{path: "/public/activation/activate", want: true},
 		{path: "/public/activation/config", want: true},
 		{path: "/api/public/mailbox/login_ticket/consume", want: true},
+		{path: "/api/public/mailbox/user_event", want: true},
 		{path: "/static/js/index.js", want: true},
 		{path: "/api/activation/list", want: false},
 		{path: "/mailbox", want: false},
@@ -30,6 +31,7 @@ func TestIsPublicActivationPath(t *testing.T) {
 		{path: "/api/public/activation/activate/extra", want: false},
 		{path: "/public/activation/activate/extra", want: false},
 		{path: "/api/public/mailbox/login_ticket/consume/extra", want: false},
+		{path: "/api/public/mailbox/user_event/extra", want: false},
 	}
 
 	for _, tt := range tests {
@@ -60,44 +62,96 @@ func TestPublicAPIBindsProtectedRoundcubeTicketConsumer(t *testing.T) {
 		}
 	})
 
-	const routePath = "/api/public/mailbox/login_ticket/consume"
-	foundRoute := false
-	for _, route := range server.GetRoutes() {
-		if route.Route == routePath && strings.EqualFold(route.Method, http.MethodPost) && route.IsServiceHandler {
-			foundRoute = true
-			break
+	routeRequests := map[string]string{
+		"/api/public/mailbox/login_ticket/consume": `{"ticket":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}`,
+		"/api/public/mailbox/user_event":           `{"username":"user@example.com","event_type":"login"}`,
+	}
+	for routePath := range routeRequests {
+		foundRoute := false
+		for _, route := range server.GetRoutes() {
+			if route.Route == routePath && strings.EqualFold(route.Method, http.MethodPost) && route.IsServiceHandler {
+				foundRoute = true
+				break
+			}
+		}
+		if !foundRoute {
+			t.Fatalf("POST %s was not registered", routePath)
 		}
 	}
-	if !foundRoute {
-		t.Fatalf("POST %s was not registered", routePath)
+
+	client := &http.Client{Timeout: 2 * time.Second}
+	for routePath, requestBody := range routeRequests {
+		request, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("http://127.0.0.1:%d%s", server.GetListenedPort(), routePath),
+			strings.NewReader(requestBody),
+		)
+		if err != nil {
+			t.Fatalf("create request for %s: %v", routePath, err)
+		}
+		request.Header.Set("Content-Type", "application/json")
+
+		response, err := client.Do(request)
+		if err != nil {
+			t.Fatalf("call protected public endpoint %s: %v", routePath, err)
+		}
+
+		body, readErr := io.ReadAll(io.LimitReader(response.Body, 8192))
+		response.Body.Close()
+		if readErr != nil {
+			t.Fatalf("read response for %s: %v", routePath, readErr)
+		}
+		if response.StatusCode != http.StatusForbidden {
+			t.Fatalf("%s without shared secret returned %d, want %d; body=%s", routePath, response.StatusCode, http.StatusForbidden, body)
+		}
+		if strings.Contains(strings.ToLower(string(body)), "password") {
+			t.Fatalf("error response must not contain mailbox credentials: %s", body)
+		}
 	}
 
 	request, err := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("http://127.0.0.1:%d%s", server.GetListenedPort(), routePath),
-		strings.NewReader(`{"ticket":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}`),
+		fmt.Sprintf("http://127.0.0.1:%d/api/public/mailbox/user_event", server.GetListenedPort()),
+		strings.NewReader(`{"username":"invalid","event_type":"unknown"}`),
 	)
 	if err != nil {
-		t.Fatalf("create request: %v", err)
+		t.Fatalf("create malformed unauthenticated user event request: %v", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 2 * time.Second}
 	response, err := client.Do(request)
 	if err != nil {
-		t.Fatalf("call public ticket consumer: %v", err)
+		t.Fatalf("call malformed unauthenticated user event endpoint: %v", err)
 	}
-	defer response.Body.Close()
-
 	body, err := io.ReadAll(io.LimitReader(response.Body, 8192))
+	response.Body.Close()
 	if err != nil {
-		t.Fatalf("read response: %v", err)
+		t.Fatalf("read malformed unauthenticated user event response: %v", err)
 	}
 	if response.StatusCode != http.StatusForbidden {
-		t.Fatalf("ticket consumer without shared secret returned %d, want %d; body=%s", response.StatusCode, http.StatusForbidden, body)
+		t.Fatalf("malformed unauthenticated user event returned %d, want %d; body=%s", response.StatusCode, http.StatusForbidden, body)
 	}
-	if strings.Contains(strings.ToLower(string(body)), "password") {
-		t.Fatalf("error response must not contain mailbox credentials: %s", body)
+
+	request, err = http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("http://127.0.0.1:%d/api/public/mailbox/user_event", server.GetListenedPort()),
+		strings.NewReader(`{"username":"user@example.com","event_type":"unknown"}`),
+	)
+	if err != nil {
+		t.Fatalf("create invalid user event request: %v", err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-JesusMail-Roundcube-SSO-Secret", "route-test-shared-secret")
+	response, err = client.Do(request)
+	if err != nil {
+		t.Fatalf("call user event endpoint with invalid payload: %v", err)
+	}
+	defer response.Body.Close()
+	body, err = io.ReadAll(io.LimitReader(response.Body, 8192))
+	if err != nil {
+		t.Fatalf("read invalid user event response: %v", err)
+	}
+	if response.StatusCode != http.StatusOK || !strings.Contains(string(body), `"success":false`) {
+		t.Fatalf("invalid user event was not rejected safely: status=%d body=%s", response.StatusCode, body)
 	}
 }
 

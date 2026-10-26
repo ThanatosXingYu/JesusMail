@@ -8,7 +8,6 @@ import (
 	"time"
 
 	mailboxv1 "jesusmail-core/api/mail_boxes/v1"
-	"jesusmail-core/internal/service/domains"
 	"jesusmail-core/internal/service/mail_boxes"
 	"jesusmail-core/internal/service/mail_service"
 	"jesusmail-core/internal/service/public"
@@ -68,7 +67,7 @@ func deliver(ctx context.Context, job Job, config Config) error {
 	}
 
 	htmlPath, txtPath := templatePaths()
-	htmlBody, _, err := renderTemplateFiles(job.Email, domains.GetBaseURL(), htmlPath, txtPath)
+	htmlBody, _, err := renderTemplateFiles(job.Email, htmlPath, txtPath)
 	if err != nil {
 		return fmt.Errorf("render activation welcome template: %w", err)
 	}

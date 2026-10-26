@@ -91,6 +91,12 @@ func TestResolveSender(t *testing.T) {
 }
 
 func TestRenderActivationWelcomeTemplates(t *testing.T) {
+	originalResolver := resolveWebmailHost
+	resolveWebmailHost = func(string) string { return "mail.example.com" }
+	t.Cleanup(func() {
+		resolveWebmailHost = originalResolver
+	})
+
 	_, testFile, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatal("resolve test file path")
@@ -98,7 +104,6 @@ func TestRenderActivationWelcomeTemplates(t *testing.T) {
 	templateDir := filepath.Join(filepath.Dir(testFile), "..", "..", "..", "template", "activation_welcome_email")
 	htmlBody, txtBody, err := renderTemplateFiles(
 		"student@mail.example.com",
-		"https://mail.example.com/",
 		filepath.Join(templateDir, "welcome_email.html"),
 		filepath.Join(templateDir, "welcome_email.txt"),
 	)
@@ -109,8 +114,8 @@ func TestRenderActivationWelcomeTemplates(t *testing.T) {
 	required := []string{
 		"student@mail.example.com",
 		"https://mail.example.com/roundcube/",
-		"mail.example.com",
-		"收发",
+		"欢迎",
+		"妥善保管密码",
 	}
 	for _, fragment := range required {
 		if !strings.Contains(htmlBody, fragment) {
@@ -120,13 +125,21 @@ func TestRenderActivationWelcomeTemplates(t *testing.T) {
 			t.Errorf("TXT template missing %q", fragment)
 		}
 	}
+	for _, fragment := range []string{"SMTP", "IMAP", "POP3", "41443"} {
+		if strings.Contains(htmlBody, fragment) || strings.Contains(txtBody, fragment) {
+			t.Errorf("welcome template must not contain %q", fragment)
+		}
+	}
 }
 
 func TestWebmailURL(t *testing.T) {
-	if got := webmailURL("https://mail.example.com/"); got != "https://mail.example.com/roundcube/" {
+	originalResolver := resolveWebmailHost
+	resolveWebmailHost = func(string) string { return "mail.example.com" }
+	t.Cleanup(func() {
+		resolveWebmailHost = originalResolver
+	})
+
+	if got := webmailURL("mail.example.com"); got != "https://mail.example.com/roundcube/" {
 		t.Fatalf("webmailURL() = %q", got)
-	}
-	if got := webmailURL(""); got != "/roundcube/" {
-		t.Fatalf("webmailURL(empty) = %q", got)
 	}
 }

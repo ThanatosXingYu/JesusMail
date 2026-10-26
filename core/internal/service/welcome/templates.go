@@ -6,23 +6,25 @@ import (
 	"os"
 	"strings"
 	texttemplate "text/template"
+
+	"jesusmail-core/internal/service/public"
 )
 
 type TemplateData struct {
 	Email      string
-	Domain     string
 	WebmailURL string
 }
 
-func renderTemplateFiles(email, baseURL, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
+var resolveWebmailHost = public.FormatMX
+
+func renderTemplateFiles(email, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
 	recipient, domain, err := splitRecipient(email)
 	if err != nil {
 		return "", "", err
 	}
 	data := TemplateData{
 		Email:      recipient,
-		Domain:     domain,
-		WebmailURL: webmailURL(baseURL),
+		WebmailURL: webmailURL(domain),
 	}
 
 	htmlSource, err := os.ReadFile(htmlPath)
@@ -54,10 +56,10 @@ func renderTemplateFiles(email, baseURL, htmlPath, txtPath string) (htmlBody, tx
 	return htmlBuilder.String(), txtBuilder.String(), nil
 }
 
-func webmailURL(baseURL string) string {
-	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
-	if baseURL == "" {
-		return "/roundcube/"
+func webmailURL(recipientDomain string) string {
+	host := strings.Trim(strings.TrimSpace(resolveWebmailHost(recipientDomain)), "/")
+	if host == "" {
+		host = strings.Trim(recipientDomain, "/")
 	}
-	return baseURL + "/roundcube/"
+	return "https://" + host + "/roundcube/"
 }

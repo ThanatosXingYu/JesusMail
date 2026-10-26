@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>您的邮箱已开通</title>
+    <title>欢迎使用 JesusMail</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f6f8;color:#1f2933;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f6f8;padding:32px 16px;">
@@ -13,24 +13,25 @@
                     <tr>
                         <td style="padding:28px 32px;background:#123b5d;color:#ffffff;">
                             <div style="font-size:20px;font-weight:600;">JesusMail</div>
-                            <div style="margin-top:8px;font-size:14px;color:#d8e6f1;">邮箱激活成功</div>
+                            <div style="margin-top:8px;font-size:14px;color:#d8e6f1;">欢迎加入，您的邮箱已经准备就绪</div>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:32px;">
-                            <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">您好，您的邮箱 <strong>{{ .Email }}</strong> 已成功开通。</p>
-                            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;">您可以点击下面的地址登录网页邮箱：</p>
+                            <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">您好，欢迎使用 <strong>{{ .Email }}</strong>。</p>
+                            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;">从今天起，您可以用它接收重要消息、与朋友保持联系，也可以安心保存每一封值得留存的邮件。</p>
+                            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;">我们已经为您准备好专属邮箱空间，点击下方按钮即可开始使用：</p>
                             <p style="margin:0 0 24px;">
-                                <a href="{{ .WebmailURL }}" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;">打开网页邮箱</a>
+                                <a href="{{ .WebmailURL }}" style="display:inline-block;padding:11px 20px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">进入我的邮箱</a>
                             </p>
-                            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;word-break:break-all;">登录地址：<a href="{{ .WebmailURL }}" style="color:#0f766e;">{{ .WebmailURL }}</a></p>
-                            <div style="margin:24px 0;padding:16px;background:#f8fafb;border-left:3px solid #0f766e;font-size:14px;line-height:1.8;">
-                                <div style="font-weight:600;margin-bottom:6px;">服务器配置提示</div>
-                                <div>SMTP / IMAP / POP3 服务器：{{ .Domain }}</div>
-                                <div>用户名：请填写完整邮箱地址 {{ .Email }}</div>
-                                <div>端口和加密方式：请以管理员提供的配置为准</div>
+                            <p style="margin:0 0 16px;font-size:13px;line-height:1.7;word-break:break-all;color:#52606d;">邮箱地址：<a href="{{ .WebmailURL }}" style="color:#0f766e;">{{ .WebmailURL }}</a></p>
+                            <div style="margin:24px 0;padding:18px;background:#f8fafb;border-left:3px solid #0f766e;font-size:14px;line-height:1.8;">
+                                <div style="font-weight:600;margin-bottom:6px;">一个小提醒</div>
+                                <div>建议登录后尽快完善个人设置，并妥善保管密码。</div>
+                                <div>愿每一封来信，都能带来好消息。</div>
                             </div>
-                            <p style="margin:0;font-size:14px;line-height:1.7;color:#52606d;">如果您能收到这封邮件，说明该邮箱的收发功能正常。建议您登录后及时检查邮箱设置。</p>
+                            <p style="margin:0;font-size:14px;line-height:1.7;color:#52606d;">感谢您选择 JesusMail。如果这不是您的操作，请联系系统管理员。</p>
+                            <p style="margin:20px 0 0;font-size:14px;line-height:1.7;color:#1f2933;">JesusMail 团队</p>
                         </td>
                     </tr>
                 </table>

@@ -99,6 +99,7 @@
 			"group": "分组",
 			"domain": "域名",
 			"mailboxes": "邮箱",
+			"mailList": "邮件查询",
 			"activation": "激活码",
 			"settings": "设置",
 			"common": "常用设置",
@@ -458,7 +459,7 @@
 			"useAiTools": "使用人工智能工具帮您自动生成邮件内容，提升工作您的效率",
 			"create": "创建",
 			"notices": {
-				"domainListEmpty": "请先为 JesusMail 创建第一个用于发件的域名",
+				"domainListEmpty": "请先为JesusMail创建第一个用于发件的域名",
 				"aiConfigurationInvalid": "当前并未配置AI大模型，您无法使用AI模型创建邮件模板",
 				"invalidBrandDomain": "请先为域名创建品牌信息"
 			},
@@ -468,7 +469,7 @@
 			}
 		},
 		"ai": {
-			"title": "AI 模板",
+			"title": "AI模板",
 			"welcomeMessage": "您可以说：创建一份欢迎用户加入{domain}的欢迎邮件",
 			"greeting": "让我们创建一个漂亮的邮件模板。",
 			"brandName": "JesusMail",
@@ -581,7 +582,7 @@
 				"overwriteDescription": "在导入时是否按照导入数据来覆盖列表中存在的客户信息",
 				"subscriptionStatus": "订阅状态",
 				"status": "状态",
-				"exampleCsvLabel": "CSV 示例",
+				"exampleCsvLabel": "CSV示例",
 				"overwriteOptions": {
 					"no": "否",
 					"yes": "是"
@@ -880,10 +881,10 @@
 			"title": "黑名单检测",
 			"checking": "正在检测解析到 {ip} 的 {results}，对比 {tested} 个已知黑名单...",
 			"listed": "已列入黑名单数：{count}",
-			"success": "您的 IP 未出现在任何已知黑名单中",
+			"success": "您的IP未出现在任何已知黑名单中",
 			"columns": {
 				"blacklist": "黑名单",
-				"responseIp": "响应 IP",
+				"responseIp": "响应IP",
 				"checkTime": "检测时间"
 			}
 		},
@@ -915,7 +916,7 @@
 				"dedicatedIpRequired": "请先输入域名专用IP"
 			},
 			"tips": {
-				"aRecordFailed": "提示A记录解析失败。请检查填写的A记录域名是否已解析到服务器 IP",
+				"aRecordFailed": "提示A记录解析失败。请检查填写的A记录域名是否已解析到服务器IP",
 				"dnsSetup": "需要在您的DNS服务提供商控制台添加A记录",
 				"cloudflare": "如果使用CloudFlare，请在添加记录时选择【仅DNS】"
 			},
@@ -940,7 +941,7 @@
 			"testConnection": "连接测试"
 		},
 		"dns": {
-			"title": "DNS 记录",
+			"title": "DNS记录",
 			"verify": "已设置，验证域名解析",
 			"status": {
 				"ok": "正常",
@@ -968,8 +969,8 @@
 			},
 			"step4": {
 				"title": "步骤4：添加PTR记录",
-				"description1": "（可选）PTR记录用于反向 DNS 查找",
-				"description2": "联系您的IP提供商创建 PTR 记录"
+				"description1": "（可选）PTR记录用于反向DNS查找",
+				"description2": "联系您的IP提供商创建PTR记录"
 			},
 			"dkim": {
 				"formatLabel": "DKIM记录格式：",
@@ -988,7 +989,7 @@
 			"expired": "已过期",
 			"daysLeft": "{days}天",
 			"notSet": "未设置",
-			"title": "域名 SSL",
+			"title": "域名SSL",
 			"tabs": {
 				"otherCertificate": "其他证书"
 			},
@@ -1005,14 +1006,14 @@
 				"applyFree": "申请免费证书"
 			},
 			"tips": {
-				"paste": "粘贴您的 KEY 和 CRT 内容，然后保存",
-				"chainCheck": "如果浏览器提示证书链不完整，请检查 PEM 证书是否正确拼接",
-				"pemFormat": "PEM 格式证书 = 域名证书 Crt + 根证书 (root_bundle)Crt",
-				"defaultSite": "当未指定 SSL 默认站点时，未配置 SSL 的站点将使用 HTTPS 访问启用了 SSL 的站点"
+				"paste": "粘贴您的KEY和CRT内容，然后保存",
+				"chainCheck": "如果浏览器提示证书链不完整，请检查PEM证书是否正确拼接",
+				"pemFormat": "PEM格式证书 = 域名证书Crt + 根证书 (root_bundle)Crt",
+				"defaultSite": "当未指定SSL默认站点时，未配置SSL的站点将使用HTTPS访问启用了SSL的站点"
 			}
 		},
 		"edit": {
-			"pageTitle": "域名 / 编辑域名",
+		"pageTitle": "域名/编辑域名",
 			"save": "保存",
 			"tabs": {
 				"domainConfiguration": "域名配置",
@@ -1175,8 +1176,9 @@
 		},
 		"columns": {
 			"username": "用户名",
+		"recoveryEmail": "备用邮箱",
 			"password": "密码",
-			"loginInfo": "登录信息（WebMail / SMTP）",
+		"loginInfo": "登录信息（WebMail/SMTP）",
 			"receivedCount": "已收邮件",
 			"sentCount": "已发邮件",
 			"quota": "配额",
@@ -1213,7 +1215,10 @@
 			"count": "邮箱数量",
 			"displayName": "显示名称",
 			"quotaLimit": "配额限制",
-			"expiresAt": "到期时间"
+		"expiresAt": "到期时间",
+		"recoveryEmail": "备用邮箱（选填）",
+		"recoveryEmailPlaceholder": "用于接收激活账号和登录密码",
+		"noActivationKey": "该邮箱不是通过激活码创建，无备用邮箱"
 		},
 		"validation": {
 			"emailRequired": "请输入邮箱地址",
@@ -1225,7 +1230,8 @@
 			"fileRequired": "请选择上传文件",
 			"nameRequired": "请输入显示名称",
 			"expirationRequired": "请选择邮箱到期日期",
-			"expirationPast": "到期日期不能早于今天"
+		"expirationPast": "到期日期不能早于今天",
+		"recoveryEmailFormat": "请输入正确的备用邮箱地址"
 		},
 		"delete": {
 			"title": "删除邮箱",
@@ -1234,7 +1240,7 @@
 		},
 		"loginInfo": {
 			"template": "WebMail: {webmail}\n用户名: {username}\n密码: {password}\nPOP service [ Address: {mx} Port: 110/995 ]\nIMAP service [ Address: {mx} Port: 143/993 ]\nSMTP service [ Address: {mx} Port: 25/465/587 ]",
-			"oneClickLoginFailed": "一键登录失败，请确认邮箱已启用且未到期，并检查 WebMail 服务。"
+			"oneClickLoginFailed": "一键登录失败，请确认邮箱已启用且未到期，并检查WebMail服务。"
 		},
 		"api": {
 			"loading": {
@@ -1248,7 +1254,7 @@
 		"expiration": {
 			"permanent": "永久",
 			"specificDate": "指定日期",
-			"tip": "到期当天 23:59:59 后停止使用，并进入 30 天回收期。"
+			"tip": "到期当天23:59:59后停止使用，并进入30天回收期。"
 		}
 	},
 	"smtp": {
@@ -1313,7 +1319,7 @@
 		"title": "系统设置",
 		"service": {
 			"title": "服务状态",
-			"tips": "提示：Ctrl+F 搜索关键词，Ctrl+S 保存，Ctrl+H 搜索和替换",
+			"tips": "提示：Ctrl+F搜索关键词，Ctrl+S保存，Ctrl+H搜索和替换",
 			"editTitle": "在线编辑 {name}",
 			"columns": {
 				"name": "服务名称",
@@ -1522,7 +1528,7 @@
 				"on": "已启用",
 				"off": "已关闭",
 				"sender": "发件邮箱",
-				"senderPlaceholder": "留空则自动使用 noreply 系统邮箱",
+				"senderPlaceholder": "留空则自动使用noreply系统邮箱",
 				"subject": "邮件主题",
 				"save": "保存设置"
 			},
@@ -1585,7 +1591,7 @@
 			},
 			"search": {
 				"username": "搜索邮箱用户",
-				"keyword": "搜索 IP/详情"
+				"keyword": "搜索IP/详情"
 			}
 		},
 		"table": {
@@ -1649,8 +1655,8 @@
 			"group": {
 				"label": "收件人分组",
 				"tips": {
-					"choose": "选择分组：所有通过此 API 添加的新联系人，都会被自动放进您选定的组里。",
-					"autoCreate": "不选择分组：系统会自动为这个 API 创建一个全新的、独立的联系人组，用于存放所有新联系人。"
+					"choose": "选择分组：所有通过此API添加的新联系人，都会被自动放进您选定的组里。",
+					"autoCreate": "不选择分组：系统会自动为这个API创建一个全新的、独立的联系人组，用于存放所有新联系人。"
 				}
 			},
 			"validation": {
@@ -1726,5 +1732,30 @@
 			"personalized": "Personalized",
 			"queued": "Queued"
 		}
+	},
+	"mailList": {
+		"title": "邮件查询",
+		"description": "查看全部用户的收件与发件记录，并可搜索收发件人、主题和正文",
+		"tabs": {
+			"received": "收件",
+			"sent": "发件"
+		},
+		"actions": {
+			"sync": "同步邮件"
+		},
+		"search": {
+			"placeholder": "搜索收发件人、主题或正文",
+			"mailboxPlaceholder": "筛选用户邮箱"
+		},
+		"columns": {
+			"time": "时间",
+			"mailbox": "用户邮箱",
+			"sender": "发件人",
+			"recipients": "收件人",
+			"subject": "主题",
+			"preview": "内容摘要"
+		},
+		"noSubject": "无主题",
+		"syncResult": "同步完成：新增或更新{indexed}封，移除{removed}封，失败{failed}封"
 	}
 }

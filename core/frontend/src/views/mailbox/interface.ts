@@ -25,6 +25,7 @@ export interface MailBox {
 	expires_at: string | null
 	source_type: string
 	activation_key_id: number | null
+	recovery_email: string
 	sent_count: number
 	received_count: number
 }

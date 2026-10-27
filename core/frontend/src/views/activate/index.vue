@@ -32,7 +32,7 @@
 						<n-input
 							v-model:value="form.prefix"
 							maxlength="30"
-							placeholder="3-30 位字母、数字或 . _ -"
+							placeholder="3-30位字母、数字或. _ -"
 							@update:value="form.prefix = form.prefix.toLowerCase()" />
 						<n-input-group-label>{{ domainSuffix }}</n-input-group-label>
 					</n-input-group>
@@ -43,7 +43,7 @@
 						type="password"
 						show-password-on="click"
 						maxlength="64"
-						placeholder="8-64 位，须同时包含字母和数字" />
+						placeholder="8-64位，须同时包含字母和数字" />
 				</n-form-item>
 				<n-form-item label="确认密码" path="password2">
 					<n-input
@@ -121,7 +121,7 @@ const rules: FormRules = {
 		{
 			required: true,
 			pattern: /^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$/,
-			message: '请输入 3-30 位合法邮箱前缀',
+			message: '请输入3-30位合法邮箱前缀',
 			trigger: ['blur', 'input'],
 		},
 	],
@@ -131,7 +131,7 @@ const rules: FormRules = {
 			min: 8,
 			max: 64,
 			validator: (_rule, value: string) => /[A-Za-z]/.test(value) && /\d/.test(value),
-			message: '密码需 8-64 位且同时包含字母和数字',
+			message: '密码需8-64位且同时包含字母和数字',
 			trigger: ['blur', 'input'],
 		},
 	],

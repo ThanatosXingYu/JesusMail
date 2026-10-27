@@ -112,6 +112,7 @@ const iconMap: Record<string, VNodeChild> = {
 	enrichment: <i class="i-mdi-database-search-outline"></i>,
 	domain: <i class="i-mdi-web"></i>,
 	mailbox: <i class="i-custom:mailbox"></i>,
+	'mail-list': <i class="i-mdi-email-search-outline"></i>,
 	'mailbox-recycle': <i class="i-mdi-delete-clock-outline"></i>,
 	recycle: <i class="i-mdi-delete-clock-outline"></i>,
 	activation: <i class="i-mdi-key-variant"></i>,

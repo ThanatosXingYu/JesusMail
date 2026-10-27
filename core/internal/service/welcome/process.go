@@ -67,7 +67,7 @@ func deliver(ctx context.Context, job Job, config Config) error {
 	}
 
 	htmlPath, txtPath := templatePaths()
-	htmlBody, _, err := renderTemplateFiles(job.Email, htmlPath, txtPath)
+	htmlBody, _, err := renderTemplateFiles(ctx, job.Email, htmlPath, txtPath)
 	if err != nil {
 		return fmt.Errorf("render activation welcome template: %w", err)
 	}

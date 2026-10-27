@@ -2,6 +2,7 @@ package timers
 
 import (
 	"context"
+	"errors"
 	"jesusmail-core/internal/service/abnormal_recipient"
 	"jesusmail-core/internal/service/askai"
 	"jesusmail-core/internal/service/batch_mail"
@@ -11,6 +12,7 @@ import (
 	"jesusmail-core/internal/service/log_maintenance"
 	"jesusmail-core/internal/service/mail_boxes"
 	"jesusmail-core/internal/service/mail_service"
+	"jesusmail-core/internal/service/mailbox_messages"
 	"jesusmail-core/internal/service/maillog_stat"
 	"jesusmail-core/internal/service/multi_ip_domain"
 	"jesusmail-core/internal/service/relay"
@@ -25,6 +27,14 @@ import (
 
 // Start Start initializes and starts all the necessary timers for the service.
 func Start(ctx context.Context) (err error) {
+	go func() {
+		scanCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Minute)
+		defer cancel()
+		if _, scanErr := mailbox_messages.Scan(scanCtx); scanErr != nil && !errors.Is(scanErr, mailbox_messages.ErrScanInProgress) {
+			g.Log().Warning(scanCtx, "Initial mailbox message index failed:", scanErr)
+		}
+	}()
+
 	g.Log().Debug(ctx, "Starting timers...")
 
 	// Normalize mailboxes to lowercase
@@ -199,6 +209,14 @@ func Start(ctx context.Context) (err error) {
 	gtimer.Add(time.Minute, func() {
 		if err := welcome.Process(ctx); err != nil {
 			g.Log().Warning(ctx, "Activation welcome email processing failed:", err)
+		}
+	})
+
+	gtimer.Add(10*time.Minute, func() {
+		scanCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Minute)
+		defer cancel()
+		if _, scanErr := mailbox_messages.Scan(scanCtx); scanErr != nil && !errors.Is(scanErr, mailbox_messages.ErrScanInProgress) {
+			g.Log().Warning(scanCtx, "Mailbox message index refresh failed:", scanErr)
 		}
 	})
 

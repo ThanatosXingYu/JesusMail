@@ -28,7 +28,7 @@ import type { Task, TaskStatus } from '../interface'
 
 import TaskStatusDetails from './TaskStatusDetails.vue'
 
-const title = ref('Error tasks')
+const title = ref('异常任务')
 
 const loading = ref(false)
 
@@ -42,15 +42,15 @@ const tableList = ref<TaskStatus[]>([])
 const columns = ref<DataTableColumns<TaskStatus>>([
 	{
 		key: 'domain',
-		title: 'Domain',
+		title: '域名',
 	},
 	{
 		key: 'count',
-		title: 'Count',
+		title: '数量',
 	},
 	{
 		key: 'active',
-		title: 'Operator',
+		title: '操作',
 		align: 'right',
 		render: row => {
 			return (
@@ -60,7 +60,7 @@ const columns = ref<DataTableColumns<TaskStatus>>([
 					onClick={() => {
 						handleShowDetails(row)
 					}}>
-					Details
+					详情
 				</NButton>
 			)
 		},

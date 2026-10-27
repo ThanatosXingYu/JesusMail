@@ -7,6 +7,7 @@ import automationRoute from './modules/automation'
 import contactsRoute from './modules/contacts'
 import domainRoute from './modules/domain'
 import logsRoute from './modules/logs'
+import mailListRoute from './modules/mail-list'
 import mailboxRecycleRoute from './modules/mailbox-recycle'
 import mailboxRoute from './modules/mailbox'
 import marketRoute from './modules/market'
@@ -27,6 +28,7 @@ const routesReflectList = [
 	'Enrichment',
 	'MailDomain',
 	'MailBoxes',
+	'Mail List',
 	'Mailbox Recycle Bin',
 	'SMTP',
 	'Logs',
@@ -41,6 +43,7 @@ const moduleRoutes: RouteRecordRaw[] = [
 	contactsRoute,
 	domainRoute,
 	logsRoute,
+	mailListRoute,
 	mailboxRoute,
 	mailboxRecycleRoute,
 	marketRoute,

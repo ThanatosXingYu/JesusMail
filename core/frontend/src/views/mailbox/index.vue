@@ -42,7 +42,7 @@
 						class="mailbox-table"
 						v-bind="tableProps"
 						:columns="columns"
-						:scroll-x="1710"
+						:scroll-x="1930"
 						flex-height>
 						<template #empty>
 							<bt-table-help> </bt-table-help>
@@ -171,6 +171,13 @@ const columns = ref<DataTableColumns<MailBox>>([
 		ellipsis: {
 			tooltip: true,
 		},
+	},
+	{
+		key: 'recovery_email',
+		title: t('mailbox.columns.recoveryEmail'),
+		width: 220,
+		ellipsis: { tooltip: true },
+		render: row => row.recovery_email || '',
 	},
 	{
 		key: 'password',

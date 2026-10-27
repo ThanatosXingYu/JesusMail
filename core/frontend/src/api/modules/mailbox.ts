@@ -23,6 +23,7 @@ export type MailboxMutationParams = {
 	quota: number
 	quota_active: number
 	expires_at: string | null
+	recovery_email?: string
 }
 
 export const createMailbox = (params: MailboxMutationParams) => {
@@ -87,4 +88,39 @@ export const importMailbox = (params: { file_data: string; file_type: string }) 
 
 export const createMailboxLoginTicket = (params: { username: string }) => {
 	return instance.post<MailboxLoginTicket, MailboxLoginTicket>('/mailbox/login_ticket', params)
+}
+
+export interface UserMessage {
+	id: number
+	mailbox_username: string
+	direction: 'sent' | 'received'
+	folder: string
+	message_id: string
+	sender: string
+	recipients: string
+	subject: string
+	sent_at: string
+	body_preview: string
+}
+
+export interface UserMessageParams {
+	page: number
+	page_size: number
+	direction: 'sent' | 'received'
+	keyword: string
+	mailbox: string
+	start_time?: number
+	end_time?: number
+}
+
+export const getUserMessages = (params: UserMessageParams) => {
+	return instance.get('/mailbox/messages', { params })
+}
+
+export const reindexUserMessages = () => {
+	return instance.post(
+		'/mailbox/messages/reindex',
+		{},
+		{ fetchOptions: { loading: '正在同步邮件索引，请稍候...', successMessage: true } }
+	)
 }

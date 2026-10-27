@@ -3,7 +3,7 @@
 		<div class="page-head">
 			<div>
 				<div class="bt-title">邮箱回收站</div>
-				<div class="description">已删除邮箱及邮件默认保留 30 天，可在到期前恢复。</div>
+				<div class="description">已删除邮箱及邮件默认保留30天，可在到期前恢复。</div>
 			</div>
 			<n-space>
 				<n-button :loading="loading" @click="refresh">刷新</n-button>
@@ -267,7 +267,7 @@ const purgeRows = (ids: number[], row?: MailboxRecycleItem) => {
 const cleanupExpired = () =>
 	confirm({
 		title: '清理已到期回收项',
-		content: '仅清理保留期已超过 30 天且归档完整的邮箱。清理后的邮件无法恢复，确定继续吗？',
+		content: '仅清理保留期已超过30天且归档完整的邮箱。清理后的邮件无法恢复，确定继续吗？',
 		confirmText: '确认清理',
 		confirmType: 'error',
 		onConfirm: async () => {

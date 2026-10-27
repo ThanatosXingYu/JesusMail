@@ -101,6 +101,11 @@ const columns = ref<DataTableColumns<Template>>([
 						row.isEdit = true
 						row.edit_name = row.temp_name
 						}}></i>
+					{row.system_key ? (
+						<NTag size="small" bordered={false} type="warning">
+							系统模板
+						</NTag>
+					) : null}
 				</div>
 			} else {
 				return <div class="flex justify-start gap-1.25 items-center">
@@ -181,6 +186,7 @@ const columns = ref<DataTableColumns<Template>>([
 				<NButton
 					type="error"
 					text={true}
+					disabled={Boolean(row.system_key)}
 					onClick={() => {
 						handleDelete(row)
 					}}>

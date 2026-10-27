@@ -46,7 +46,7 @@ func SendActivationRecoveryEmail(ctx context.Context, email, password, recoveryE
 		return fmt.Errorf("prepare system sender mailbox: %w", err)
 	}
 
-	htmlBody, _, err := renderRecoveryTemplateFiles(email, password)
+	htmlBody, _, err := renderRecoveryTemplateFiles(ctx, email, password)
 	if err != nil {
 		return err
 	}
@@ -66,12 +66,12 @@ func SendActivationRecoveryEmail(ctx context.Context, email, password, recoveryE
 	return nil
 }
 
-func renderRecoveryTemplateFiles(email, password string) (htmlBody, txtBody string, err error) {
+func renderRecoveryTemplateFiles(ctx context.Context, email, password string) (htmlBody, txtBody string, err error) {
 	htmlPath, txtPath := recoveryTemplatePaths()
-	return renderRecoveryTemplates(email, password, htmlPath, txtPath)
+	return renderRecoveryTemplates(ctx, email, password, htmlPath, txtPath)
 }
 
-func renderRecoveryTemplates(email, password, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
+func renderRecoveryTemplates(ctx context.Context, email, password, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
 	recipient, domain, err := splitRecipient(email)
 	if err != nil {
 		return "", "", err
@@ -82,11 +82,11 @@ func renderRecoveryTemplates(email, password, htmlPath, txtPath string) (htmlBod
 		WebmailURL: webmailURL(domain),
 	}
 
-	htmlSource, err := os.ReadFile(htmlPath)
+	htmlSource, err := loadTemplateContent(ctx, SystemTemplateRecovery, htmlPath)
 	if err != nil {
 		return "", "", fmt.Errorf("read recovery HTML template: %w", err)
 	}
-	htmlTemplate, err := htmltemplate.New("activation-recovery-html").Option("missingkey=error").Parse(string(htmlSource))
+	htmlTemplate, err := htmltemplate.New("activation-recovery-html").Option("missingkey=error").Parse(htmlSource)
 	if err != nil {
 		return "", "", fmt.Errorf("parse recovery HTML template: %w", err)
 	}
@@ -95,11 +95,11 @@ func renderRecoveryTemplates(email, password, htmlPath, txtPath string) (htmlBod
 		return "", "", fmt.Errorf("execute recovery HTML template: %w", err)
 	}
 
-	txtSource, err := os.ReadFile(txtPath)
+	txtSource, err := loadTemplateContent(ctx, "", txtPath)
 	if err != nil {
 		return "", "", fmt.Errorf("read recovery TXT template: %w", err)
 	}
-	txtTemplate, err := texttemplate.New("activation-recovery-txt").Option("missingkey=error").Parse(string(txtSource))
+	txtTemplate, err := texttemplate.New("activation-recovery-txt").Option("missingkey=error").Parse(txtSource)
 	if err != nil {
 		return "", "", fmt.Errorf("parse recovery TXT template: %w", err)
 	}

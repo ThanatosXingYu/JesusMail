@@ -1,10 +1,10 @@
 package email_template
 
 import (
+	"context"
 	"jesusmail-core/internal/consts"
 	"jesusmail-core/internal/service/email_template"
 	"jesusmail-core/internal/service/public"
-	"context"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
@@ -15,11 +15,21 @@ func (c *ControllerV1) DeleteTemplate(ctx context.Context, req *v1.DeleteTemplat
 	res = &v1.DeleteTemplateRes{}
 
 	template, _ := email_template.GetTemplate(ctx, req.Id)
+	if template == nil || template.Id == 0 {
+		res.Code = 404
+		res.SetError(gerror.New("模板不存在"))
+		return
+	}
+	if template.SystemKey != "" {
+		res.Code = 400
+		res.SetError(gerror.New("系统模板不能删除"))
+		return
+	}
 
 	err = email_template.DeleteTemplate(ctx, req.Id)
 	if err != nil {
 		res.Code = 500
-		res.SetError(gerror.New(public.LangCtx(ctx, "Failed to delete template")))
+		res.SetError(gerror.New("删除模板失败"))
 		return
 	}
 

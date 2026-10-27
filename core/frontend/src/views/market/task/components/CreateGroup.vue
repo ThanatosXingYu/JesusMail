@@ -8,7 +8,7 @@
 						:placeholder="t('market.task.createGroup.groupNamePlaceholder')">
 					</n-input>
 				</n-form-item>
-				<n-form-item label="Status">
+				<n-form-item label="状态">
 					<n-select v-model:value="form.status" :options="statusOptions"></n-select>
 				</n-form-item>
 				<n-form-item :label="t('market.task.createGroup.email')" path="file_data">
@@ -62,8 +62,8 @@ const rules: FormRules = {
 }
 
 const statusOptions = [
-	{ label: 'Confirmed', value: 1 },
-	{ label: 'Unconfirmed', value: 0 },
+	{ label: '已确认', value: 1 },
+	{ label: '未确认', value: 0 },
 ]
 
 const example = `email,attributes

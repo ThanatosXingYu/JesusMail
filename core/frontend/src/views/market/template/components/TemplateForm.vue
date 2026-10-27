@@ -2,13 +2,13 @@
 	<modal :title="title" :width="1200">
 		<bt-form class="pt-8px" :model="form">
 			<n-grid :cols="24" :x-gap="24">
-				<n-form-item-gi :span="18" label="Name" path="temp_name">
+				<n-form-item-gi :span="18" label="模板名称" path="temp_name">
 					<n-input
 						v-model:value="form.temp_name"
 						:placeholder="$t('market.template.add.namePlaceholder')">
 					</n-input>
 				</n-form-item-gi>
-				<n-form-item-gi :span="6" label="Type" path="add_type">
+				<n-form-item-gi :span="6" label="模板类型" path="add_type">
 					<n-select v-model:value="form.add_type" :disabled="isEdit" :options="typeOptions">
 					</n-select>
 				</n-form-item-gi>
@@ -56,7 +56,7 @@ const EmailEditor = defineAsyncComponent(() => import('@/features/EmailEditor/in
 const isEdit = ref(false)
 
 const title = computed(() => {
-	return isEdit.value ? 'Edit template' : 'New template'
+	return isEdit.value ? '编辑模板' : '新建模板'
 })
 
 const id = ref(0)
@@ -70,7 +70,7 @@ const form = reactive({
 
 const typeOptions = [
 	{ label: 'HTML', value: 0 },
-	{ label: 'Drag', value: 1 },
+	{ label: '可视化编辑', value: 1 },
 ]
 
 const typeLabel = computed(() => {

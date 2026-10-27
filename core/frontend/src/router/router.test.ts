@@ -15,6 +15,7 @@ describe('application router', () => {
 			'/contacts',
 			'/domain',
 			'/mailbox',
+			'/mail-list',
 			'/mailbox-recycle',
 			'/smtp',
 			'/logs',
@@ -25,12 +26,14 @@ describe('application router', () => {
 		expect(menuList.at(-1)?.path).toBe('/activation')
 	})
 
-	it('includes mailbox, recycle, and activation routes without registering video outreach', () => {
+	it('includes mailbox, mail list, recycle, and activation routes without registering video outreach', () => {
 		expect(routes.some(route => route.path === '/mailbox')).toBe(true)
+		expect(routes.some(route => route.path === '/mail-list')).toBe(true)
 		expect(routes.some(route => route.path === '/mailbox-recycle')).toBe(true)
 		expect(routes.some(route => route.path === '/activation')).toBe(true)
 		expect(routes.some(route => route.path === '/video-outreach')).toBe(false)
 		expect(router.resolve('/mailbox').matched.length).toBeGreaterThan(0)
+		expect(router.resolve('/mail-list').matched.length).toBeGreaterThan(0)
 		expect(router.resolve('/mailbox-recycle').matched.length).toBeGreaterThan(0)
 		expect(router.resolve('/activation').matched.length).toBeGreaterThan(0)
 	})

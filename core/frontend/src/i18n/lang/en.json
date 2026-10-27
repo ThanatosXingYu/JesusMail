@@ -99,6 +99,7 @@
 			"group": "Group",
 			"domain": "Domain",
 			"mailboxes": "Mailboxes",
+			"mailList": "Mail Search",
 			"activation": "Activation Keys",
 			"settings": "Settings",
 			"common": "Common Settings",
@@ -1165,6 +1166,7 @@
 		},
 		"columns": {
 			"username": "Username",
+		"recoveryEmail": "Recovery Email",
 			"password": "Password",
 			"loginInfo": "Login Info(WebMail / SMTP)",
 			"receivedCount": "Received",
@@ -1203,7 +1205,10 @@
 			"count": "Email Count",
 			"displayName": "Display Name",
 			"quotaLimit": "Quota Limit",
-			"expiresAt": "Expires At"
+		"expiresAt": "Expires At",
+		"recoveryEmail": "Recovery Email (optional)",
+		"recoveryEmailPlaceholder": "Receives the activation account and login password",
+		"noActivationKey": "This mailbox was not created by an activation key"
 		},
 		"validation": {
 			"emailRequired": "Please enter email address",
@@ -1215,7 +1220,8 @@
 			"fileRequired": "Please select upload file",
 			"nameRequired": "Please enter a display name",
 			"expirationRequired": "Please select an expiration date",
-			"expirationPast": "The expiration date cannot be before today"
+		"expirationPast": "The expiration date cannot be before today",
+		"recoveryEmailFormat": "Please enter a valid recovery email"
 		},
 		"delete": {
 			"title": "Delete Mailbox",
@@ -1723,5 +1729,30 @@
 			"personalized": "Personalized",
 			"queued": "Queued"
 		}
+	},
+	"mailList": {
+		"title": "Mail Search",
+		"description": "Review all user sent and received messages, and search senders, recipients, subjects, and message content.",
+		"tabs": {
+			"received": "Received",
+			"sent": "Sent"
+		},
+		"actions": {
+			"sync": "Sync Mail"
+		},
+		"search": {
+			"placeholder": "Search sender, recipient, subject, or content",
+			"mailboxPlaceholder": "Filter by user mailbox"
+		},
+		"columns": {
+			"time": "Time",
+			"mailbox": "User Mailbox",
+			"sender": "Sender",
+			"recipients": "Recipients",
+			"subject": "Subject",
+			"preview": "Preview"
+		},
+		"noSubject": "No subject",
+		"syncResult": "Sync complete: {indexed} indexed, {removed} removed, {failed} failed"
 	}
 }

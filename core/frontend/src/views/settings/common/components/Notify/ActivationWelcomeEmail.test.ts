@@ -81,7 +81,7 @@ describe('ActivationWelcomeEmail settings', () => {
 		mocks.welcomeEmail = ref({
 			enabled: true,
 			sender: '',
-			subject: '您的 JesusMail 邮箱已成功激活',
+			subject: '您的JesusMail邮箱已成功激活',
 		})
 	})
 

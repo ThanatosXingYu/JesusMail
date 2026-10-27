@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"jesusmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/v2/frame/g"
+	"jesusmail-core/utility/types/api_v1"
 )
 
 // EmailTemplate defines the email template entity
@@ -15,6 +15,7 @@ type EmailTemplate struct {
 	CreateTime int    `json:"create_time" description:"Create Time"     orm:"create_time"`
 	UpdateTime int    `json:"update_time" description:"Update Time"     orm:"update_time"`
 	Chat_id    string `json:"chat_id"     description:"Exclusive AI Email"   orm:"chat_id"`
+	SystemKey  string `json:"system_key"  description:"System Template Key" orm:"system_key"`
 }
 
 // CreateTemplateReq Create template request

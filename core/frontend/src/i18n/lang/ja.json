@@ -96,6 +96,7 @@
 			"group": "グループ",
 			"domain": "ドメイン",
 			"mailboxes": "メールボックス",
+			"mailList": "メール検索",
 			"activation": "アクティベーションキー",
 			"settings": "設定",
 			"common": "共通設定",
@@ -1096,6 +1097,7 @@
 		},
 		"columns": {
 			"username": "ユーザー名",
+		"recoveryEmail": "予備メール",
 			"password": "パスワード",
 			"loginInfo": "ログイン情報（WebMail / SMTP）",
 			"receivedCount": "受信数",
@@ -1133,7 +1135,10 @@
 			"count": "メール数",
 			"displayName": "表示名",
 			"quotaLimit": "クォータ制限",
-			"expiresAt": "有効期限"
+		"expiresAt": "有効期限",
+		"recoveryEmail": "予備メール（任意）",
+		"recoveryEmailPlaceholder": "有効化したアカウントとログインパスワードを受信します",
+		"noActivationKey": "このメールボックスはアクティベーションキーで作成されていません"
 		},
 		"validation": {
 			"emailRequired": "メールアドレスを入力してください",
@@ -1145,7 +1150,8 @@
 			"fileRequired": "アップロードファイルを選択してください",
 			"nameRequired": "表示名を入力してください",
 			"expirationRequired": "有効期限を選択してください",
-			"expirationPast": "有効期限は今日より前に設定できません"
+		"expirationPast": "有効期限は今日より前に設定できません",
+		"recoveryEmailFormat": "正しい予備メールアドレスを入力してください"
 		},
 		"delete": {
 			"title": "メールボックス削除",
@@ -1653,5 +1659,30 @@
 		"search": {
 			"placeholder": "詳細/IPを入力して検索"
 		}
+	},
+	"mailList": {
+		"title": "メール検索",
+		"description": "全ユーザーの送受信メールを確認し、送信者、受信者、件名、本文を検索します。",
+		"tabs": {
+			"received": "受信",
+			"sent": "送信"
+		},
+		"actions": {
+			"sync": "メール同期"
+		},
+		"search": {
+			"placeholder": "送信者、受信者、件名、本文を検索",
+			"mailboxPlaceholder": "ユーザーメールで絞り込み"
+		},
+		"columns": {
+			"time": "日時",
+			"mailbox": "ユーザーメール",
+			"sender": "送信者",
+			"recipients": "受信者",
+			"subject": "件名",
+			"preview": "内容プレビュー"
+		},
+		"noSubject": "件名なし",
+		"syncResult": "同期完了：{indexed}件更新、{removed}件削除、{failed}件失敗"
 	}
 }

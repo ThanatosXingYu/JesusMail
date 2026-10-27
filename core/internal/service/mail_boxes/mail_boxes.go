@@ -2,8 +2,10 @@ package mail_boxes
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/GehirnInc/crypt/md5_crypt"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -13,6 +15,7 @@ import (
 	"jesusmail-core/internal/service/dockerapi"
 	"jesusmail-core/internal/service/public"
 	"math/rand"
+	"net/mail"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -63,7 +66,7 @@ func Add(ctx context.Context, mailbox *v1.Mailbox) (err error) {
 	return nil
 }
 
-func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided bool) (err error) {
+func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided, recoveryEmailProvided bool) (err error) {
 	mailbox.UpdateTime = time.Now().Unix()
 	updateData := g.Map{
 		"full_name":    mailbox.FullName,
@@ -109,7 +112,7 @@ func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided bool) (e
 			Where("create_time", previous.CreateTime).
 			Where("maildir", previous.Maildir).
 			WhereIn("archive_status", mailboxUpdateBlockingRecycleStatuses()).
-			OrderDesc("id").Limit(1).LockUpdate().Scan(&recycleOperation); err != nil {
+			OrderDesc("id").Limit(1).LockUpdate().Scan(&recycleOperation); err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("check mailbox recycle operation: %w", err)
 		}
 		if recycleOperation.ID != 0 {
@@ -130,6 +133,38 @@ func Update(ctx context.Context, mailbox *v1.Mailbox, expiresAtProvided bool) (e
 		}
 		if affected != 1 {
 			return fmt.Errorf("mailbox %s changed while being updated", mailbox.Username)
+		}
+		if recoveryEmailProvided {
+			recoveryEmail := strings.ToLower(strings.TrimSpace(mailbox.RecoveryEmail))
+			if recoveryEmail != "" {
+				if len(recoveryEmail) > 320 || strings.ContainsAny(recoveryEmail, "\r\n") {
+					return fmt.Errorf("备用邮箱格式不正确")
+				}
+				address, parseErr := mail.ParseAddress(recoveryEmail)
+				if parseErr != nil || address.Name != "" || strings.ToLower(address.Address) != recoveryEmail {
+					return fmt.Errorf("备用邮箱格式不正确")
+				}
+			}
+			if previous.ActivationKeyID == nil {
+				if recoveryEmail != "" {
+					return fmt.Errorf("该邮箱未关联激活码，不能设置备用邮箱")
+				}
+			} else {
+				result, updateErr := tx.Model("activation_keys").Ctx(ctx).
+					Where("id", *previous.ActivationKeyID).
+					Data("recovery_email", recoveryEmail).
+					Update()
+				if updateErr != nil {
+					return fmt.Errorf("update activation recovery email: %w", updateErr)
+				}
+				affected, rowsErr := result.RowsAffected()
+				if rowsErr != nil {
+					return fmt.Errorf("verify activation recovery email update: %w", rowsErr)
+				}
+				if affected != 1 {
+					return fmt.Errorf("邮箱%s关联的激活码不存在", mailbox.Username)
+				}
+			}
 		}
 		return nil
 	})
@@ -165,14 +200,19 @@ func DeleteBatch(ctx context.Context, emails []string) (int64, error) {
 }
 
 func Get(ctx context.Context, domain, keyword string, page, pageSize int) ([]v1.Mailbox, int, error) {
-	m := g.DB().Model("mailbox").Order("create_time", "desc")
+	m := g.DB().Model("mailbox mb").Ctx(ctx).
+		LeftJoin("activation_keys ak", "ak.id=mb.activation_key_id")
 
 	if domain != "" {
-		m.Where("domain", domain)
+		m = m.Where("mb.domain", domain)
 	}
 
 	if keyword != "" {
-		m = m.WhereLike("username", fmt.Sprintf("%%%s%%", keyword))
+		pattern := "%" + strings.ToLower(strings.TrimSpace(keyword)) + "%"
+		m = m.Where(
+			"(LOWER(mb.username) LIKE ? OR LOWER(mb.full_name) LIKE ? OR LOWER(COALESCE(ak.recovery_email, '')) LIKE ?)",
+			pattern, pattern, pattern,
+		)
 	}
 
 	count, err := m.Count()
@@ -181,7 +221,9 @@ func Get(ctx context.Context, domain, keyword string, page, pageSize int) ([]v1.
 	}
 
 	var mailboxes []v1.Mailbox
-	err = m.Page(page, pageSize).Scan(&mailboxes)
+	err = m.Fields(
+		"mb.username,mb.password,mb.password_encode,mb.full_name,mb.is_admin,mb.maildir,mb.quota,mb.local_part,mb.domain,mb.create_time,mb.update_time,mb.active,mb.used_quota,mb.quota_active,mb.expires_at,mb.source_type,mb.activation_key_id,COALESCE(ak.recovery_email, '') AS recovery_email",
+	).Order("mb.create_time", "desc").Page(page, pageSize).Scan(&mailboxes)
 
 	return mailboxes, count, err
 }

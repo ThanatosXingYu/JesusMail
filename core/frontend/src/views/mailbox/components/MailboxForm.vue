@@ -24,6 +24,19 @@
 				<n-input v-model:value="form.password" :placeholder="t('mailbox.form.passwordPlaceholder')">
 				</n-input>
 			</n-form-item>
+			<n-form-item
+				v-if="isEdit"
+				:label="t('mailbox.form.recoveryEmail')"
+				path="recovery_email">
+				<n-input
+					v-model:value="form.recovery_email"
+					:disabled="!form.activation_key_id"
+					:placeholder="
+						form.activation_key_id
+							? t('mailbox.form.recoveryEmailPlaceholder')
+							: t('mailbox.form.noActivationKey')
+					" />
+			</n-form-item>
 			<n-form-item :label="t('mailbox.form.quotaLimit')">
 				<n-switch v-model:value="form.quota_active" :checked-value="1" :unchecked-value="0" />
 			</n-form-item>
@@ -93,6 +106,8 @@ const form = reactive({
 	active: 1,
 	expiration_mode: 'permanent' as 'permanent' | 'date',
 	expiration_date: null as number | null,
+	recovery_email: '',
+	activation_key_id: null as number | null,
 })
 
 const unitOptions = [
@@ -162,6 +177,16 @@ const rules: FormRules = {
 			return true
 		},
 	},
+	recovery_email: {
+		trigger: 'blur',
+		validator: () => {
+			const value = form.recovery_email.trim()
+			if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+				return new Error(t('mailbox.validation.recoveryEmailFormat'))
+			}
+			return true
+		},
+	},
 }
 
 const startOfToday = () => {
@@ -209,6 +234,9 @@ const getParams = () => {
 		active: form.active,
 		quota_active: form.quota_active,
 		expires_at: serializeExpiration(),
+		...(isEdit.value && form.activation_key_id
+			? { recovery_email: form.recovery_email.trim() }
+			: {}),
 	}
 }
 
@@ -228,6 +256,8 @@ const [Modal, modalApi] = useModal({
 				form.quota_active = row.quota_active
 				form.expiration_mode = row.expires_at ? 'date' : 'permanent'
 				form.expiration_date = row.expires_at ? new Date(row.expires_at).getTime() : null
+				form.recovery_email = row.recovery_email || ''
+				form.activation_key_id = row.activation_key_id
 
 				const quota = getByteUnit(row.quota)
 				const [quotaNum, quotaUnit] = quota.split(' ')
@@ -246,6 +276,8 @@ const [Modal, modalApi] = useModal({
 			form.quota_active = 1
 			form.expiration_mode = 'permanent'
 			form.expiration_date = null
+			form.recovery_email = ''
+			form.activation_key_id = null
 		}
 	},
 	onConfirm: async () => {

@@ -25,6 +25,8 @@ import {
   exportMailbox,
   importMailbox,
   createMailboxLoginTicket,
+  getUserMessages,
+  reindexUserMessages,
 } from './mailbox'
 
 describe('mailbox API', () => {
@@ -113,6 +115,29 @@ describe('mailbox API', () => {
       username: 'user@test.com',
     })
     expect(mockPost.mock.calls[0][1]).not.toHaveProperty('password')
+  })
+
+  it('getUserMessages requests a separated mail direction with search filters', () => {
+    const params = {
+      page: 1,
+      page_size: 20,
+      direction: 'received' as const,
+      keyword: 'hello',
+      mailbox: 'user@test.com',
+      start_time: 100,
+      end_time: 200,
+    }
+    getUserMessages(params)
+    expect(mockGet).toHaveBeenCalledWith('/mailbox/messages', { params })
+  })
+
+  it('reindexUserMessages triggers the admin message index refresh', () => {
+    reindexUserMessages()
+    expect(mockPost).toHaveBeenCalledWith(
+      '/mailbox/messages/reindex',
+      {},
+      expect.objectContaining({ fetchOptions: expect.any(Object) })
+    )
   })
 
 })

@@ -72,7 +72,7 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 	const welcomeEmail = reactive({
 		enabled: true,
 		sender: '',
-		subject: '您的 JesusMail 邮箱已成功激活',
+		subject: '您的JesusMail邮箱已成功激活',
 	})
 
 	const checkPasswordStrength = () => {
@@ -175,7 +175,7 @@ export const useSettingsStore = defineStore('SettingsCommonStore', () => {
 		retentionDays.value = 0
 		welcomeEmail.enabled = true
 		welcomeEmail.sender = ''
-		welcomeEmail.subject = '您的 JesusMail 邮箱已成功激活'
+		welcomeEmail.subject = '您的JesusMail邮箱已成功激活'
 	}
 
 	return {

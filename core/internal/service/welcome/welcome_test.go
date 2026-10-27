@@ -1,6 +1,7 @@
 package welcome
 
 import (
+	"context"
 	"errors"
 	"path/filepath"
 	"runtime"
@@ -8,6 +9,15 @@ import (
 	"testing"
 	"time"
 )
+
+func useFileTemplateFallback(t *testing.T) {
+	t.Helper()
+	original := readManagedTemplateContent
+	readManagedTemplateContent = nil
+	t.Cleanup(func() {
+		readManagedTemplateContent = original
+	})
+}
 
 func TestConfigValidation(t *testing.T) {
 	tests := []struct {
@@ -91,6 +101,7 @@ func TestResolveSender(t *testing.T) {
 }
 
 func TestRenderActivationWelcomeTemplates(t *testing.T) {
+	useFileTemplateFallback(t)
 	originalResolver := resolveWebmailHost
 	resolveWebmailHost = func(string) string { return "mail.example.com" }
 	t.Cleanup(func() {
@@ -103,6 +114,7 @@ func TestRenderActivationWelcomeTemplates(t *testing.T) {
 	}
 	templateDir := filepath.Join(filepath.Dir(testFile), "..", "..", "..", "template", "activation_welcome_email")
 	htmlBody, txtBody, err := renderTemplateFiles(
+		context.Background(),
 		"student@mail.example.com",
 		filepath.Join(templateDir, "welcome_email.html"),
 		filepath.Join(templateDir, "welcome_email.txt"),
@@ -145,6 +157,7 @@ func TestWebmailURL(t *testing.T) {
 }
 
 func TestRenderActivationRecoveryTemplateContainsCredentials(t *testing.T) {
+	useFileTemplateFallback(t)
 	originalResolver := resolveWebmailHost
 	resolveWebmailHost = func(string) string { return "mail.example.com" }
 	t.Cleanup(func() {
@@ -157,6 +170,7 @@ func TestRenderActivationRecoveryTemplateContainsCredentials(t *testing.T) {
 	}
 	templateDir := filepath.Join(filepath.Dir(testFile), "..", "..", "..", "template", "activation_recovery_email")
 	htmlBody, txtBody, err := renderRecoveryTemplates(
+		context.Background(),
 		"student@mail.example.com",
 		"Pass<word&9",
 		filepath.Join(templateDir, "recovery_email.html"),
@@ -180,6 +194,26 @@ func TestRenderActivationRecoveryTemplateContainsCredentials(t *testing.T) {
 	for _, body := range []string{htmlBody, txtBody} {
 		if strings.Contains(body, "SMTP") || strings.Contains(body, ":41443") {
 			t.Fatal("recovery template contains infrastructure details")
+		}
+	}
+}
+
+func TestAdminTemplateSeedsAreComplete(t *testing.T) {
+	seeds := adminTemplateSeeds()
+	if len(seeds) != 2 {
+		t.Fatalf("adminTemplateSeeds() length = %d, want 2", len(seeds))
+	}
+	seen := make(map[string]struct{}, len(seeds))
+	for _, seed := range seeds {
+		if seed.Key == "" || seed.Name == "" {
+			t.Fatalf("system template seed is incomplete: %+v", seed)
+		}
+		if _, exists := seen[seed.Key]; exists {
+			t.Fatalf("duplicate system template key: %s", seed.Key)
+		}
+		seen[seed.Key] = struct{}{}
+		if !strings.HasSuffix(seed.Path, ".html") {
+			t.Fatalf("system template path is invalid: %s", seed.Path)
 		}
 	}
 }

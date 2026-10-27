@@ -1,14 +1,17 @@
 <template>
 	<modal :title="title" :width="1200">
 		<bt-form class="pt-8px" :model="form">
+			<n-alert v-if="form.system_key" type="info" :bordered="false" class="mb-16px">
+				系统模板可以修改正文，但不能删除。保存后新的欢迎邮件将使用此处内容。
+			</n-alert>
 			<n-grid :cols="24" :x-gap="24">
-				<n-form-item-gi :span="18" label="Name" path="temp_name">
+				<n-form-item-gi :span="18" label="模板名称" path="temp_name">
 					<n-input
 						v-model:value="form.temp_name"
 						:placeholder="$t('market.template.add.namePlaceholder')">
 					</n-input>
 				</n-form-item-gi>
-				<n-form-item-gi :span="6" label="Type" path="add_type">
+				<n-form-item-gi :span="6" label="模板类型" path="add_type">
 					<n-select v-model:value="form.add_type" :disabled="isEdit" :options="typeOptions">
 					</n-select>
 				</n-form-item-gi>
@@ -56,7 +59,8 @@ const EmailEditor = defineAsyncComponent(() => import('@/features/EmailEditor/in
 const isEdit = ref(false)
 
 const title = computed(() => {
-	return isEdit.value ? 'Edit template' : 'New template'
+	if (isEdit.value && form.system_key) return '编辑系统模板'
+	return isEdit.value ? '编辑模板' : '新建模板'
 })
 
 const id = ref(0)
@@ -66,6 +70,7 @@ const form = reactive({
 	add_type: 0,
 	html_content: '',
 	drag_data: '',
+	system_key: '',
 })
 
 const typeOptions = [
@@ -110,6 +115,7 @@ const [Modal, modalApi] = useModal({
 				form.add_type = row.add_type
 				form.html_content = row.html_content
 				form.drag_data = row.drag_data
+				form.system_key = row.system_key || ''
 			}
 		} else {
 			id.value = 0
@@ -117,6 +123,7 @@ const [Modal, modalApi] = useModal({
 			form.add_type = 0
 			form.html_content = ''
 			form.drag_data = ''
+			form.system_key = ''
 		}
 	},
 	onConfirm: async () => {

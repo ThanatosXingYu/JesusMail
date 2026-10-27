@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"jesusmail-core/utility/types/api_v1"
 	"github.com/gogf/gf/v2/frame/g"
+	"jesusmail-core/utility/types/api_v1"
 	"time"
 )
 
@@ -25,6 +25,7 @@ type Mailbox struct {
 	ExpiresAt       *time.Time `json:"expires_at"        dc:"Mailbox expiration time; null means permanent"`
 	SourceType      string     `json:"source_type"       dc:"Mailbox creation source"`
 	ActivationKeyID *int64     `json:"activation_key_id" dc:"Activation key relation"`
+	RecoveryEmail   string     `json:"recovery_email"    dc:"Activation recovery email"`
 }
 
 type AddMailboxReq struct {
@@ -71,6 +72,7 @@ type UpdateMailboxReq struct {
 	Quota         int        `json:"quota"  dc:"Quota" d:"5242880"`
 	QuotaActive   int        `json:"quota_active" v:"in:0,1" dc:"Quota switch 1: On 0: Off" d:"1"`
 	ExpiresAt     *time.Time `json:"expires_at" dc:"Mailbox expiration time; null means permanent"`
+	RecoveryEmail *string    `json:"recovery_email" v:"max-length:320" dc:"Activation recovery email"`
 }
 
 type UpdateMailboxRes struct {
@@ -197,3 +199,51 @@ type RecycleCleanupReq struct {
 }
 
 type RecycleCleanupRes struct{ api_v1.StandardRes }
+
+type UserMessage struct {
+	ID              int64     `json:"id"`
+	MailboxUsername string    `json:"mailbox_username"`
+	Direction       string    `json:"direction"`
+	Folder          string    `json:"folder"`
+	MessageID       string    `json:"message_id"`
+	Sender          string    `json:"sender"`
+	Recipients      string    `json:"recipients"`
+	Subject         string    `json:"subject"`
+	SentAt          time.Time `json:"sent_at"`
+	BodyPreview     string    `json:"body_preview"`
+}
+
+type GetUserMessagesReq struct {
+	g.Meta        `path:"/mailbox/messages" tags:"MailBox Messages" method:"get" summary:"List user sent or received messages"`
+	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
+	Page          int    `json:"page" v:"min:1" d:"1"`
+	PageSize      int    `json:"page_size" v:"min:1|max:100" d:"20"`
+	Direction     string `json:"direction" v:"required|in:sent,received"`
+	Keyword       string `json:"keyword" v:"max-length:500"`
+	Mailbox       string `json:"mailbox" v:"max-length:320"`
+	StartTime     int64  `json:"start_time" v:"min:0"`
+	EndTime       int64  `json:"end_time" v:"min:0"`
+}
+
+type GetUserMessagesRes struct {
+	api_v1.StandardRes
+	Data struct {
+		Total int           `json:"total"`
+		List  []UserMessage `json:"list"`
+	} `json:"data"`
+}
+
+type ReindexUserMessagesReq struct {
+	g.Meta        `path:"/mailbox/messages/reindex" tags:"MailBox Messages" method:"post" summary:"Refresh user message search index"`
+	Authorization string `json:"authorization" dc:"Authorization" in:"header"`
+}
+
+type ReindexUserMessagesRes struct {
+	api_v1.StandardRes
+	Data struct {
+		Scanned int `json:"scanned"`
+		Indexed int `json:"indexed"`
+		Removed int `json:"removed"`
+		Failed  int `json:"failed"`
+	} `json:"data"`
+}

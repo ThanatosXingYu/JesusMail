@@ -1,9 +1,9 @@
 package welcome
 
 import (
+	"context"
 	"fmt"
 	htmltemplate "html/template"
-	"os"
 	"strings"
 	texttemplate "text/template"
 
@@ -17,7 +17,7 @@ type TemplateData struct {
 
 var resolveWebmailHost = public.FormatMX
 
-func renderTemplateFiles(email, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
+func renderTemplateFiles(ctx context.Context, email, htmlPath, txtPath string) (htmlBody, txtBody string, err error) {
 	recipient, domain, err := splitRecipient(email)
 	if err != nil {
 		return "", "", err
@@ -27,11 +27,11 @@ func renderTemplateFiles(email, htmlPath, txtPath string) (htmlBody, txtBody str
 		WebmailURL: webmailURL(domain),
 	}
 
-	htmlSource, err := os.ReadFile(htmlPath)
+	htmlSource, err := loadTemplateContent(ctx, SystemTemplateWelcome, htmlPath)
 	if err != nil {
 		return "", "", fmt.Errorf("read HTML template: %w", err)
 	}
-	htmlTemplate, err := htmltemplate.New("activation-welcome-html").Option("missingkey=error").Parse(string(htmlSource))
+	htmlTemplate, err := htmltemplate.New("activation-welcome-html").Option("missingkey=error").Parse(htmlSource)
 	if err != nil {
 		return "", "", fmt.Errorf("parse HTML template: %w", err)
 	}
@@ -40,11 +40,11 @@ func renderTemplateFiles(email, htmlPath, txtPath string) (htmlBody, txtBody str
 		return "", "", fmt.Errorf("execute HTML template: %w", err)
 	}
 
-	txtSource, err := os.ReadFile(txtPath)
+	txtSource, err := loadTemplateContent(ctx, "", txtPath)
 	if err != nil {
 		return "", "", fmt.Errorf("read TXT template: %w", err)
 	}
-	txtTemplate, err := texttemplate.New("activation-welcome-txt").Option("missingkey=error").Parse(string(txtSource))
+	txtTemplate, err := texttemplate.New("activation-welcome-txt").Option("missingkey=error").Parse(txtSource)
 	if err != nil {
 		return "", "", fmt.Errorf("parse TXT template: %w", err)
 	}

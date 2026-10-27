@@ -3,7 +3,7 @@
 		<div class="page-head">
 			<div>
 				<div class="bt-title">激活码管理</div>
-				<div class="description">管理 JesusMail 原生邮箱开户激活码</div>
+				<div class="description">管理JesusMail原生邮箱开户激活码</div>
 			</div>
 			<n-space>
 				<n-button tag="a" href="/activate" target="_blank">打开激活页</n-button>
@@ -64,7 +64,7 @@
 				</n-space>
 				<n-space align="center">
 					<span class="selected-count">已选 {{ checked.length }} 项</span>
-					<n-button :loading="exporting" @click="exportCsv">导出当前筛选 CSV</n-button>
+					<n-button :loading="exporting" @click="exportCsv">导出当前筛选CSV</n-button>
 				</n-space>
 			</div>
 			<n-data-table
@@ -103,7 +103,7 @@
 					<n-input
 						v-model:value="generateForm.group"
 						maxlength="100"
-						placeholder="可选，例如：2026 新生" />
+						placeholder="可选，例如：2026新生" />
 				</n-form-item>
 				<n-form-item label="备注">
 					<n-input v-model:value="generateForm.note" maxlength="255" placeholder="可选" />
@@ -284,7 +284,7 @@ const columns: DataTableColumns<ActivationKey> = [
 	{ title: '分组', key: 'group_name', width: 130, render: row => row.group_name || '未分组' },
 	{ title: '开通邮箱', key: 'email', width: 210, render: row => row.email || '-' },
 	{ title: '备用邮箱', key: 'recovery_email', width: 210, render: row => row.recovery_email || '-' },
-	{ title: '使用 IP', key: 'used_ip', width: 140, render: row => row.used_ip || '-' },
+	{ title: '使用IP', key: 'used_ip', width: 140, render: row => row.used_ip || '-' },
 	{ title: '使用时间', key: 'used_at', width: 175, render: row => fmt(row.used_at) },
 	{ title: '备注', key: 'note', minWidth: 150, render: row => row.note || '-' },
 	{ title: '创建时间', key: 'created_at', width: 175, render: row => fmt(row.created_at) },
@@ -347,11 +347,11 @@ const showGenerate = ref(false),
 const isValidGenerateCount = (value: number | null): value is number =>
 	value !== null && Number.isInteger(value) && value >= 1 && value <= 500
 const generateCountFeedback = computed(() =>
-	isValidGenerateCount(generateForm.count) ? undefined : '生成数量必须是 1-500 之间的整数'
+	isValidGenerateCount(generateForm.count) ? undefined : '生成数量必须是1-500之间的整数'
 )
 const generate = async () => {
 	if (!isValidGenerateCount(generateForm.count)) {
-		Message.warning('生成数量必须是 1-500 之间的整数')
+		Message.warning('生成数量必须是1-500之间的整数')
 		return
 	}
 	mutationLoading.value = 'generate'

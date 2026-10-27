@@ -59,6 +59,7 @@ func init() {
                 add_type SMALLINT NOT NULL DEFAULT 0,  -- // 0 html  1 drag  2 AI
                 content TEXT NOT NULL DEFAULT '',
                 render TEXT NOT NULL DEFAULT '',
+                system_key VARCHAR(64) NOT NULL DEFAULT '',
                 create_time INTEGER NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
                 update_time INTEGER NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
     			UNIQUE(temp_name)
@@ -247,6 +248,13 @@ func init() {
 
 		//email_templates
 		_ = AddColumnIfNotExists("email_templates", "chat_id", "VARCHAR(255)", "''", false)
+		_ = AddColumnIfNotExists("email_templates", "system_key", "VARCHAR(64)", "''", false)
+		_, err := g.DB().Exec(context.Background(), `CREATE UNIQUE INDEX IF NOT EXISTS idx_email_templates_system_key
+			ON email_templates(system_key) WHERE system_key <> ''`)
+		if err != nil {
+			g.Log().Error(context.Background(), "Failed to initialize system template index:", err)
+			return
+		}
 
 		// email_tasks
 		_ = AddColumnIfNotExists("email_tasks", "sends_count", "INTEGER", "0", true)

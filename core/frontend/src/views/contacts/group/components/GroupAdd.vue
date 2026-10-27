@@ -5,7 +5,7 @@
 				<n-form-item :label="t('contacts.group.form.name')" path="name">
 					<n-input v-model:value="form.name"></n-input>
 				</n-form-item>
-				<n-form-item label="List Type">
+				<n-form-item label="列表类型">
 					<n-select v-model:value="form.double_optin" :options="statusOptions"></n-select>
 				</n-form-item>
 				<n-form-item :label="t('contacts.group.form.file')" path="file_data">
@@ -24,7 +24,7 @@
 						</div>
 					</div>
 				</n-form-item>
-				<n-form-item label="Example raw CSV">
+				<n-form-item label="示例CSV">
 					<pre class="csv-example">{{ example }}</pre>
 				</n-form-item>
 			</bt-form>
@@ -60,8 +60,8 @@ const rules = {
 }
 
 const statusOptions = [
-	{ label: 'Single Opt-in', value: 0 },
-	{ label: 'Double Opt-in', value: 1 },
+	{ label: '单次确认', value: 0 },
+	{ label: '双重确认', value: 1 },
 ]
 
 const example = `email,attributes

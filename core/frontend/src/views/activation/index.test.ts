@@ -254,7 +254,7 @@ describe('原生激活码管理', () => {
 		expect(text).toContain('清除绑定')
 		expect(text).toContain('批量删除')
 		expect(text).not.toContain('强制删除')
-		expect(text).toContain('导出当前筛选 CSV')
+		expect(text).toContain('导出当前筛选CSV')
 
 		const selects = wrapper.findAllComponents(NSelectStub)
 		expect(selects[0].props('options')).toEqual([
@@ -442,7 +442,7 @@ describe('原生激活码管理', () => {
 
 		mocks.getActivationList.mockReset()
 		mocks.getActivationList.mockResolvedValueOnce(listResult({ total: 1, list: [dangerousRow] }))
-		await findButton(wrapper, '导出当前筛选 CSV').trigger('click')
+		await findButton(wrapper, '导出当前筛选CSV').trigger('click')
 		await flushPromises()
 
 		const blob = createObjectURL.mock.calls[0][0] as Blob
@@ -468,7 +468,7 @@ describe('原生激活码管理', () => {
 		Object.defineProperty(URL, 'revokeObjectURL', { value: revokeObjectURL, configurable: true })
 		const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
 
-		await findButton(wrapper, '导出当前筛选 CSV').trigger('click')
+		await findButton(wrapper, '导出当前筛选CSV').trigger('click')
 		await flushPromises()
 
 		expect(mocks.getActivationList).toHaveBeenNthCalledWith(1, {

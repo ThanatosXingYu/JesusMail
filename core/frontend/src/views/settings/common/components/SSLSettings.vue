@@ -100,9 +100,9 @@ const handleApplySSL = () => {
 		width: 460,
 		content: () => (
 			<div style={{ lineHeight: '22px' }}>
-				<div class="mb-8px">Certificate Application Functionality:</div>
-				<div>- Implement certificate application using hostname</div>
-				<div>- Ensure the hostname has a valid A record configured with:</div>
+				<div class="mb-8px">证书申请功能：</div>
+				<div>使用主机名申请证书</div>
+				<div>请确保该主机名已配置有效的A记录，并指向：</div>
 				<div>
 					- Record Type: <b>A</b>
 				</div>

@@ -6,7 +6,7 @@
 					<div class="back-tool">
 						<i class="i-ri:apps-fill text-6"></i>
 					</div>
-					<span class="tit-content"> Typography </span>
+					<span class="tit-content">排版设置</span>
 				</div>
 			</div>
 		</n-card>
@@ -14,13 +14,13 @@
 		<n-card class="mb-5">
 			<n-form>
 				<n-form-item>
-					<template #label><span class="form-label">Heading Font</span></template>
+					<template #label><span class="form-label">标题字体</span></template>
 					<n-input v-model:value="heading_font"></n-input>
 				</n-form-item>
 
 				<n-card class="form-desc">
 					<div class="container">
-						<div class="form-label">Preview:</div>
+						<div class="form-label">预览：</div>
 						<div class="desc" :style="{ fontFamily: heading_font }">
 							The quick brown fox jumps over the lazy dog
 						</div>
@@ -32,13 +32,13 @@
 		<n-card class="mb-5">
 			<n-form>
 				<n-form-item>
-					<template #label><span class="form-label">Body Font</span></template>
+					<template #label><span class="form-label">正文字体</span></template>
 					<n-input v-model:value="body_font"></n-input>
 				</n-form-item>
 
 				<n-card class="form-desc">
 					<div class="container">
-						<div class="form-label">Preview:</div>
+						<div class="form-label">预览：</div>
 						<div class="desc" :style="{ fontFamily: body_font }">
 							The quick brown fox jumps over the lazy dog
 						</div>
@@ -49,9 +49,9 @@
 
 		<n-card>
 			<div class="attention">
-				<div class="attention-tit">Typography Guidelines:</div>
-				<div class="attention-item">Use web-safe fonts for better compatibility</div>
-				<div class="attention-item">Always include fallback fonts for better performance</div>
+				<div class="attention-tit">排版建议：</div>
+				<div class="attention-item">优先使用Web安全字体以提高兼容性</div>
+				<div class="attention-item">始终配置后备字体以提高加载性能</div>
 			</div>
 		</n-card>
 	</div>

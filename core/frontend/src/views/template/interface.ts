@@ -6,9 +6,10 @@ export interface Template {
 	drag_data: string
 	create_time: number
 	update_time: number
-	chat_id:string
-	isEdit?:boolean
-	edit_name?:string
+	chat_id: string
+	system_key?: string
+	isEdit?: boolean
+	edit_name?: string
 }
 
 export interface TemplateParams {

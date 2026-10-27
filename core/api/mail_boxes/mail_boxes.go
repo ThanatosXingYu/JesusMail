@@ -26,6 +26,8 @@ type IMailBoxesV1 interface {
 	RecycleRestore(ctx context.Context, req *v1.RecycleRestoreReq) (res *v1.RecycleRestoreRes, err error)
 	RecyclePurge(ctx context.Context, req *v1.RecyclePurgeReq) (res *v1.RecyclePurgeRes, err error)
 	RecycleCleanup(ctx context.Context, req *v1.RecycleCleanupReq) (res *v1.RecycleCleanupRes, err error)
+	GetUserMessages(ctx context.Context, req *v1.GetUserMessagesReq) (res *v1.GetUserMessagesRes, err error)
+	ReindexUserMessages(ctx context.Context, req *v1.ReindexUserMessagesReq) (res *v1.ReindexUserMessagesRes, err error)
 }
 
 // IPublicMailBoxesV1 contains endpoints authenticated with the Roundcube shared secret.

@@ -40,6 +40,7 @@ import (
 	"jesusmail-core/internal/service/redis_initialization"
 	"jesusmail-core/internal/service/rspamd"
 	"jesusmail-core/internal/service/timers"
+	"jesusmail-core/internal/service/welcome"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -247,6 +248,9 @@ var (
 			if err = database_initialization.ActivationSchemaInitializationError(); err != nil {
 				g.Log().Error(ctx, "initialize activation schema failed ", err)
 				return err
+			}
+			if err = welcome.EnsureAdminTemplates(ctx); err != nil {
+				g.Log().Warning(ctx, "initialize editable system email templates failed:", err)
 			}
 
 			// Init Redis

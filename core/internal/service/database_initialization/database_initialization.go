@@ -77,6 +77,7 @@ func InitDatabase() (err error) {
 		activationWelcomeSchemaInitializationErr,
 		mailboxUserEventsSchemaInitializationErr,
 		mailboxLifecycleSchemaInitializationErr,
+		mailboxMessageIndexSchemaInitializationErr,
 	); migrationErr != nil {
 		return fmt.Errorf("database schema initialization failed: %w", migrationErr)
 	}
